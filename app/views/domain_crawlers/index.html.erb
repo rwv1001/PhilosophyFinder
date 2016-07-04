@@ -1,0 +1,9 @@
+<h1>Domain Crawler#index</h1>
+<p>Find me in app/views/domain_crawler/index.html.erb sausage</p>
+
+<%= form_tag domain_crawlers_path, :method => 'get' do %>
+    <p>
+      <%= text_field_tag :domain, params[:domain] %>
+      <%= submit_tag "Domain", :name => nil %>
+    </p>
+<% end %>

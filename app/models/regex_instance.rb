@@ -1,0 +1,2 @@
+class RegexInstance < ApplicationRecord
+end

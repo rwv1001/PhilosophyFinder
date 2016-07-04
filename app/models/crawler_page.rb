@@ -1,0 +1,2 @@
+class CrawlerPage < ApplicationRecord
+end

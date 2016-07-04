@@ -1,0 +1,2 @@
+class WordPair < ApplicationRecord
+end

@@ -1,0 +1,287 @@
+  [1m[35m (656.9ms)[0m  [1m[35mCREATE TABLE `schema_migrations` (`version` varchar(255) PRIMARY KEY) ENGINE=InnoDB[0m
+  [1m[35m (417.5ms)[0m  [1m[35mCREATE TABLE `ar_internal_metadata` (`key` varchar(255) PRIMARY KEY, `value` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT DATABASE() as db[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT GET_LOCK('7208685785707650720', 0);[0m
+  [1m[36mActiveRecord::SchemaMigration Load (3.0ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+Migrating to CreateUsers (20160626103644)
+  [1m[35m (298.3ms)[0m  [1m[35mCREATE TABLE `users` (`id` int AUTO_INCREMENT PRIMARY KEY, `email` varchar(255), `first_name` varchar(255), `second_name` varchar(255), `password_digest` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (24.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160626103644')[0m
+  [1m[35m (25.0ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddAuthTokenToUsers (20160626203027)
+  [1m[35m (693.8ms)[0m  [1m[35mALTER TABLE `users` ADD `auth_token` varchar(255)[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (16.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160626203027')[0m
+  [1m[35m (26.0ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddPasswordResetToUsers (20160626204443)
+  [1m[35m (784.2ms)[0m  [1m[35mALTER TABLE `users` ADD `password_reset_token` varchar(255)[0m
+  [1m[35m (1050.9ms)[0m  [1m[35mALTER TABLE `users` ADD `password_reset_sent_at` datetime[0m
+  [1m[35m (0.5ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (1.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160626204443')[0m
+  [1m[35m (45.6ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateRegexTemplates (20160701091618)
+  [1m[35m (344.4ms)[0m  [1m[35mCREATE TABLE `regex_templates` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `name` varchar(255), `expression` varchar(255), `arg_names` varchar(255), `help` text, `join_code` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (0.5ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (29.6ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701091618')[0m
+  [1m[35m (58.4ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateRegexInstances (20160701091640)
+  [1m[35m (1014.5ms)[0m  [1m[35mCREATE TABLE `regex_instances` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `regex_templated_id` int, `argument` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (0.5ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (38.3ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701091640')[0m
+  [1m[35m (135.5ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateSearchQueries (20160701091700)
+  [1m[35m (357.1ms)[0m  [1m[35mCREATE TABLE `search_queries` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `domain` varchar(255), `regex_id` int, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (15.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701091700')[0m
+  [1m[35m (28.1ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateSearchResults (20160701091717)
+  [1m[35m (282.0ms)[0m  [1m[35mCREATE TABLE `search_results` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `search_query_id` int, `page_id` int, `marker_begin` int, `marker_end` int, `display_begin` int, `display_end` int, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (1.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701091717')[0m
+  [1m[35m (27.0ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateResultPages (20160701091734)
+  [1m[35m (402.9ms)[0m  [1m[35mCREATE TABLE `result_pages` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `URL` varchar(255), `content` text, `hash_value` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (1.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701091734')[0m
+  [1m[35m (32.8ms)[0m  [1m[35mCOMMIT[0m
+Migrating to AddPreviousGroupSearchIdsToUsers (20160701092304)
+  [1m[35m (975.0ms)[0m  [1m[35mALTER TABLE `users` ADD `group_id` int[0m
+  [1m[35m (479.6ms)[0m  [1m[35mALTER TABLE `users` ADD `search_query_id` int[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (0.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701092304')[0m
+  [1m[35m (20.8ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateGroupNames (20160701092413)
+  [1m[35m (347.8ms)[0m  [1m[35mCREATE TABLE `group_names` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `name` varchar(255), `ancestry` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (1.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701092413')[0m
+  [1m[35m (17.0ms)[0m  [1m[35mCOMMIT[0m
+Migrating to CreateGroupElements (20160701092429)
+  [1m[35m (237.9ms)[0m  [1m[35mCREATE TABLE `group_elements` (`id` int AUTO_INCREMENT PRIMARY KEY, `user_id` int, `group_id` int, `search_result_id` int, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (1.0ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20160701092429')[0m
+  [1m[35m (25.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mActiveRecord::InternalMetadata Load (1.0ms)[0m  [1m[34mSELECT  `ar_internal_metadata`.* FROM `ar_internal_metadata` WHERE `ar_internal_metadata`.`key` = 'environment' LIMIT 1[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[35mSQL (13.0ms)[0m  [1m[32mINSERT INTO `ar_internal_metadata` (`key`, `value`, `created_at`, `updated_at`) VALUES ('environment', 'test', '2016-07-01 14:01:24', '2016-07-01 14:01:24')[0m
+  [1m[35m (35.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT RELEASE_LOCK('7208685785707650720')[0m
+  [1m[36mActiveRecord::SchemaMigration Load (1.0ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSHOW CREATE TABLE `group_elements`[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW CREATE TABLE `group_names`[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'group_names'[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW CREATE TABLE `regex_instances`[0m
+  [1m[35m (2.0ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'regex_instances'[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSHOW CREATE TABLE `regex_templates`[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'regex_templates'[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW CREATE TABLE `result_pages`[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'result_pages'[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW CREATE TABLE `search_queries`[0m
+  [1m[35m (0.9ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'search_queries'[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSHOW CREATE TABLE `search_results`[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSHOW CREATE TABLE `users`[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSHOW TABLE STATUS LIKE 'users'[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'group_elements'
+[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'group_names'
+[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'regex_instances'
+[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'regex_templates'
+[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'result_pages'
+[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'search_queries'
+[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'search_results'
+[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'DominicanOffice_test'
+  AND fk.table_name = 'users'
+[0m
+  [1m[36mActiveRecord::SchemaMigration Load (19.0ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT @@FOREIGN_KEY_CHECKS[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 0[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mFixture Delete (46.1ms)[0m  [1m[31mDELETE FROM `group_elements`[0m
+  [1m[36mFixture Insert (13.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 14:44:08', '2016-07-01 14:44:08', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 14:44:08', '2016-07-01 14:44:08', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `group_names`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `regex_instances`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `regex_templates`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `result_pages`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_queries`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_results`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 14:44:09', '2016-07-01 14:44:09', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 14:44:09', '2016-07-01 14:44:09', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `users`[0m
+  [1m[35m (60.1ms)[0m  [1m[31mROLLBACK[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 1[0m
+  [1m[36mActiveRecord::SchemaMigration Load (2.0ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT @@FOREIGN_KEY_CHECKS[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 0[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `group_elements`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (15.0ms)[0m  [1m[31mDELETE FROM `group_names`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `regex_instances`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (2.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `regex_templates`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `result_pages`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_queries`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_results`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 14:46:37', '2016-07-01 14:46:37', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `users`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 14:46:38', '2016-07-01 14:46:38', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 14:46:38', '2016-07-01 14:46:38', 298486374)[0m
+  [1m[35m (51.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 1[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+--------------------------------
+SearchResultTest: test_the_truth
+--------------------------------
+  [1m[35m (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mActiveRecord::SchemaMigration Load (5.0ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+  [1m[35m (0.0ms)[0m  [1m[34mSELECT @@FOREIGN_KEY_CHECKS[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 0[0m
+  [1m[35m (1.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mFixture Delete (50.1ms)[0m  [1m[31mDELETE FROM `group_elements`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `group_names`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `regex_instances`[0m
+  [1m[36mFixture Insert (14.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (23.0ms)[0m  [1m[31mDELETE FROM `regex_templates`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `result_pages`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_queries`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `search_results`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `users`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 15:08:00', '2016-07-01 15:08:00', 298486374)[0m
+  [1m[35m (142.2ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (1.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 1[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+--------------------------------
+SearchResultTest: test_the_truth
+--------------------------------
+  [1m[35m (0.0ms)[0m  [1m[31mROLLBACK[0m
+  [1m[36mActiveRecord::SchemaMigration Load (67.2ms)[0m  [1m[34mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT @@FOREIGN_KEY_CHECKS[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 0[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `group_elements`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 15:15:22', '2016-07-01 15:15:22', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_elements` (`user_id`, `group_id`, `search_result_id`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, '2016-07-01 15:15:22', '2016-07-01 15:15:22', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `group_names`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `group_names` (`user_id`, `name`, `ancestry`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `regex_instances`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_instances` (`user_id`, `regex_templated_id`, `argument`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `regex_templates`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 980190962)[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `regex_templates` (`user_id`, `name`, `expression`, `arg_names`, `help`, `join_code`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyString', 'MyString', 'MyText', 'MyString', '2016-07-01 15:15:22', '2016-07-01 15:15:22', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `result_pages`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 15:15:23', '2016-07-01 15:15:23', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `result_pages` (`user_id`, `URL`, `content`, `hash_value`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 'MyText', 'MyString', '2016-07-01 15:15:23', '2016-07-01 15:15:23', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `search_queries`[0m
+  [1m[36mFixture Insert (0.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 15:15:23', '2016-07-01 15:15:23', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_queries` (`user_id`, `domain`, `regex_id`, `created_at`, `updated_at`, `id`) VALUES (1, 'MyString', 1, '2016-07-01 15:15:23', '2016-07-01 15:15:23', 298486374)[0m
+  [1m[36mFixture Delete (1.0ms)[0m  [1m[31mDELETE FROM `search_results`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 15:15:23', '2016-07-01 15:15:23', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `search_results` (`user_id`, `search_query_id`, `page_id`, `marker_begin`, `marker_end`, `display_begin`, `display_end`, `created_at`, `updated_at`, `id`) VALUES (1, 1, 1, 1, 1, 1, 1, '2016-07-01 15:15:23', '2016-07-01 15:15:23', 298486374)[0m
+  [1m[36mFixture Delete (0.0ms)[0m  [1m[31mDELETE FROM `users`[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 15:15:23', '2016-07-01 15:15:23', 980190962)[0m
+  [1m[36mFixture Insert (1.0ms)[0m  [1m[32mINSERT INTO `users` (`password_digest`, `created_at`, `updated_at`, `id`) VALUES ('MyString', '2016-07-01 15:15:23', '2016-07-01 15:15:23', 298486374)[0m
+  [1m[35m (49.1ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (0.0ms)[0m  [1m[35mSET FOREIGN_KEY_CHECKS = 1[0m
+  [1m[35m (0.0ms)[0m  [1m[35mBEGIN[0m
+--------------------------------
+SearchResultTest: test_the_truth
+--------------------------------
+  [1m[35m (1.0ms)[0m  [1m[31mROLLBACK[0m

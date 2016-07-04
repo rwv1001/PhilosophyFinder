@@ -1,0 +1,2 @@
+class GroupElement < ApplicationRecord
+end

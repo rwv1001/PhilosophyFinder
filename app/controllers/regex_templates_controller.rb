@@ -1,0 +1,2 @@
+class RegexTemplatesController < ApplicationController
+end

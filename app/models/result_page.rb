@@ -1,0 +1,2 @@
+class ResultPage < ApplicationRecord
+end
