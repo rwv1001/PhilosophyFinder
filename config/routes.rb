@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   resources :domain_crawlers
+  resources :search_queries
   resources :group_names
   resources :search_results
   resources :regex_templates

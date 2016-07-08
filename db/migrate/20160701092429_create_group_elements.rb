@@ -1,4 +1,4 @@
-class CreateGroupElements < ActiveRecord::Migration[5.0]
+class CreateGroupElements < ActiveRecord::Migration
   def change
     create_table :group_elements do |t|
       t.integer :user_id

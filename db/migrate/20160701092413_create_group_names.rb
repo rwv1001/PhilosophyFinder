@@ -1,4 +1,4 @@
-class CreateGroupNames < ActiveRecord::Migration[5.0]
+class CreateGroupNames < ActiveRecord::Migration
   def change
     create_table :group_names do |t|
       t.integer :user_id

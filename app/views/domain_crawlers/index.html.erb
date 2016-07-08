@@ -1,9 +1,75 @@
-<h1>Domain Crawler#index</h1>
+<!--
+<h1>Domain Crawler#new</h1>
 <p>Find me in app/views/domain_crawler/index.html.erb sausage</p>
+<h1>Listing users</h1>
 
-<%= form_tag domain_crawlers_path, :method => 'get' do %>
-    <p>
-      <%= text_field_tag :domain, params[:domain] %>
-      <%= submit_tag "Domain", :name => nil %>
-    </p>
+<table>
+  <thead>
+  <tr>
+    <th>Email</th>
+    <th>Person ID</th>
+    <th colspan="3"></th>
+  </tr>
+  </thead>
+
+  <% @users.each do |user| %>
+      <tr>
+        <td><%= user.email %></td>
+        <td><%= user.first_name %></td>
+        <td><%= user.second_name %></td>
+        <td><%= link_to 'Show', user %></td>
+        <td><%= link_to 'Edit', edit_user_path(user) %></td>
+        <td><%= link_to 'Destroy', user, method: :delete,
+                        data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+  <% end %>
+</table>
+
+<br>
+
+<% content_for :title,  current_domain_crawler.domain_home_page %>
+
+
+<div id="submenu">
+  <%= render 'submenu_domain_crawlers', domain_crawlers: DomainCrawler.all %>
+</div>
+
+
+<p id="notice"><%= notice %></p>
+
+<div id="domain_crawler_details">
+  <%= render 'body_details', domain_crawler: current_domain_crawler %>
+</div>
+
+<div id="new_domain_crawler_form" >
+<%= form_for @domain_crawler do |f| %>
+    <% if @domain_crawler.errors.any? %>
+        <div class="error_messages">
+          <h2>Form is invalid</h2>
+          <ul>
+            <% @domain_crawler.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+
+    <div class="field">
+      <%= f.label :domain_home_page %><br />
+      <%= f.text_field :domain_home_page %>
+    </div>
+    <div class="field">
+      <%= f.label :short_name%><br />
+      <%= f.text_field :short_name %>
+    </div>
+    <div class="field">
+      <%= f.label :description%><br />
+      <%= f.text_field :description %>
+    </div>
+    <div class="field">
+      <%= f.text_field :user_id %>
+    </div>
+
+    <div class="actions"><%= f.submit "New Domain" %></div>
 <% end %>
+</div>-->

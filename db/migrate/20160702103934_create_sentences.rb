@@ -1,4 +1,4 @@
-class CreateSentences < ActiveRecord::Migration[5.0]
+class CreateSentences < ActiveRecord::Migration
   def change
     create_table :sentences do |t|
       t.text :content

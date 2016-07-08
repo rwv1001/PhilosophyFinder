@@ -1,8 +1,7 @@
-class CreateResultPages < ActiveRecord::Migration[5.0]
+class CreateResultPages < ActiveRecord::Migration
   def change
     create_table :result_pages do |t|
       t.integer :user_id
-      t.text :content
       t.string :hash_value
 
       t.timestamps

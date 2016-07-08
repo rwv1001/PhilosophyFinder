@@ -1,0 +1,22 @@
+
+<ul class="child-crawler-page" name="ul-crawler-page-<%=args[:parent_id]%>" style="display: none" >
+
+  <% args[:crawler_pages].each do |crawler_page, children| %>
+
+      <li>
+        <% url = crawler_page.URL%>
+        <% last_slash = url.rindex("/")%>
+        <% if last_slash!= nil and last_slash < url.length-1 %>
+            <% url = url[last_slash+1,url.size]%>
+        <%end%>
+
+        <% if children.present? %>
+            <%= render 'expand_buttons', id: crawler_page.id %>
+            <%= render 'url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
+            <%= render 'submenu_crawler_pages', args: {:crawler_pages => children, :parent_id => crawler_page.id}  %>
+        <% else %>
+            <%= render 'url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
+        <% end %>
+      </li>
+  <% end %>
+</ul>

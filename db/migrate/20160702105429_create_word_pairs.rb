@@ -1,4 +1,4 @@
-class CreateWordPairs < ActiveRecord::Migration[5.0]
+class CreateWordPairs < ActiveRecord::Migration
   def change
     create_table :word_pairs do |t|
       t.integer :word_1
@@ -12,4 +12,5 @@ class CreateWordPairs < ActiveRecord::Migration[5.0]
     end
     add_index :word_pairs, [:word_1, :word_2, :result_page_id]
   end
+
 end

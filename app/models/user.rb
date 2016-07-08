@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_secure_password
+  has_many :domain_crawlers
 
   validates_uniqueness_of :email
   validates_presence_of :password, :on => :create

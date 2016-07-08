@@ -1,0 +1,215 @@
+// Place all the styles related to the pages controller here.
+// They will automatically be included in application.css.scss.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+$crawler-color: #0000ff;
+$menu-color: #a593bf;
+$menu-block-color:  lighten($menu-color, 10%);
+@mixin put-margin($val) {
+  margin: $val $val;
+}
+
+.sidemenu{
+  background-color: $menu-color;
+  height: 100vh;
+  width: 300px;
+  float: left;
+}
+.user-header{
+  @include put-margin(10px);
+  background-color: $menu-block-color;
+}
+.domain-crawler{
+
+
+}
+.domain-summary{
+  @include put-margin(10px);
+  background-color: $menu-block-color;
+  overflow: auto;
+
+
+}
+
+.domain-new{
+  @include put-margin(10px);
+  background-color: $menu-block-color;
+
+}
+.domain-pages{
+
+  overflow:hidden
+
+
+}
+.show-link{
+  cursor: pointer;
+  float: right;
+  display: none;
+}
+.hide-link{
+  cursor: pointer;
+  float: right;
+
+}
+.crawler{
+  background-color: $crawler-color;
+}
+.crawler10d{
+  background-color: darken($crawler-color, 10%);
+}
+.crawler10l{
+  background-color: lighten($crawler-color, 10%);
+}
+.crawler20l{
+  background-color: lighten($crawler-color, 20%);
+}
+.small-box1{background:#ff0;
+  width: 12px;
+  height: 12px;}
+.small-box2{background:#f0f;
+  width: 12px;
+  height: 12px;}
+.small-box3{background:#40f;
+  width: 12px;
+  height: 12px;}
+.small-box4{background:#f04;
+  width: 12px;
+  height: 12px;}
+.small-box5{background:#0ff;
+  width: 12px;
+  height: 12px;}
+h3{
+  margin-top:0px;
+  margin-bottom:0px;
+}
+p{
+  margin-top:0px;
+  margin-bottom:0px;
+}
+ul{
+  margin-top:0px;
+  margin-bottom:0px;
+
+}
+
+body {
+  background-color: #a3d5d3;
+}
+.float-left {
+  float: left;
+}
+.float-right {
+  float: right;
+}
+
+.float-clear {
+  clear: both;
+}
+.clear-left{
+  float: left;
+  clear: both;
+}
+.overflow-auto{
+  overflow: auto;
+}
+.width100pc {
+  width: 100%;
+}
+
+.width300px {
+  width: 300px;
+}
+.height100pc {
+  height: 100%;
+}
+
+.height300px {
+  height: 300px;
+}
+
+.heightdv {
+  height: 100vh;
+}
+
+.red {
+  background-color: #ff0000;
+}
+
+.green {
+  background-color: #00ff00;
+}
+
+.blue {
+  background-color: #0000ff;
+}
+.yellow{
+  background-color: #ffff00;
+}
+.margin10{
+  margin: 10px 10px;
+}
+li{
+
+  list-style-type: none;
+  &:not(:first-child){
+    float: left;
+    clear: both;}
+  &:first-child{
+    clear: both;
+
+  }
+  div{
+    float: left;
+  }
+}
+ul{
+  &:first-child{padding: 5px;}
+  &:not(:first-child){padding: 12px;}
+}
+
+
+
+
+
+
+#domain_page_list {
+
+  .expand-button {
+    margin: 3px 0px 0 0px;
+    text-indent: -9999px;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    text-align: center;
+    background: image-url('tiny_plus_button.png') no-repeat;
+  }
+  .contract-button {
+    margin: 3px 0px 0 0px;
+    text-indent: -9999px;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    text-align: center;
+    background: image-url('tiny_minus_button.png') no-repeat;
+    display: none;
+  }
+
+  .domain-selector {
+    margin: 3px 0px 0px 0px;
+
+    text-indent: -9999px;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    text-align: center;
+    background: image-url('tinytiny-search.png') no-repeat;
+    display: none;
+  }
+  .domain-url{
+    cursor: pointer;
+
+  }
+}
+
+

@@ -1,4 +1,4 @@
-class CreateRegexTemplates < ActiveRecord::Migration[5.0]
+class CreateRegexTemplates < ActiveRecord::Migration
   def change
     create_table :regex_templates do |t|
       t.integer :user_id

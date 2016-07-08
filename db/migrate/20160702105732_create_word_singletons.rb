@@ -1,4 +1,4 @@
-class CreateWordSingletons < ActiveRecord::Migration[5.0]
+class CreateWordSingletons < ActiveRecord::Migration
   def change
     create_table :word_singletons do |t|
       t.integer :word_id

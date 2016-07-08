@@ -1,0 +1,7 @@
+<ul>
+  <% domain_crawlers.each do |domain_crawler| %>
+    <li>
+      <%= link_to_unless_current domain_crawler.short_name, domain_crawler %>
+    </li>
+  <% end %>
+</ul>

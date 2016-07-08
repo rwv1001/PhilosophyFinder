@@ -1,3 +1,4 @@
+# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -12,129 +13,157 @@
 
 ActiveRecord::Schema.define(version: 20160702135332) do
 
-  create_table "crawler_pages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "result_page_id"
-    t.string  "URL"
-    t.integer "domain_crawler_id"
+  create_table "crawler_pages", force: :cascade do |t|
+    t.integer "result_page_id",    limit: 4
+    t.string  "URL",               limit: 255
+    t.string  "ancestry",          limit: 255
+    t.integer "domain_crawler_id", limit: 4
   end
 
-  create_table "domain_crawlers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.integer  "version"
-    t.string   "domain_name"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+  add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree
+  add_index "crawler_pages", ["domain_crawler_id"], name: "index_crawler_pages_on_domain_crawler_id", using: :btree
+  add_index "crawler_pages", ["result_page_id"], name: "index_crawler_pages_on_result_page_id", using: :btree
+
+  create_table "domain_crawlers", force: :cascade do |t|
+    t.integer  "user_id",              limit: 4
+    t.integer  "permissions",          limit: 4
+    t.integer  "permissions_group_id", limit: 4
+    t.integer  "version",              limit: 4,     default: 1
+    t.string   "domain_home_page",     limit: 255
+    t.string   "short_name",           limit: 255
+    t.integer  "crawler_page_id",      limit: 4
+    t.text     "description",          limit: 65535
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "group_elements", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.integer  "group_id"
-    t.integer  "search_result_id"
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
+  add_index "domain_crawlers", ["crawler_page_id"], name: "index_domain_crawlers_on_crawler_page_id", using: :btree
+
+  create_table "group_elements", force: :cascade do |t|
+    t.integer  "user_id",          limit: 4
+    t.integer  "group_id",         limit: 4
+    t.integer  "search_result_id", limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "group_names", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.string   "name"
-    t.string   "ancestry"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table "group_names", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4
+    t.string   "name",       limit: 255
+    t.string   "ancestry",   limit: 255
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "paragraphs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "paragraphs", force: :cascade do |t|
     t.text    "content",        limit: 65535
-    t.integer "result_page_id"
-    t.index ["result_page_id"], name: "result_page_id_ix", using: :btree
+    t.integer "result_page_id", limit: 4
   end
 
-  create_table "regex_instances", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.integer  "regex_templated_id"
-    t.string   "argument"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+  add_index "paragraphs", ["result_page_id"], name: "result_page_id_ix", using: :btree
+
+  create_table "regex_instances", force: :cascade do |t|
+    t.integer  "user_id",            limit: 4
+    t.integer  "regex_templated_id", limit: 4
+    t.string   "argument",           limit: 255
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "regex_templates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.string   "name"
-    t.string   "expression"
-    t.string   "arg_names"
+  create_table "regex_templates", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4
+    t.string   "name",       limit: 255
+    t.string   "expression", limit: 255
+    t.string   "arg_names",  limit: 255
     t.text     "help",       limit: 65535
-    t.string   "join_code"
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
+    t.string   "join_code",  limit: 255
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "result_pages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.text     "content",    limit: 65535
-    t.string   "hash_value"
-    t.datetime "created_at",               null: false
-    t.datetime "updated_at",               null: false
-    t.index ["hash_value"], name: "hash_value_ix", using: :btree
+  create_table "result_pages", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4
+    t.string   "hash_value", limit: 255
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "search_queries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.string   "domain"
-    t.integer  "regex_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  add_index "result_pages", ["hash_value"], name: "hash_value_ix", using: :btree
+
+  create_table "search_queries", force: :cascade do |t|
+    t.integer  "user_id",            limit: 4
+    t.integer  "domain_list_id",     limit: 4
+    t.integer  "page_list_id",       limit: 4
+    t.string   "first_search_term",  limit: 255
+    t.string   "second_search_term", limit: 255
+    t.boolean  "order_sensitive"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "search_results", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer  "user_id"
-    t.integer  "search_query_id"
-    t.integer  "page_id"
-    t.integer  "marker_begin"
-    t.integer  "marker_end"
-    t.integer  "display_begin"
-    t.integer  "display_end"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+  create_table "search_results", force: :cascade do |t|
+    t.integer  "user_id",                    limit: 4
+    t.integer  "permissions",                limit: 4
+    t.integer  "permissions_group_id",       limit: 4
+    t.integer  "search_query_id",            limit: 4
+    t.integer  "marker_begin",               limit: 4
+    t.integer  "marker_end",                 limit: 4
+    t.integer  "page_id",                    limit: 4
+    t.integer  "sentence_id",                limit: 4
+    t.integer  "begin_display_paragraph_id", limit: 4
+    t.integer  "end_display_paragraph_id",   limit: 4
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
-  create_table "sentences", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  add_index "search_results", ["page_id"], name: "page_id_ix", using: :btree
+  add_index "search_results", ["search_query_id"], name: "search_query_id_ix", using: :btree
+
+  create_table "sentences", force: :cascade do |t|
     t.text    "content",      limit: 65535
-    t.integer "paragraph_id"
-    t.index ["paragraph_id"], name: "paragraph_id_ix", using: :btree
+    t.integer "paragraph_id", limit: 4
   end
 
-  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "email"
-    t.string   "first_name"
-    t.string   "second_name"
-    t.string   "password_digest"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-    t.string   "auth_token"
-    t.string   "password_reset_token"
+  add_index "sentences", ["paragraph_id"], name: "paragraph_id_ix", using: :btree
+
+  create_table "users", force: :cascade do |t|
+    t.string   "email",                     limit: 255
+    t.string   "first_name",                limit: 255
+    t.string   "second_name",               limit: 255
+    t.string   "password_digest",           limit: 255
+    t.integer  "current_page",              limit: 4,   default: 0
+    t.integer  "current_domain_crawler_id", limit: 4,   default: 1
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "auth_token",                limit: 255
+    t.string   "password_reset_token",      limit: 255
     t.datetime "password_reset_sent_at"
-    t.integer  "group_id"
-    t.integer  "search_query_id"
+    t.integer  "group_id",                  limit: 4
+    t.integer  "search_query_id",           limit: 4
   end
 
-  create_table "word_pairs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "word_1"
-    t.integer "word_2"
-    t.integer "separation"
-    t.integer "result_page_id"
-    t.integer "sentence_id"
-    t.index ["word_1", "word_2", "result_page_id"], name: "index_word_pairs_on_word_1_and_word_2_and_result_page_id", using: :btree
+  create_table "word_pairs", force: :cascade do |t|
+    t.integer "word_1",         limit: 4
+    t.integer "word_2",         limit: 4
+    t.integer "separation",     limit: 4
+    t.integer "result_page_id", limit: 4
+    t.integer "sentence_id",    limit: 4
   end
 
-  create_table "word_singletons", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "word_id"
-    t.integer "result_page_id"
-    t.integer "sentence_id"
-    t.index ["word_id"], name: "word_id_ix", using: :btree
+  add_index "word_pairs", ["word_1", "word_2", "result_page_id"], name: "index_word_pairs_on_word_1_and_word_2_and_result_page_id", using: :btree
+
+  create_table "word_singletons", force: :cascade do |t|
+    t.integer "word_id",        limit: 4
+    t.integer "result_page_id", limit: 4
+    t.integer "sentence_id",    limit: 4
   end
 
-  create_table "words", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "word_name"
-    t.index ["word_name"], name: "word_name_ix", using: :btree
+  add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
+
+  create_table "words", force: :cascade do |t|
+    t.string "word_name", limit: 255
   end
+
+  add_index "words", ["word_name"], name: "word_name_ix", using: :btree
 
 end
