@@ -1,38 +1,40 @@
-<div class = "domain-new">
+<div class="domain-new">
   <div class="float-left">
     <h3>New Domain</h3>
-    </div>
-  <%= render 'showhide', div_name: "domain-new" %>
+  </div>
+  <%= render 'domain_crawlers/showhide', div_name: "domain-new" %>
   <div class="float-clear" name="domain-new">
-<%= form_for args[:domain_crawler] do |f| %>
-    <% if args[:domain_crawler].errors.any? %>
-        <div class="error_messages">
-          <h2>Form is invalid</h2>
-          <ul>
-            <% args[:domain_crawler].errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-            <% end %>
-          </ul>
+    <%= form_for args[:domain_crawler] do |f| %>
+        <% if args[:domain_crawler].errors.any? %>
+            <div class="error_messages">
+              <h2>Form is invalid</h2>
+              <ul>
+                <% args[:domain_crawler].errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+        <% end %>
+
+
+
+        <div class="field">
+          <%= f.label :domain_home_page %><br/>
+          <%= f.text_field :domain_home_page %>
         </div>
+        <div class="field">
+          <%= f.label :short_name %><br/>
+          <%= f.text_field :short_name %>
+        </div>
+        <div class="field">
+          <%= f.label :description %><br/>
+          <%= f.text_field :description %>
+        </div>
+        <div class="field">
+          <%= f.hidden_field :user_id, :value => args[:user_id] %>
+        </div>
+
+        <div class="actions"><%= f.submit "Analyse Domain" %></div>
     <% end %>
-
-    <div class="field">
-      <%= f.label :domain_home_page %><br />
-      <%= f.text_field :domain_home_page %>
-    </div>
-    <div class="field">
-      <%= f.label :short_name%><br />
-      <%= f.text_field :short_name %>
-    </div>
-    <div class="field">
-      <%= f.label :description%><br />
-      <%= f.text_field :description %>
-    </div>
-    <div class="field">
-      <%= f.number_field :user_id, :value => args[:user_id]%>
-    </div>
-
-    <div class="actions"><%= f.submit "Analyse Domain" %></div>
-<% end %>
-</div>
+  </div>
 </div>

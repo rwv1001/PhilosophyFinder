@@ -1,4 +1,10 @@
 
-<div class="domain-url"  onclick="SelectDomain(<%=args[:crawler_page_id]%>,true)"><%= args[:url] %></div>
-<div class="domain-selector" name="domain-selector-<%= args[:crawler_page_id] %>">-
+<!--<div class="domain-url"  onclick="SelectDomain(<%=args[:crawler_page_id]%>,true)"><%= args[:url] %></div>-->
+<div class="domain-url">
+<%= link_to args[:url], set_header_path(:id => args[:crawler_page_id]), :remote => true %>
 </div>
+<div class="domain-selector" name="domain-selector-<%= args[:crawler_page_id] %>">-</div>
+<div> <input type="checkbox" id="checkbox-domain-selector-<%= args[:crawler_page_id] %>" name ="row_in_list[]" class="check"  value=<%= args[:crawler_page_id] %> onclick="SelectCrawlerPage(<%=args[:crawler_page_id]%>);"></div>
+
+
+

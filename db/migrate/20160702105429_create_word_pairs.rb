@@ -1,8 +1,7 @@
 class CreateWordPairs < ActiveRecord::Migration
   def change
     create_table :word_pairs do |t|
-      t.integer :word_1
-      t.integer :word_2
+      t.integer :word_multiple
       t.integer :separation
       t.integer :result_page_id
       t.integer :sentence_id
@@ -10,7 +9,7 @@ class CreateWordPairs < ActiveRecord::Migration
 
 
     end
-    add_index :word_pairs, [:word_1, :word_2, :result_page_id]
+    add_index :word_pairs, :word_multiple, :name => 'word_multiple_id_ix'
   end
 
 end

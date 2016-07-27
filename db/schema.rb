@@ -92,11 +92,8 @@ ActiveRecord::Schema.define(version: 20160702135332) do
 
   create_table "search_queries", force: :cascade do |t|
     t.integer  "user_id",            limit: 4
-    t.integer  "domain_list_id",     limit: 4
-    t.integer  "page_list_id",       limit: 4
     t.string   "first_search_term",  limit: 255
     t.string   "second_search_term", limit: 255
-    t.boolean  "order_sensitive"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -106,17 +103,17 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer  "permissions",                limit: 4
     t.integer  "permissions_group_id",       limit: 4
     t.integer  "search_query_id",            limit: 4
-    t.integer  "marker_begin",               limit: 4
-    t.integer  "marker_end",                 limit: 4
-    t.integer  "page_id",                    limit: 4
+    t.string   "highlighted_result",         limit: 255
     t.integer  "sentence_id",                limit: 4
+    t.integer  "crawler_page_id",            limit: 4
+    t.boolean  "hidden",                                 default: false
+    t.boolean  "selected",                               default: false
     t.integer  "begin_display_paragraph_id", limit: 4
     t.integer  "end_display_paragraph_id",   limit: 4
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "search_results", ["page_id"], name: "page_id_ix", using: :btree
   add_index "search_results", ["search_query_id"], name: "search_query_id_ix", using: :btree
 
   create_table "sentences", force: :cascade do |t|
@@ -143,14 +140,13 @@ ActiveRecord::Schema.define(version: 20160702135332) do
   end
 
   create_table "word_pairs", force: :cascade do |t|
-    t.integer "word_1",         limit: 4
-    t.integer "word_2",         limit: 4
+    t.integer "word_multiple",  limit: 4
     t.integer "separation",     limit: 4
     t.integer "result_page_id", limit: 4
     t.integer "sentence_id",    limit: 4
   end
 
-  add_index "word_pairs", ["word_1", "word_2", "result_page_id"], name: "index_word_pairs_on_word_1_and_word_2_and_result_page_id", using: :btree
+  add_index "word_pairs", ["word_multiple"], name: "word_multiple_id_ix", using: :btree
 
   create_table "word_singletons", force: :cascade do |t|
     t.integer "word_id",        limit: 4
@@ -161,7 +157,8 @@ ActiveRecord::Schema.define(version: 20160702135332) do
   add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
 
   create_table "words", force: :cascade do |t|
-    t.string "word_name", limit: 255
+    t.string  "word_name",  limit: 255
+    t.integer "word_prime", limit: 4
   end
 
   add_index "words", ["word_name"], name: "word_name_ix", using: :btree

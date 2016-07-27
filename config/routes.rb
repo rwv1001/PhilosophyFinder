@@ -10,9 +10,14 @@ Rails.application.routes.draw do
   get 'login', to: 'sessions#new', as: 'login'
   get 'logout', to: 'sessions#destroy', as: 'logout'
 
+  get "/set_header" => 'domain_crawlers#set_header', as: 'set_header'
+
+  get 'search', to: 'domain_crawlers#search', as: 'search'
+
   resources :users
   resources :sessions
   resources :password_resets
+
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 

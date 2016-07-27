@@ -14,6 +14,7 @@ $menu-block-color:  lighten($menu-color, 10%);
   height: 100vh;
   width: 300px;
   float: left;
+  overflow: hidden;
 }
 .user-header{
   @include put-margin(10px);
@@ -34,6 +35,14 @@ $menu-block-color:  lighten($menu-color, 10%);
 .domain-new{
   @include put-margin(10px);
   background-color: $menu-block-color;
+  overflow: auto;
+
+}
+
+.search-new{
+  @include put-margin(10px);
+  background-color: $menu-block-color;
+  overflow: auto;
 
 }
 .domain-pages{
@@ -135,6 +144,9 @@ body {
 .red {
   background-color: #ff0000;
 }
+.highlight{
+  background-color: #ffff00;
+}
 
 .green {
   background-color: #00ff00;
@@ -167,6 +179,26 @@ ul{
   &:first-child{padding: 5px;}
   &:not(:first-child){padding: 12px;}
 }
+.main-panel{
+  width: -moz-calc(100% - 330px);
+  width: -webkit-calc(100% - 330px);
+  width: calc(100% - 330px);
+  overflow: auto;
+  background-color: #00ffff;
+}
+.menu-div{
+  overflow: auto;
+  width: 100%;
+}
+.menu-tab{
+  margin: 0px 0px 0px 23px;
+  background-color: #888888;
+  width: 75px;
+  float: left;
+
+
+}
+
 
 
 
@@ -203,8 +235,7 @@ ul{
     width: 12px;
     height: 12px;
     text-align: center;
-    background: image-url('tinytiny-search.png') no-repeat;
-    display: none;
+
   }
   .domain-url{
     cursor: pointer;

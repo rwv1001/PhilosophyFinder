@@ -1,0 +1,12 @@
+
+selector_obj =$('[name="domain-selector-<%=@crawler_page_id%>"]');
+selector_obj.show();
+<% if @crawler_page_id != @old_crawler_page_id %>
+
+  selector_obj =$('[name="domain-selector-<%=@old_crawler_page_id%>"]');
+  selector_obj.hide();
+
+<%end%>
+
+
+//$('#domain_summary_header').replaceWith('<%= j render "domain_summary_header" %>');

@@ -2,14 +2,14 @@
 
 
 <div id="submenu">
-  <%= render 'submenu_domain_crawlers', domain_crawlers: DomainCrawler.all %>
+  <%= render 'domain_crawlers/submenu_domain_crawlers', domain_crawlers: DomainCrawler.all %>
 </div>
 
 
 <p id="notice"><%= notice %></p>
 
 <div id="domain_crawler_details">
-  <%= render 'body_details', domain_crawler: @domain_crawler %>
+  <%= render 'domain_crawlers/body_details', domain_crawler: @domain_crawler %>
 </div>
 
 

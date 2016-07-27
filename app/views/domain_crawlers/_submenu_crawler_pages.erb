@@ -11,11 +11,11 @@
         <%end%>
 
         <% if children.present? %>
-            <%= render 'expand_buttons', id: crawler_page.id %>
-            <%= render 'url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
-            <%= render 'submenu_crawler_pages', args: {:crawler_pages => children, :parent_id => crawler_page.id}  %>
+            <%= render 'domain_crawlers/expand_buttons', id: crawler_page.id %>
+            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
+            <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => children, :parent_id => crawler_page.id}  %>
         <% else %>
-            <%= render 'url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
+            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id} %>
         <% end %>
       </li>
   <% end %>

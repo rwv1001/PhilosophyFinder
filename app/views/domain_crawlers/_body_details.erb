@@ -20,10 +20,10 @@
              style="display: none"
              onclick="contractCrawlerPage(<%=current_domain_crawler.crawler_page.id%>)">-
         </span>
-        <%= render 'url', args: {:url => current_domain_crawler.crawler_page.URL, :crawler_page_id => current_domain_crawler.crawler_page.id} %>
+        <%= render 'domain_crawlers/url', args: {:url => current_domain_crawler.crawler_page.URL, :crawler_page_id => current_domain_crawler.crawler_page.id} %>
         </span>
       </li>
-<%= render 'submenu_crawler_pages', args: {:crawler_pages => current_domain_crawler.crawler_page.root.descendants.arrange, :parent_id => current_domain_crawler.crawler_page.id } %>
+<%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => current_domain_crawler.crawler_page.root.descendants.arrange, :parent_id => current_domain_crawler.crawler_page.id } %>
     </ul>
     <% else %>
     <p>something has gone wrong: <%= @domain_crawler.id %></p>

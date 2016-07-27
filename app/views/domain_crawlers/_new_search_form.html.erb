@@ -1,0 +1,26 @@
+<div class="search-new">
+  <div class="float-left">
+    <h3>New Search</h3>
+  </div>
+  <%= render 'domain_crawlers/showhide', div_name: "search-new" %>
+  <div class="float-clear" name="search-new">
+
+    <%= form_tag search_path, :id => 'search_form', method: 'get', remote: true do %>
+        <div class="field">
+          <%= label_tag :word1 %><br />
+          <%= text_field_tag :word1, params[:word1] %>
+        </div>
+        <div class="field">
+          <%= label_tag :word2 %><br />
+          <%= text_field_tag :word2, params[:word2] %>
+        </div>
+        <div id="specific_action_variables">
+
+        </div>
+        <div class="actions"><%= submit_tag "Search" %>
+        </div>
+        <div><input type="button" name="search_button"  value="Search click" onclick= Search() ></div>
+    <% end %>
+
+  </div>
+</div>

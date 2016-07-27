@@ -1,11 +1,14 @@
 require 'nokogiri'
 require 'open-uri'
 require 'digest/md5'
+require 'prime'
 
 
 class DomainCrawler < ApplicationRecord
   has_many :crawler_pages
   belongs_to :crawler_page
+
+  @@primes = Prime.instance
 
   def ProcessSentence(sentence, result_page_id, paragraph_id)
     logger.info "ProcessSentence begin"
@@ -21,28 +24,51 @@ class DomainCrawler < ApplicationRecord
     sentence = sentence.gsub(/[^a-zA-Z]/, ' ')
     logger.info "sentence without punctuation: #{sentence}"
     word_list = sentence.split(' ')
+    #  logger.info "v1"
     sentence.split(' ').each do |word|
-     # logger.info "#{word_count}, Word: #{word}"
+      # logger.info "#{word_count}, Word: #{word}"
       word_count=word_count+1
+      #   logger.info "v2"
       if word.length > 1
-
-        word_object = Word.find_by_word_name(word)
-
+        #      logger.info "v3"
+        word_object = Word.find_by_word_name(word.downcase)
+        #     logger.info "v4"
         if word_object == nil
-
+          #      logger.info "v5"
           word_object = Word.new
 
-          word_object.word_name = word
+          word_object.word_name = word.downcase
+          if Word.exists?
+            #       logger.info "v6"
+            #     logger.info "last word is #{Word.last.word_prime}"
+            possible_prime = Word.last.word_prime
 
+            #        logger.info "v7 #{possible_prime}"
+            possible_prime = possible_prime + 2
+            #        logger.info "v7a #{possible_prime}"
+            while @@primes.prime?(possible_prime) == false
+              possible_prime = possible_prime + 2
+              #       logger.info "v8"
+            end
+
+          else
+            #       logger.info "v9"
+            possible_prime = 3
+
+          end
+          #    logger.info "v10"
+          word_object.word_prime = possible_prime
           word_object.save
         end
-
-        word_array << word_object.id
-
+        #  logger.info "v11"
+        word_array << word_object
+        #  logger.info "v12"
         word_set.add(word_object.id)
+        #    logger.info "v13"
       end
+      #  logger.info "v14"
     end
-    logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
+    #  logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
     word_set.each do |word_id|
       word_singleton = WordSingleton.new
       word_singleton.word_id = word_id
@@ -53,37 +79,23 @@ class DomainCrawler < ApplicationRecord
     for i in 0..word_array.length-1
       word_1 = word_array[i]
 
-=begin
-      if i>0
-        for j in[0,i-@max_separation].max..(i-1)
-          word_2 = word_array[j]
-          word_pair = WordPair.new
-          word_pair.word_1 = word_1
-          word_pair.word_2 = word_2
-          word_pair.separation = j-i
-          word_pair.result_page_id = result_page_id
-          word_pair.sentence_id = sentence_object.id
-          word_pair.save
-
-        end
-      end
-=end
 
       if i<word_array.length-1
         for j in (i+1) .. [i+@max_separation, word_array.length-1].min
           word_2 = word_array[j]
           word_pair = WordPair.new
-          word_pair.word_1 = word_1
-          word_pair.word_2 = word_2
+          word_pair.word_multiple = word_1.word_prime * word_2.word_prime
           word_pair.separation = j-i
           word_pair.result_page_id = result_page_id
           word_pair.sentence_id = sentence_object.id
-          word_pair.save if not WordPair.exists?(:word_1 => word_1, :word_2 => word_2, :result_page_id => result_page_id, :sentence_id => sentence_object.id)
+          word_pair.save
+          #        word_pair.save if not WordPair.exists?(:word_multiple => word_pair.word_multiple, :result_page_id => result_page_id, :sentence_id => sentence_object.id)
         end
       end
     end
     logger.info "ProcessSentence end"
   end
+
   def ProcessParagraphs(paragraphs, result_page_id)
     logger.info "ProcessParagraphs begin, paragraphs length = #{paragraphs.length}"
     paragraph_count = 0
@@ -94,11 +106,29 @@ class DomainCrawler < ApplicationRecord
     logger.info "AAParagraph 2 is #{paragraphs[2].text}"
     logger.info "AAParagraph 3 is #{paragraphs[3].text}"
 =end
-    paragraphs.each do |par|
+    for par_count in 0..paragraphs.length-1
+      par = paragraphs[par_count]
+#      logger.info "01"
 
       if @max_paragraph_number<0 || paragraph_count<@max_paragraph_number
         #index_paragraphs
+#        logger.info "02"
         par_text = par.text
+ #       logger.info "03"
+        if par_count < (paragraphs.length-2)
+  #        logger.info "04"
+          par_index = par_text.index(paragraphs[par_count+1].text)
+   #       logger.info "05"
+          logger.info "par_index = #{par_index}"
+
+          if par_index != nil and par_text.index(paragraphs[par_count+2].text) !=nil
+    #        logger.info "06"
+            par_text = par_text[0..par_index-1]
+     #       logger.info "07"
+          end
+      #    logger.info "07a"
+        end
+    #    logger.info "08"
         @last_paragraph = par_text
         logger.info "#{paragraph_count}, Paragraph: #{par_text}"
         paragraph_count=paragraph_count+1
@@ -122,6 +152,7 @@ class DomainCrawler < ApplicationRecord
     logger.info "ProcessParagraphs end"
 
   end
+
   # @param [String] url
   # @param [String] base_url
   # @param [number] current_level
@@ -129,152 +160,154 @@ class DomainCrawler < ApplicationRecord
   def ProcessPage(url, current_level, parent_id)
     logger.info "ProcessPage begin"
     logger.info "AA parent_id = #{parent_id}, level = #{current_level}"
-    new_parent_id = 0
-    crawl_number =0
-    last_slash = url.rindex("/")
-    last_period = url.rindex(".")
+    if (@current_page_store<@max_page_store or @max_page_store<0)
+      new_parent_id = 0
+      crawl_number =0
+      last_slash = url.rindex("/")
+      last_period = url.rindex(".")
 
-    if last_slash < url.length-1
-      if last_period > last_slash then
-        file_name = url[last_slash+1,url.size]
-        base_url = url[0,last_slash+1]
+      if last_slash < url.length-1
+        if last_period > last_slash then
+          file_name = url[last_slash+1, url.size]
+          base_url = url[0, last_slash+1]
+        else
+          file_name = ''
+          base_url = url + '/'
+        end
       else
         file_name = ''
-        base_url = url + '/'
+        base_url = url
       end
-    else
-      file_name = ''
-      base_url = url
-    end
 
 
+      logger.info "process_hash url: #{url}, base_url: #{base_url}, file_name: #{file_name}, level: #{current_level}"
+      next_level = current_level+1
+      new_pages = Set.new
+      begin
+        doc = Nokogiri::HTML(open(url))
+        logger.info "let's sleep"
+        sleep(10)
 
-    logger.info "process_hash url: #{url}, base_url: #{base_url}, file_name: #{file_name}, level: #{current_level}"
-    next_level = current_level+1
-    new_pages = Set.new
-    begin
-      doc = Nokogiri::HTML(open(url))
 
+        #blogger.info "Body is #{body}"
 
+        # hash_value = Digest::MD5.hexdigest(body)
 
-      #blogger.info "Body is #{body}"
-
-      # hash_value = Digest::MD5.hexdigest(body)
-      if (@current_page_store<@max_page_store or @max_page_store<0)
         @current_page_store = @current_page_store +1
         paragraphs = doc.xpath('//p')
-        logger.info "Number of paragraphs =  #{paragraphs.length}"
-        #logger.info "Paragraph 0 is #{paragraphs[0].text}"
-        #logger.info "Paragraph 1 is #{paragraphs[1].text}"
-        #logger.info "Paragraph 2 is #{paragraphs[2].text}"
-        #logger.info "Paragraph 3 is #{paragraphs[3].text}"
-        content = ""
-        paragraphs.each do |par|
-          #logger.info "par content is #{par.text}"
-          #content << "<p>" << ActionController::Base.helpers.strip_tags(par.text) << "</p>\n\n"
-          #par_text = Nokogiri::HTML(par).xpath('//text()').map(&:text).join(' ')
-          #content << "<p>" << par.text.gsub(/<[^>]*>/, " ") << "</p>\n\n"
-          content << "<p>" << Digest::MD5.hexdigest(par.xpath('//text()').map(&:text).join(' ')) << "</p>\n\n"
+
+          logger.info "Number of paragraphs =  #{paragraphs.length}"
+          #logger.info "Paragraph 0 is #{paragraphs[0].text}"
+          #logger.info "Paragraph 1 is #{paragraphs[1].text}"
+          #logger.info "Paragraph 2 is #{paragraphs[2].text}"
+          #logger.info "Paragraph 3 is #{paragraphs[3].text}"
+          content = ""
+          paragraphs.each do |par|
+            #logger.info "par content is #{par.text}"
+            #content << "<p>" << ActionController::Base.helpers.strip_tags(par.text) << "</p>\n\n"
+            #par_text = Nokogiri::HTML(par).xpath('//text()').map(&:text).join(' ')
+            #content << "<p>" << par.text.gsub(/<[^>]*>/, " ") << "</p>\n\n"
+            content << "<p>" << Digest::MD5.hexdigest(par.xpath('//text()').map(&:text).join(' ')) << "</p>\n\n"
+          end
+          #logger.info "body content is #{content}"
+
+          hash_value = Digest::MD5.hexdigest(content)
+          logger.info "hash_value is #{hash_value}"
+          result_page = ResultPage.find_by_hash_value(hash_value)
+          if result_page==nil or @always_process
+            result_page = ResultPage.new
+            # result_page.content = content
+            result_page.hash_value = hash_value
+            result_page.save
+
+            ProcessParagraphs(paragraphs, result_page.id)
+
+          else
+
+            logger.info "Page already processed #{url}"
+          end
+      #    logger.info "ProcessPage 2"
+          new_crawler_page = CrawlerPage.new
+       #   logger.info "ProcessPage 2a"
+          new_crawler_page.result_page_id = result_page.id
+        #  logger.info "ProcessPage 2b"
+          new_crawler_page.URL = url
+         # logger.info "ProcessPage 2c"
+          new_crawler_page.domain_crawler_id = id
+          #logger.info "ProcessPage 2e"
+
+          logger.info "parent_id = #{parent_id}, level = #{current_level}"
+          logger.info "inspect new_crawler_page #{new_crawler_page.inspect}"
+          if parent_id!=0
+ #           logger.info "ProcessPage 2f"
+            new_crawler_page.parent_id = parent_id
+
+          end
+  #        logger.info "ProcessPage 2g"
+          logger.info "inspect new_crawler_page #{new_crawler_page.inspect}"
+   #       logger.info "ProcessPage 2h"
+          new_crawler_page.save
+          new_parent_id = new_crawler_page.id
+
+          logger.info "@first_page_id = #{@first_page_id}"
+          if @first_page_id == 0
+            @first_page_id = new_crawler_page.id
+            self.crawler_page_id = @first_page_id
+            logger.info "Setting first crawler page to #{@first_page_id}"
+          else
+            logger.info "First crawler page not set, already #{@first_page_id}"
+          end
+
+          logger.info "Saved url #{url}"
+
+
+ #       logger.info "ProcessPage 3"
+        links = doc.xpath('//a')
+        links.each do |item|
+
+          #logger.info "Href1: #{item['href'].inspect}, #{item['href'].class}"
+
+          href_str = item["href"]
+          if href_str =~ /^#{base_url}/
+            # logger.info "we have a match for #{href_str}"
+            href_str.sub! base_url, ''
+            # logger.info "Updated: #{href_str}"
+          elsif href_str.nil? or href_str =~ /\#/ or href_str =~ /^javascript/
+            # logger.info "Nil case: #{href_str}"
+          elsif href_str !~ /^http:/ and href_str !~ /^https:/ and crawl_number < @max_crawl_number
+
+            @current_pages[base_url+href_str] ||= next_level
+            new_pages.add(base_url+href_str)
+            crawl_number=crawl_number+1
+
+          end
         end
-       #logger.info "body content is #{content}"
-
-        hash_value = Digest::MD5.hexdigest(content)
-        logger.info "hash_value is #{hash_value}"
-        result_page = ResultPage.find_by_hash_value(hash_value)
-        if result_page==nil or @always_process
-          result_page = ResultPage.new
-         # result_page.content = content
-          result_page.hash_value = hash_value
-          result_page.save
-
-          ProcessParagraphs(paragraphs, result_page.id)
-
-        else
-
-          logger.info "Page already processed #{url}"
-        end
-        logger.info "ProcessPage 2"
-        new_crawler_page = CrawlerPage.new
-        logger.info "ProcessPage 2a"
-        new_crawler_page.result_page_id = result_page.id
-        logger.info "ProcessPage 2b"
-        new_crawler_page.URL = url
-        logger.info "ProcessPage 2c"
-        new_crawler_page.domain_crawler_id = id
-        logger.info "ProcessPage 2e"
-
-        logger.info "parent_id = #{parent_id}, level = #{current_level}"
-        logger.info "inspect new_crawler_page #{new_crawler_page.inspect}"
-        if parent_id!=0
-          logger.info "ProcessPage 2f"
-          new_crawler_page.parent_id = parent_id
-
-        end
-        logger.info "ProcessPage 2g"
-        logger.info "inspect new_crawler_page #{new_crawler_page.inspect}"
-        logger.info "ProcessPage 2h"
-        new_crawler_page.save
-        new_parent_id = new_crawler_page.id
-
-        logger.info "@first_page_id = #{@first_page_id}"
-        if @first_page_id == 0
-          @first_page_id = new_crawler_page.id
-          self.crawler_page_id = @first_page_id
-          logger.info "Setting first crawler page to #{@first_page_id}"
-        else
-          logger.info "First crawler page not set, already #{@first_page_id}"
-        end
-
-        logger.info "Saved url #{url}"
+  #      logger.info "ProcessPage 4"
+      rescue Exception => e
+        logger.info "Couldn't read \"#{ url }\": #{ e }"
       end
-      logger.info "ProcessPage 3"
-      links = doc.xpath('//a')
-      links.each do |item|
+      old_parent_id = parent_id
 
-        #logger.info "Href1: #{item['href'].inspect}, #{item['href'].class}"
+      new_pages.each do |url|
 
-        href_str = item["href"]
-        if href_str =~ /^#{base_url}/
-          # logger.info "we have a match for #{href_str}"
-          href_str.sub! base_url, ''
-          # logger.info "Updated: #{href_str}"
-        elsif href_str.nil? or href_str =~ /\#/ or href_str =~ /^javascript/
-         # logger.info "Nil case: #{href_str}"
-        elsif href_str !~ /^http:/ and href_str !~ /^https:/ and crawl_number < @max_crawl_number
 
-          @current_pages[base_url+href_str] ||= next_level
-          new_pages.add(base_url+href_str)
-          crawl_number=crawl_number+1
+        parent_id = new_parent_id
 
-        end
-      end
-      logger.info "ProcessPage 4"
-    rescue Exception => e
-      logger.info "Couldn't read \"#{ url }\": #{ e }"
+        ProcessPage(url, next_level, parent_id)
+
+      end if next_level < @max_level
+      parent_id = old_parent_id
     end
-    old_parent_id = parent_id
-
-    new_pages.each do |url|
-      logger.info "let's sleep"
-      sleep(10)
-
-      parent_id =  new_parent_id
-
-      ProcessPage(url, next_level, parent_id)
-
-    end if next_level < @max_level
-    parent_id = old_parent_id
-
   end
 
   def crawl
-    logger.debug "start crawl for URL #{@domain_home_page}"
+    logger.info "start crawl for URL #{@domain_home_page}"
 
     update_domain = true
-    @max_page_store = 20
-    @max_crawl_number = 20
-    @max_paragraph_number =2
-    @max_separation = 3
+    @max_page_store = 10
+    @max_crawl_number = 10
+    @max_paragraph_number =20
+    @max_separation = 5
     @current_page_store = 0
     @last_paragraph = ""
     parent_id = 0
@@ -297,7 +330,6 @@ class DomainCrawler < ApplicationRecord
     #@domain_crawler.domain_name = domain
 
 
-
     current_level = 0
     @current_pages = Hash.new()
     @current_pages[domain_home_page] = current_level
@@ -309,7 +341,6 @@ class DomainCrawler < ApplicationRecord
       logger.info "#{count}: Page = #{page}, Level = #{level}"
       count = count+1
     end
-
 
 
     logger.info "end of crawl"

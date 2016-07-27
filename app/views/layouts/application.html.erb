@@ -19,9 +19,11 @@
     <% if current_user %>
 
         <div class="domain-crawler">
-          <%= render 'domain_summary' %>
-          <%= render 'new_domain_form', args: {:user_id=>current_user.id, :domain_crawler=>DomainCrawler.new }%>
+          <%= render 'domain_crawlers/domain_summary' %>
+          <%= render 'domain_crawlers/new_domain_form', args: {:user_id=>current_user.id, :domain_crawler=>DomainCrawler.new }%>
+          <%= render 'domain_crawlers/new_search_form', args: {:user_id=>current_user.id, :domain_crawler=>DomainCrawler.new }%>
         </div>
+        <p> here is a sentence with a word such as <span class="highlight">Go</span>d highlighted</p>
 
 
 
@@ -30,5 +32,12 @@
     <% end %>
     <%= yield %>
   </div>
+  <div class="main-panel">
+    <div class="menu-div text999 width100">
+      <div class="menu-tab margin00023"> searches </div>
+      <div class="menu-tab margin00023"> groups </div>
+    </div>
+
+      </div>
   </body>
 </html>
