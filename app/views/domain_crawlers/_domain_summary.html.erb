@@ -13,8 +13,9 @@
 
 
       <% DomainCrawler.all.each do |domain_crawler| %>
-
-          <%= render 'domain_crawlers/domain_pages', domain_crawler: domain_crawler %>
+          <% if domain_crawler.id != DEFAULT_PAGE[:domain_crawler] %>
+            <%= render 'domain_crawlers/domain_pages', domain_crawler: domain_crawler %>
+          <% end %>
       <% end %>
     </div>
   </div>

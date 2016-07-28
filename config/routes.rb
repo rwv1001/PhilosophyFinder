@@ -12,6 +12,8 @@ Rails.application.routes.draw do
 
   get "/set_header" => 'domain_crawlers#set_header', as: 'set_header'
 
+  get "/delete_result" => 'domain_crawlers#delete_result', as: 'delete_result'
+
   get 'search', to: 'domain_crawlers#search', as: 'search'
 
   resources :users

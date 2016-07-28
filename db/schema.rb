@@ -103,11 +103,11 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer  "permissions",                limit: 4
     t.integer  "permissions_group_id",       limit: 4
     t.integer  "search_query_id",            limit: 4
-    t.string   "highlighted_result",         limit: 255
+    t.text     "highlighted_result",         limit: 65535
     t.integer  "sentence_id",                limit: 4
     t.integer  "crawler_page_id",            limit: 4
-    t.boolean  "hidden",                                 default: false
-    t.boolean  "selected",                               default: false
+    t.boolean  "hidden",                                   default: false
+    t.boolean  "selected",                                 default: false
     t.integer  "begin_display_paragraph_id", limit: 4
     t.integer  "end_display_paragraph_id",   limit: 4
     t.datetime "created_at"

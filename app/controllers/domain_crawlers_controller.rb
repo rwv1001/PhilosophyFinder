@@ -34,7 +34,10 @@ class DomainCrawlersController < ApplicationController
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
 
-    search_query.search(params[:row_in_list]);
+    @search_results = search_query.search(params[:row_in_list]);
+    respond_to do |format|
+      format.js
+    end
 
   end
 
@@ -68,6 +71,14 @@ class DomainCrawlersController < ApplicationController
     end
 
 
+  end
+  def delete_result
+    logger.info "delete_result begin"
+    @delete_id = params[:id]
+    SearchResult.destroy(@delete_id)
+    respond_to do |format|
+      format.js
+    end
   end
 
   def set_header

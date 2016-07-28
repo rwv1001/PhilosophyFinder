@@ -14,10 +14,10 @@
           <%= label_tag :word2 %><br />
           <%= text_field_tag :word2, params[:word2] %>
         </div>
-        <div id="specific_action_variables">
+        <div id="specific_action_variables" class = "hidden" >
 
         </div>
-        <div class="actions"><%= submit_tag "Search" %>
+        <div class="actions hidden "><%= submit_tag "Search" %>
         </div>
         <div><input type="button" name="search_button"  value="Search click" onclick= Search() ></div>
     <% end %>

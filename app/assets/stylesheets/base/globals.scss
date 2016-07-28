@@ -11,10 +11,12 @@ $menu-block-color:  lighten($menu-color, 10%);
 
 .sidemenu{
   background-color: $menu-color;
-  height: 100vh;
+
+
   width: 300px;
   float: left;
   overflow: hidden;
+  height:auto;
 }
 .user-header{
   @include put-margin(10px);
@@ -103,7 +105,7 @@ ul{
 }
 
 body {
-  background-color: #a3d5d3;
+  background-color:$menu-color;
 }
 .float-left {
   float: left;
@@ -184,7 +186,7 @@ ul{
   width: -webkit-calc(100% - 330px);
   width: calc(100% - 330px);
   overflow: auto;
-  background-color: #00ffff;
+  background-color: $menu-block-color;
 }
 .menu-div{
   overflow: auto;
@@ -241,6 +243,40 @@ ul{
     cursor: pointer;
 
   }
+}
+
+.main-panel-content{
+  background-color: #556474;
+}
+.crawler_page_name{
+  background-color: #72869c;
+}
+.search-result-outer{
+  background-color: #8a6d9c;
+  overflow: auto;
+  margin: 0px 0px 5px 0px;
+}
+.search-result-text{
+  background-color: #93adc9;
+  margin: 0px 0px 0px 23px;
+  width: -moz-calc(100% - 124px);
+  width: -webkit-calc(100% - 124px);
+  width: calc(100% - 124px);
+  float: left;
+}
+.search-check-box{
+  width: 20px;
+
+  float: left;
+}
+.delete-link{
+  padding: 0px 0px 0px 23px;
+  a:link{
+    color: black;
+  }
+}
+.hidden{
+  display: none;
 }
 
 
