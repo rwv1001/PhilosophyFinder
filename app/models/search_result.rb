@@ -7,7 +7,9 @@ class SearchResult < ApplicationRecord
   # @param [String] base_url
   # @param [number] current_level
     # @return [Object]
-    def self.ProcessHash(url, current_level)
+  has_many :group_elements
+
+  def self.ProcessHash(url, current_level)
 
       max_crawl_number = 5
       crawl_number =0

@@ -1,0 +1,13 @@
+
+$('#result-groups').replaceWith('<%= j render "domain_crawlers/groups" %>');
+<% group_id = @group_parent_id %>
+<% while group_id != nil %>
+expandGroupName(<%= group_id %>);
+<% group_id = GroupName.find_by_id(group_id).parent_id%>
+<% end %>
+
+var $radios = $('input:radio[name=group_radio]');
+$radios.filter('[value=<%= @group_parent_id %>]').prop('checked', true);
+
+$("#group_notice").empty();
+$("#search_notice").empty();

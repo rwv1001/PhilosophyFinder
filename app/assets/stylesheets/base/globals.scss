@@ -41,6 +41,14 @@ $menu-block-color:  lighten($menu-color, 10%);
 
 }
 
+.result-groups{
+  @include put-margin(10px);
+  background-color: $menu-block-color;
+  overflow: auto;
+
+
+}
+
 .search-new{
   @include put-margin(10px);
   background-color: $menu-block-color;
@@ -48,6 +56,12 @@ $menu-block-color:  lighten($menu-color, 10%);
 
 }
 .domain-pages{
+
+  overflow:hidden
+
+
+}
+.group-names{
 
   overflow:hidden
 
@@ -197,8 +211,36 @@ ul{
   background-color: #888888;
   width: 75px;
   float: left;
+  cursor: pointer;
 
+}
+.move-location-group-name-radio{
+  display: none;
+}
+.add-result{
+  display: none;
+  cursor: pointer;
+  margin: 0px 0px 0px 10px;
+}
+.remove-group{
+  display: none;
+  cursor: pointer;
+  margin: 0px 0px 0px 10px;
+}
+#select-group-action{
+  border:none;
+  background-color: #ffffff;
+  overflow:hidden
+}
 
+.group-field{
+  display: none;
+}
+#group_notice, #search_notice{
+
+  background-color: #d2e8ff;
+  padding: 3px 3px 3px 3px;
+  display: none;
 }
 
 
@@ -206,8 +248,7 @@ ul{
 
 
 
-
-#domain_page_list {
+#domain_page_list, #group_names_list {
 
   .expand-button {
     margin: 3px 0px 0 0px;
@@ -243,20 +284,38 @@ ul{
     cursor: pointer;
 
   }
+  .group-name{
+    cursor: pointer;
+  }
 }
+#group-results{
+  display:none;
 
+}
+#search-result{
+
+}
+.group-search-action-button{
+  display:none;
+}
+.search-action-button{
+  display: none;
+}
+#add_elements_group_id{
+  display: none;
+}
 .main-panel-content{
   background-color: #556474;
 }
 .crawler_page_name{
   background-color: #72869c;
 }
-.search-result-outer{
+.search-result-outer, .group-search-result-outer{
   background-color: #8a6d9c;
   overflow: auto;
   margin: 0px 0px 5px 0px;
 }
-.search-result-text{
+.search-result-text, .group-search-result-text{
   background-color: #93adc9;
   margin: 0px 0px 0px 23px;
   width: -moz-calc(100% - 124px);
@@ -264,9 +323,8 @@ ul{
   width: calc(100% - 124px);
   float: left;
 }
-.search-check-box{
+.search-check-box, .group-search-check-box{
   width: 20px;
-
   float: left;
 }
 .delete-link{

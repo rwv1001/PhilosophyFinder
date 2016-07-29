@@ -1,0 +1,49 @@
+<div class="result-groups" id="result-groups">
+  <div class="float-left">
+    <h3>Groups</h3></div>
+  <%= render 'domain_crawlers/showhide', div_name: "result-groups" %>
+
+
+  <div class="float-clear" name="result-groups">
+    <div>
+      <select id="select-group-action" name="select-group-action" onChange="SelectGroupAction()">
+        <option <% if args[:selected] == GROUP_ACTION[:select_action] %> selected <% end %> value= <%= GROUP_ACTION[:select_action] %> > Select Group Action</option>
+        <option <% if args[:selected] == GROUP_ACTION[:new_group]%> selected <% end %>  value= <%= GROUP_ACTION[:new_group]%> > New Group</option>
+        <option <% if args[:selected] == GROUP_ACTION[:rename] %> selected <% end %>  value= <%= GROUP_ACTION[:rename]%> > Rename Group</option>
+        <option <% if args[:selected] == GROUP_ACTION[:move_group]%> selected <% end %>  value= <%= GROUP_ACTION[:move_group]%> > Move Group</option>
+        <option <% if args[:selected] == GROUP_ACTION[:remove_group] %> selected <% end %>  value= <%= GROUP_ACTION[:remove_group]%> > Remove Group</option>
+        <option <% if args[:selected] == GROUP_ACTION[:add_element] %> selected <% end %>  value= <%= GROUP_ACTION[:add_element]%> > Add Search Results</option>
+        <option <% if args[:selected] == GROUP_ACTION[:remove_element] %> selected <% end %>  value= <%= GROUP_ACTION[:remove_element]%> > Remove Results From Group</option>
+
+
+      </select>
+    </div>
+
+    <div>
+      <%= form_tag group_action_path, :id => 'group_action_form', method: 'get', remote: true do %>
+          <div class="group-names">
+            <ul id="group_names_list" name="ul-group-name-#{root_group.id}">
+              <li>
+
+                <%= render 'domain_crawlers/group_expand_buttons', id: root_group.id %>
+                <%= render 'domain_crawlers/group_name', args: {:group_name => root_group.name, :group_name_id => root_group.id, :root => true} %>
+              </li>
+              <%= render 'domain_crawlers/user_groups', args: {:group_names => root_group.root.descendants.arrange, :parent_id => root_group.id} %>
+            </ul>
+          </div>
+          <div> <%= hidden_field_tag :remove_group, params[:remove_group] %></div>
+          <div class="group-field group_action_name">
+            <label for="group_action_name" id = "group_action_name">Group action name</label>:<br/>
+            <%= text_field_tag :group_action_name, params[:group_action_name] %>
+          </div>
+          <div class="actions group-field group-action-button" ><%= submit_tag "New Group", id: "group-action-button" %></div>
+      <% end %>
+    </div>
+    <div><input type="button" class="group-field" name="remove_elements_button"  value="Remove From Group" onclick= RemoveFromGroup() ></div>
+    <div id="group_notice"></div>
+  </div>
+</div>
+
+<script>SelectGroupAction();</script>
+
+

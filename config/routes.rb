@@ -12,9 +12,17 @@ Rails.application.routes.draw do
 
   get "/set_header" => 'domain_crawlers#set_header', as: 'set_header'
 
+  get "/display_group" => 'domain_crawlers#display_group', as: 'display_group'
+
   get "/delete_result" => 'domain_crawlers#delete_result', as: 'delete_result'
 
   get 'search', to: 'domain_crawlers#search', as: 'search'
+
+  get 'group_action', to: 'domain_crawlers#group_action', as: 'group_action'
+
+  post 'add_result', to:'domain_crawlers#add_result', as: 'add_result'
+  post 'remove_group_result', to:'domain_crawlers#remove_group_result', as: 'remove_group_result'
+
 
   resources :users
   resources :sessions

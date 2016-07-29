@@ -1,0 +1,20 @@
+
+<div class="group-name">
+  <%= link_to args[:group_name], display_group_path(:id => args[:group_name_id]), :remote => true %>
+</div>
+<div class="group-name-radio group-field" >
+  <input type="radio" name ="group_radio" <% if args[:root] %> checked <% end %> value=<%=args[:group_name_id]%> id="group-name-<%=args[:group_name_id]%>"  >
+</div>
+<div class="move-location-group-name-radio group-field" >
+  <input type="radio" name ="move_location_group_radio" <% if args[:root] %> checked <% end %> value=<%=args[:group_name_id]%> id="move-location-group-name-<%=args[:group_name_id]%>"  >
+</div>
+<div class="add-result group-field" onclick="AddToGroup(<%= args[:group_name_id]%>)">
+Add Results
+</div>
+<div class="remove-group group-field" onclick="RemoveGroup(<%= args[:group_name_id]%>)">
+  Remove
+</div>
+
+
+
+

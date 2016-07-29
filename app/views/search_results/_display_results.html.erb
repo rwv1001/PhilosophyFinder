@@ -5,8 +5,8 @@
     <div class="page-results">
       <%= crawler_page_name %>
     </div>
-
-    <% @search_results.each do |search_result| %>
+      <%= form_tag add_result_path, :id => 'add_result_form', method: 'post', remote: true do %>
+    <% @search_results.first(MAX_DISPLAY).each do |search_result| %>
         <% if search_result.crawler_page_id != crawler_page_id %>
             <% crawler_page_id = search_result.crawler_page_id %>
             <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
@@ -18,12 +18,15 @@
           <div class="search-result-text">
           <%= raw(search_result.highlighted_result) %>
           </div>
-          <span class="search-check-box">
+          <span class="search-check-box ">
             <input type="checkbox"  id="checkbox-search-result-<%= search_result.id %>" name ="search_result_list[]"  class="check"  value=<%= search_result.id %>  >
           </span>
           <span class="delete-link"> <%= link_to 'delete', delete_result_path(:id => search_result.id), :remote => true %> </span>
         </div>
     <% end %>
+          <%= text_field_tag :add_elements_group_id, params[:add_elements_group_id] %>
+          <div class="actions search-action-button" ><%= submit_tag "Add Selected", id: "search-action-button" %></div>
+          <% end %>
 <% else %>
     <div>No results found</div>
 <% end %>

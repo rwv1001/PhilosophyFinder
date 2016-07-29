@@ -46,10 +46,22 @@ class ApplicationController < ActionController::Base
     @current_domain_crawler = DomainCrawler.find_by_id( current_domain_crawler_id)
   end
 
+  def root_group
+    @root_group = GroupName.where(["user_id = ?", current_user.id]).first
+    if @root_group == nil
+      @root_group = GroupName.new
+      @root_group.user_id = current_user.id
+      @root_group.name = "Root"
+      @root_group.save
+    end
+    return @root_group;
+  end
+
   helper_method :current_user
   helper_method :current_page
   helper_method :current_search_query
   helper_method :current_domain_crawler
+  helper_method :root_group
 
   def authorize
     redirect_to login_url, alert: "Not authorized" if current_user.nil?

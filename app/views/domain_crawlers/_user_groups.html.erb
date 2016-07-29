@@ -1,0 +1,15 @@
+<ul class="child-group-name" name="ul-group-name-<%=args[:parent_id]%>" style="display: none" >
+
+  <% args[:group_names].each do |group_name, children| %>
+
+      <li>
+        <% if children.present? %>
+            <%= render 'domain_crawlers/group_expand_buttons', id: group_name.id %>
+            <%= render 'domain_crawlers/group_name', args:{:group_name => group_name.name, :group_name_id => group_name.id, :root => false} %>
+            <%= render 'domain_crawlers/user_groups', args: {:group_names => children, :parent_id => group_name.id}  %>
+        <% else %>
+            <%= render 'domain_crawlers/group_name', args:{:group_name => group_name.name, :group_name_id => group_name.id, :root => false} %>
+        <% end %>
+      </li>
+  <% end %>
+</ul>

@@ -13,7 +13,23 @@ function SelectDomain(new_crawler_page_id
         old_crawler_page_id = new_crawler_page_id;
     }
 }
+function ShowSearchResults()
+{
+    var $search_div = $('[id="search-results"]');
+    $search_div.show();
+    var $group_div = $('[id="group-results"]');
+    $group_div.hide();
+    
+}
 
+function ShowGroupResults()
+{
+    var $search_div = $('[id="search-results"]');
+    $search_div.hide();
+    var $group_div = $('[id="group-results"]');
+    $group_div.show();
+
+}
 
 function Search()
 {
@@ -49,6 +65,8 @@ function SelectCrawlerPage( page_id) {
    // expand_ref_obj.hide();
 }
 
+
+
 function expandCrawlerPage( page_id) {
 
     ul_ref_obj_str = 'ul-crawler-page-' + page_id;
@@ -73,6 +91,120 @@ function contractCrawlerPage( page_id) {
     contract_ref_obj = $('[name="contract-button-'+ page_id+'"]');
     contract_ref_obj.hide();
     expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
+    expand_ref_obj.show();
+}
+
+function SelectGroupAction()
+{
+    $("#search_notice").empty();
+    $("#group_notice").empty();
+    obj = $("#select-group-action option:selected");
+    value = obj.val();
+//alert("value = " + obj.val());
+    switch(value) {
+        case "select_action":
+            $( ".group-field" ).hide();
+            break;
+        case "new_group":
+            $( ".group-field" ).hide();
+            $( ".group-action-button" ).show();
+            $(".group_action_name").show();
+            $(".group-name-radio").show();
+            $("#group-action-button").prop('value', 'Create Group');
+            $("#group_action_name").text("New Group Name");
+            break;
+
+        case "move_group":
+            $(".group-field").hide();
+            $(".group-name-radio").show();
+            $(".move-location-group-name-radio").show();
+            $( ".group-action-button" ).show();
+            $("#group-action-button").prop('value', 'Move Selected');
+
+           
+            break;
+        case "add_element":
+            $( ".group-field" ).hide();
+            $(".search-check-box").show();
+            $( ".add-result" ).show();
+            ShowSearchResults();
+            break;
+        case "remove_element":
+            $( ".group-field" ).hide();
+            $("[name='remove_elements_button']").show();
+            
+            ShowGroupResults();
+            break;
+
+        case "rename":
+            $( ".group-field" ).hide();
+            $( ".group-action-button" ).show();
+            $(".group_action_name").show();
+            $(".group-name-radio").show();
+            $("#group-action-button").prop('value', 'Rename Group');
+            $("#group_action_name").text("New Group Name");
+            break;
+        case "remove_group":
+            $( ".group-field" ).hide();
+            $( ".remove-group" ).show();
+            $("#group-action-button").prop('value', 'Remove Group');
+            break;
+
+
+        default:
+        alert("something has gone wrong");
+    }
+}
+function RemoveFromGroup()
+{
+    form_obj = $('[id="remove_group_result_form"]');
+    form_obj.submit();   
+}
+
+function AddToGroup(group_id)
+{
+    $("#add_elements_group_id").val(group_id);
+    form_obj = $('[id="add_result_form"]');
+    form_obj.submit();
+    
+}
+
+function RemoveGroup(group_id)
+{
+    form_obj = $('[id="group_action_form"]');
+
+    $('[name="remove_group"]').prop('value', group_id);
+    form_obj.submit();
+
+
+}
+
+
+
+function expandGroupName( group_name_id) {
+
+    ul_ref_obj_str = 'ul-group-name-' + group_name_id;
+    ul_ref_obj = $('[name="ul-group-name-'+ group_name_id+'"]');
+
+
+    ul_ref_obj.show();
+
+    contract_ref_obj = $('[name="group-contract-button-'+ group_name_id+'"]');
+    contract_ref_obj.show();
+    expand_ref_obj = $('[name="group-expand-button-'+ group_name_id+'"]');
+    expand_ref_obj.hide();
+}
+
+function contractGroupName( group_name_id) {
+    ul_ref_obj_str = 'ul-group-name-' + group_name_id;
+    ul_ref_obj = $('[name="ul-group-name-'+ group_name_id+'"]');
+
+
+    ul_ref_obj.hide();
+
+    contract_ref_obj = $('[name="group-contract-button-'+ group_name_id+'"]');
+    contract_ref_obj.hide();
+    expand_ref_obj = $('[name="group-expand-button-'+ group_name_id+'"]');
     expand_ref_obj.show();
 }
 

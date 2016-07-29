@@ -41,11 +41,17 @@ ActiveRecord::Schema.define(version: 20160702135332) do
 
   create_table "group_elements", force: :cascade do |t|
     t.integer  "user_id",          limit: 4
-    t.integer  "group_id",         limit: 4
+    t.text     "note",             limit: 65535
+    t.integer  "group_name_id",    limit: 4
     t.integer  "search_result_id", limit: 4
+    t.string   "hash_value",       limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "group_elements", ["group_name_id"], name: "index_group_elements_on_group_name_id", using: :btree
+  add_index "group_elements", ["hash_value"], name: "index_group_elements_on_hash_value", using: :btree
+  add_index "group_elements", ["search_result_id"], name: "index_group_elements_on_search_result_id", using: :btree
 
   create_table "group_names", force: :cascade do |t|
     t.integer  "user_id",    limit: 4
@@ -104,6 +110,7 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer  "permissions_group_id",       limit: 4
     t.integer  "search_query_id",            limit: 4
     t.text     "highlighted_result",         limit: 65535
+    t.string   "hash_value",                 limit: 255
     t.integer  "sentence_id",                limit: 4
     t.integer  "crawler_page_id",            limit: 4
     t.boolean  "hidden",                                   default: false

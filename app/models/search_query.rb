@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 class SearchQuery < ApplicationRecord
   def search(pages)
     logger.info "SearchQuery search"
@@ -14,7 +16,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def process_sentences(sentence_set, tokens)
-    logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set}"
+    logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.inspect}"
     @search_results = [];
     @highlighted_result = "";
     @search_result = nil;
@@ -110,7 +112,7 @@ class SearchQuery < ApplicationRecord
   def single_search(search_term)
 
    # terms = Word.where("word_name LIKE (?)", "#{search_term}")
-    terms = get_terms(search_terms)
+    terms = get_terms(search_term)
     logger.info "single_search words = #{terms.inspect}"
     sentence_set = SortedSet.new
     terms.each do |term|
@@ -139,6 +141,8 @@ class SearchQuery < ApplicationRecord
       @last_sentence_id = sentence.id
     end
     @search_result.highlighted_result = @highlighted_result
+    hash_value = Digest::MD5.hexdigest(@highlighted_result)
+    @search_result.hash_value = hash_value
     @search_result.save
     @search_results << @search_result
     logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"

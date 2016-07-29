@@ -1,0 +1,36 @@
+<div id="group-results">
+  <% group_name = GroupName.find_by_id(args[:group_id]) %>
+  <h3><%=group_name.name%></h3>
+  <% group_elements = GroupElement.where(group_name_id: args[:group_id]) %>
+  <% if group_elements.length >0 %>
+      <% search_result = SearchResult.find_by_id(group_elements[0].search_result_id) %>
+      <% crawler_page_id =search_result.crawler_page_id %>
+      <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
+      <div class="page-results">
+        <%= crawler_page_name %>
+      </div>
+      <%= form_tag remove_group_result_path, :id => 'remove_group_result_form', method: 'post', remote: true do %>
+          <% group_elements.each do |group_element| %>
+              <% search_result = SearchResult.find_by_id(group_element.search_result_id) %>
+              <% if search_result.crawler_page_id != crawler_page_id %>
+                  <% crawler_page_id = search_result.crawler_page_id %>
+                  <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
+                  <div class="page-results">
+                    <%= crawler_page_name %>
+                  </div>
+              <% end %>
+              <div class="group-search-result-outer" name="group-search-result-<%= group_element.id%>">
+                <div class="group-search-result-text">
+                  <%= raw(search_result.highlighted_result) %>
+                </div>
+          <span class="group-search-check-box ">
+            <input type="checkbox"  id="checkbox-group-search-result-<%= group_element.id %>" name ="group_search_result_list[]"  class="check"  value=<%= group_element.id %>  >
+          </span>
+              </div>
+          <% end %>
+          <div class="actions group-search-action-button" ><%= submit_tag "Add Selected", id: "group-search-action-button" %></div>
+      <% end %>
+  <% else %>
+      <div>No entries in group</div>
+  <% end %>
+</div>

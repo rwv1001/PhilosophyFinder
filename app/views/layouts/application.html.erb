@@ -22,6 +22,7 @@
         <%= render 'domain_crawlers/domain_summary' %>
         <%= render 'domain_crawlers/new_domain_form', args: {:user_id => current_user.id, :domain_crawler => DomainCrawler.new} %>
         <%= render 'domain_crawlers/new_search_form', args: {:user_id => current_user.id, :domain_crawler => DomainCrawler.new} %>
+        <%= render 'domain_crawlers/groups', args: {:selected => GROUP_ACTION[:select_action]} %>
       </div>
 
 
@@ -31,11 +32,12 @@
 </div>
 <div class="main-panel">
   <div class="menu-div text999 width100">
-    <div class="menu-tab margin00023"> searches</div>
-    <div class="menu-tab margin00023"> groups</div>
+    <div class="menu-tab"  onclick="ShowSearchResults()" > searches</div>
+    <div class="menu-tab"   onclick="ShowGroupResults()" > groups</div>
   </div>
   <div class="main-panel-content">
-    <div id="search-results"></div>
+    <div id="search-results" ></div>
+    <div id="group-results"></div>
   </div>
 </div>
 </body>

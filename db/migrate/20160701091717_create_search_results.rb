@@ -6,6 +6,7 @@ class CreateSearchResults < ActiveRecord::Migration
       t.integer :permissions_group_id
       t.integer :search_query_id
       t.text :highlighted_result
+      t.string :hash_value
       t.integer :sentence_id
       t.integer :crawler_page_id
       t.boolean :hidden, :default => false

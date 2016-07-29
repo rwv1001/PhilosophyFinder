@@ -1,3 +1,12 @@
-
+ShowSearchResults();
 
 $('#search-results').replaceWith('<%= j render "search_results/display_results" %>');
+
+$("#group_notice").empty();
+$("#search_notice").empty();
+$("#search_notice").show();
+$("#search_notice").text("Number of Results: <%= @search_results.length %>");
+
+<% if @domain_length == 0 %>
+alert("You haven't selected any domains!");
+<% end %>
