@@ -28,11 +28,23 @@ class DomainCrawlersController < ApplicationController
  #   logger.info "DomainCrawlersController new called @domain_crawler id set to #{@domain_crawler.id}"
   end
 
+  def crawler_debug
+    crawler_page = CrawlerPage.where(id: 3)
+    logger.info "crawler_page: #{crawler_page.inspect}"
+    descendents = crawler_page.root.descendants.arrange
+    descendents.each do |descendent|
+    logger.info "Descendent is #{descendent}"
+    end
+    x =y
+  end
+
   def search
     logger.info "DomainCrawlersController search called"
     logger.info "check #{params[:row_in_list]}"
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
+
+  #  crawler_debug
 
     if params[:row_in_list]== nil
       @domain_length = 0;
@@ -196,6 +208,79 @@ class DomainCrawlersController < ApplicationController
     respond_to do |format|
       format.js
     end
+
+  end
+
+  def domain_action
+    logger.info "domain_action begin"
+    case params[:commit]
+      when "Rename Page"
+        rename_domain(params)
+      when "Move Selected"
+        move_domain(params)
+      when "Remove Domain"
+        remove_domain(params)
+      else
+        remove_domain(params)
+    end
+    logger.info "domain_action result_str = #{@result_str}"
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  def remove_domain(params)
+    logger.info "remove_domain begin"
+    @selected = DOMAIN_ACTION[:remove_domain]
+    crawler_page_name = CrawlerPage.find_by_id(params[:remove_domain])
+    if crawler_page_name != nil
+      if crawler_page_name.parent_id == nil
+        DomainCrawler.destroy(crawler_page_name.domain_crawler.id)
+        @result_str = ""
+        @crawler_parent_id = nil
+        current_user.current_domain_crawler_id = DEFAULT_PAGE[:domain_crawler]
+
+      else
+        @crawler_parent_id = crawler_page_name.parent_id
+        CrawlerPage.destroy(crawler_page_name.id)
+        @result_str = ""
+        end
+    else
+      @result_str = "Page already deleted"
+    end
+  end
+
+  def rename_domain(params)
+    crawler_page_name = CrawlerPage.find_by_id(params[:domain_radio]);
+    crawler_page_name.name = params[:domain_action_name];
+    crawler_page_name.save
+    if crawler_page_name.parent_id == nil
+      domain_crawler = crawler_page_name.domain_crawler
+      domain_crawler.short_name = params[:domain_action_name];
+      domain_crawler.save
+    end
+    @selected = DOMAIN_ACTION[:rename]
+    @crawler_parent_id = crawler_page_name.parent_id
+    @result_str = ""
+  end
+
+  def move_domain(params)
+    crawler_page_name = CrawlerPage.find_by_id(params[:domain_radio]);
+    new_parent = CrawlerPage.find_by_id(params[:move_location_domain_radio]);
+    ancestor_ids = new_parent.ancestor_ids
+    logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
+    if ancestor_ids.index(crawler_page_name.id) != nil
+
+      @result_str = "You cannot move a parent to one of its children"
+    else
+      crawler_page_name.parent_id = new_parent.id
+      crawler_page_name.save;
+      @result_str = ""
+    end
+    logger.info "move_domain result_str = #{@result_str}"
+
+    @selected = DOMAIN_ACTION[:move_domain]
+    @crawler_parent_id = crawler_page_name.parent_id
 
   end
 

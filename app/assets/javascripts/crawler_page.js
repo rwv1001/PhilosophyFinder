@@ -33,8 +33,8 @@ function ShowGroupResults()
 
 function Search()
 {
-    var $domain_summary_div = $('[name="domain_summary"]');
-    var $cloned_summary=$domain_summary_div.children().first().clone();
+    var $domain_summary_div = $('[name="domain_summary_pages"]');
+    var $cloned_summary=$domain_summary_div.clone();
     var $specific_div = $('[id="specific_action_variables"]');
     $specific_div = $specific_div.empty();
     $specific_div.html($cloned_summary);
@@ -92,6 +92,58 @@ function contractCrawlerPage( page_id) {
     contract_ref_obj.hide();
     expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
     expand_ref_obj.show();
+}
+
+function SelectDomainAction()
+{
+    $("#search_notice").empty();
+    $("#group_notice").empty();
+    obj = $("#select-domain-action option:selected");
+    value = obj.val();
+    switch(value) {
+        case "select_action":
+            $( ".domain-field" ).hide();
+            break;
+        case "new_domain":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();         
+            break;
+        case "search_domain":
+            $( ".domain-field" ).hide();
+            $(".domain-checkbox").show();
+            $( ".search-new" ).show();
+            break;
+
+        case "move_domain":
+            $(".domain-field").hide();
+            $(".domain-name-radio").show();
+            $(".move-location-domain-name-radio").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Move Selected');
+
+
+            break;
+        case "rename":
+            $( ".domain-field" ).hide();
+            $( ".domain-action-button" ).show();
+            $(".domain_action_name").show();
+            $(".domain-name-radio").show();
+            $("#domain-action-button").prop('value', 'Rename Page');
+            
+            break;
+        case "remove_domain":
+            $( ".domain-field" ).hide();
+            $( ".remove-domain" ).show();
+            $("#domain-action-button").prop('value', 'Remove Page');
+            break;
+
+
+        default:
+            alert("something has gone wrong");
+    }
+
+
+
 }
 
 function SelectGroupAction()
@@ -179,6 +231,15 @@ function RemoveGroup(group_id)
 
 }
 
+function RemoveDomain(crawler_page_id)
+{
+    form_obj = $('[id="domain_action_form"]');
+
+    $('[name="remove_domain"]').prop('value', crawler_page_id);
+    form_obj.submit();
+
+
+}
 
 
 function expandGroupName( group_name_id) {

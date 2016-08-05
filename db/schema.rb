@@ -16,13 +16,13 @@ ActiveRecord::Schema.define(version: 20160702135332) do
   create_table "crawler_pages", force: :cascade do |t|
     t.integer "result_page_id",    limit: 4
     t.string  "URL",               limit: 255
+    t.string  "name",              limit: 255
     t.string  "ancestry",          limit: 255
     t.integer "domain_crawler_id", limit: 4
   end
 
   add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree
   add_index "crawler_pages", ["domain_crawler_id"], name: "index_crawler_pages_on_domain_crawler_id", using: :btree
-  add_index "crawler_pages", ["result_page_id"], name: "index_crawler_pages_on_result_page_id", using: :btree
 
   create_table "domain_crawlers", force: :cascade do |t|
     t.integer  "user_id",              limit: 4
@@ -100,6 +100,8 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer  "user_id",            limit: 4
     t.string   "first_search_term",  limit: 255
     t.string   "second_search_term", limit: 255
+    t.string   "third_search_term",  limit: 255
+    t.string   "fourth_search_term", limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -147,7 +149,7 @@ ActiveRecord::Schema.define(version: 20160702135332) do
   end
 
   create_table "word_pairs", force: :cascade do |t|
-    t.integer "word_multiple",  limit: 4
+    t.integer "word_multiple",  limit: 8
     t.integer "separation",     limit: 4
     t.integer "result_page_id", limit: 4
     t.integer "sentence_id",    limit: 4

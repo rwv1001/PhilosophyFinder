@@ -16,9 +16,10 @@ Rails.application.routes.draw do
 
   get "/delete_result" => 'domain_crawlers#delete_result', as: 'delete_result'
 
-  get 'search', to: 'domain_crawlers#search', as: 'search'
+  post 'search', to: 'domain_crawlers#search', as: 'search'
 
   get 'group_action', to: 'domain_crawlers#group_action', as: 'group_action'
+  get 'domain_action', to: 'domain_crawlers#domain_action', as: 'domain_action'
 
   post 'add_result', to:'domain_crawlers#add_result', as: 'add_result'
   post 'remove_group_result', to:'domain_crawlers#remove_group_result', as: 'remove_group_result'

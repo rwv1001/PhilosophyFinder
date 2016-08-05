@@ -1,7 +1,7 @@
 class CreateWordPairs < ActiveRecord::Migration
   def change
     create_table :word_pairs do |t|
-      t.integer :word_multiple
+      t.integer :word_multiple, :limit => 8
       t.integer :separation
       t.integer :result_page_id
       t.integer :sentence_id

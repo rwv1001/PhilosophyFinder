@@ -6,6 +6,8 @@ class CreateSearchQueries < ActiveRecord::Migration
   #    t.integer :page_list_id
       t.string :first_search_term
       t.string :second_search_term
+      t.string :third_search_term
+      t.string :fourth_search_term
   #    t.boolean :order_sensitive
 
       t.timestamps

@@ -1,0 +1,17 @@
+
+
+$('#domain-summary').replaceWith('<%= j render "domain_crawlers/domain_summary", args: {:selected => @selected} %>');
+<% if @crawler_parent_id != nil %>
+<% crawler_id = @crawler_parent_id %>
+<% while crawler_id != nil %>
+expandCrawlerPage(<%= crawler_id %>);
+<% crawler_id = CrawlerPage.find_by_id(crawler_id).parent_id%>
+<% end %>
+
+var $radios = $('input:radio[name=domain_radio]');
+$radios.filter('[value=<%= @crawler_parent_id %>]').prop('checked', true);
+<% end %>
+
+$("#group_notice").empty();
+$("#search_notice").empty();
+

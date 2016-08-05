@@ -1,11 +1,11 @@
-<div class="search-new">
+<div class="search-new domain-field">
   <div class="float-left">
     <h3>New Search</h3>
   </div>
-  <%= render 'domain_crawlers/showhide', div_name: "search-new" %>
+
   <div class="float-clear" name="search-new">
 
-    <%= form_tag search_path, :id => 'search_form', method: 'get', remote: true do %>
+    <%= form_tag search_path, :id => 'search_form', method: 'post', remote: true do %>
         <div class="field">
           <%= label_tag :word1 %><br />
           <%= text_field_tag :word1, params[:word1] %>
@@ -14,12 +14,20 @@
           <%= label_tag :word2 %><br />
           <%= text_field_tag :word2, params[:word2] %>
         </div>
+        <div class="field">
+          <%= label_tag :word3 %><br />
+          <%= text_field_tag :word3, params[:word3] %>
+        </div>
+        <div class="field">
+          <%= label_tag :word4 %><br />
+          <%= text_field_tag :word4, params[:word4] %>
+        </div>
         <div id="specific_action_variables" class = "hidden" >
 
         </div>
-        <div class="actions hidden "><%= submit_tag "Search" %>
+        <div class="actions hidden "><%= submit_tag "Search C" %>
         </div>
-        <div><input type="button" name="search_button"  value="Search click" onclick= Search() ></div>
+        <div><input type="button" name="search_button"  value="Search" onclick= Search() ></div>
     <% end %>
 
   </div>

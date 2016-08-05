@@ -1,15 +1,24 @@
-<div class="domain-summary">
+<div class="domain-summary" id="domain-summary">
   <div class="float-left">
     <h3>Domain Summary</h3></div>
   <%= render 'domain_crawlers/showhide', div_name: "domain_summary" %>
 
-  <div class="float-clear" name="domain_summary">
+  <div>
+    <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
+      <option <% if args[:selected] == DOMAIN_ACTION[:select_action] %> selected <% end %> value= <%= DOMAIN_ACTION[:select_action] %> > Select Domain Action</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:search_domain] %> selected <% end %>  value= <%= DOMAIN_ACTION[:search_domain]%> > Search Domain</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:new_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:new_domain]%> > New Domain</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:rename] %> selected <% end %>  value= <%= DOMAIN_ACTION[:rename]%> > Rename Domain</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:move_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:move_domain]%> > Move Domain</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:remove_domain] %> selected <% end %>  value= <%= DOMAIN_ACTION[:remove_domain]%> > Remove Domain</option>
+    </select>
+  </div>
 
-    <!--   <%= render 'domain_crawlers/domain_summary_header' %>-->
-    <div>
-      <% if current_domain_crawler.crawler_page != nil %>
-          <p>Pages:</p>
-      <% end %>
+  <div class="float-clear" name="domain_summary">
+    <%= form_tag domain_action_path, :id => 'domain_action_form', method: 'get', remote: true do %>
+<div name="domain_summary_pages">
+    <div >
+
 
 
       <% DomainCrawler.all.each do |domain_crawler| %>
@@ -18,9 +27,16 @@
           <% end %>
       <% end %>
     </div>
+        <div class="domain-field domain_action_name">
+          <label for="domain_action_name" id = "domain_action_name">Domain action name</label>:<br/>
+          <%= text_field_tag :domain_action_name, params[:domain_action_name] %>
+        </div>
+        <div> <%= hidden_field_tag :remove_domain, params[:remove_domain] %></div>
+</div>
+        <div class="actions domain-field domain-action-button" ><%= submit_tag "New Domain", id: "domain-action-button" %></div>
+    <% end %>
+
   </div>
 </div>
 
-<script language="javascript">
-  SelectDomain(<%=current_domain_crawler.crawler_page.id%>);
-</script>
+

@@ -2,33 +2,51 @@ require 'digest/md5'
 
 class SearchQuery < ApplicationRecord
   def search(pages)
-    logger.info "SearchQuery search"
+    logger.info "SearchQuery search: #{first_search_term}, #{second_search_term}, #{third_search_term}, #{fourth_search_term}"
     page_hash(pages)
-    if self.second_search_term.length == 0
-      search_results = single_search(self.first_search_term)
-    elsif self.first_search_term.length == 0
-      search_results = single_search(self.second_search_term)
-    else
-      search_results = double_search(self.first_search_term, self.second_search_term)
+    search_terms = []
+    search_results = []
+    if self.first_search_term.length !=0
+      search_terms << self.first_search_term
+    end
+    if self.second_search_term.length !=0
+      search_terms << self.second_search_term
+    end
+    if self.third_search_term.length !=0
+      search_terms << self.third_search_term
+    end
+    if self.fourth_search_term.length !=0
+      search_terms << self.fourth_search_term
+    end
 
+    if search_terms.length == 1
+      search_results = single_search(self.first_search_term)
+    elsif search_terms.length > 1
+      search_results = multiple_search(search_terms)
     end
     return search_results
   end
 
   def process_sentences(sentence_set, tokens)
-    logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.inspect}"
+    logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.length}"
+    sentence_set = sentence_set
+    count = 0
     @search_results = [];
     @highlighted_result = "";
     @search_result = nil;
     @last_sentence_id = 0;
     @current_paragraph_id = 0
     sentence_set.each do |sentence_id|
+      count = count +1
+      if count > MAX_DISPLAY
+        break
+      end
       sentence = Sentence.find_by_id(sentence_id)
       #     logger.info "04"
       paragraph = Paragraph.find_by_id(sentence.paragraph_id)
       #   logger.info "05"
       content = sentence.content.gsub(/\n/, ' ')
-      logger.info "content: #{content}"
+    #  logger.info "content: #{content}"
       highlights = Hash.new
 
       tokens.each do |token|
@@ -44,10 +62,10 @@ class SearchQuery < ApplicationRecord
         end
 
       end
-      logger.info "highlights: #{highlights}"
+    #  logger.info "highlights: #{highlights}"
       sorted_highlights = Hash[highlights.sort]
 
-      logger.info "sorted highlights #{sorted_highlights}"
+   #   logger.info "sorted highlights #{sorted_highlights}"
       compressed_highlights = []
       sorted_highlights.each do |a, b|
         if compressed_highlights.length == 0 or a > compressed_highlights[-1][1]
@@ -57,12 +75,12 @@ class SearchQuery < ApplicationRecord
         end
       end
       compressed_highlights.reverse_each do |pair|
-        logger.info "inserting pair #{pair}"
+ #       logger.info "inserting pair #{pair}"
         content.insert(pair[1], '</span>')
         content.insert(pair[0], '<span class="highlight">')
       end
-      logger.info "compressed highlights: #{compressed_highlights}"
-      logger.info "highlighted content: #{content}"
+    #  logger.info "compressed highlights: #{compressed_highlights}"
+     # logger.info "highlighted content: #{content}"
       if @current_paragraph_id != paragraph.id
         if @search_result != nil
           complete_result()
@@ -110,6 +128,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def single_search(search_term)
+    logger.info "single_search begin"
 
    # terms = Word.where("word_name LIKE (?)", "#{search_term}")
     terms = get_terms(search_term)
@@ -145,8 +164,52 @@ class SearchQuery < ApplicationRecord
     @search_result.hash_value = hash_value
     @search_result.save
     @search_results << @search_result
-    logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"
+#    logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"
     @highlighted_result = "";
+  end
+
+  def multiple_search(search_terms)
+    logger.info "multiple_search begin"
+    terms = []
+    tokens = []
+
+
+    search_terms.each do |search_term|
+      terms << get_terms(search_term)
+      tokens.concat(search_term.split(/%| OR /))
+    end
+
+    term_indicies = (0..search_terms.length-1).to_a
+    term_pairs=term_indicies.combination(2).to_a
+    logger.info "term_pairs: #{term_pairs.inspect}"
+    result_pair_str = "(#{@result_pages.join(', ')})"
+    sql_str = []
+    sentence_pairs = []
+    sql_intersect_header = ""
+    term_pairs.each do |term_pair|
+      word_multiples = []
+      terms[term_pair[0]].each do |first_term|
+        terms[term_pair[1]].each do |second_term|
+          word_multiples << first_term.word_prime * second_term.word_prime
+        end
+      end
+      sql_str = "SELECT * FROM word_pairs WHERE result_page_id IN  #{result_pair_str} AND word_multiple IN  (#{word_multiples.join(', ')})"
+      logger.info "sql_str = #{sql_str}"
+      word_pairs= WordPair.find_by_sql(sql_str)
+      sentence_pair = SortedSet.new
+      word_pairs.each do |word_pair|
+        sentence_pair.add(word_pair.sentence_id)
+      end
+      sentence_pairs << sentence_pair
+    end
+    sentence_set = sentence_pairs.inject(:&)
+
+
+    process_sentences(sentence_set, tokens)
+
+    logger.info "search_results: @search_results.inspect"
+    return @search_results
+
   end
 
   def double_search(first_search_term, second_search_term)
@@ -198,8 +261,25 @@ class SearchQuery < ApplicationRecord
   def create(params, current_user)
     logger.info "SearchQuery create"
     self.user_id = current_user.id
-    self.first_search_term = params[:word1];
-    self.second_search_term = params[:word2];
+    search_terms=[]
+    if params[:word1].length >0
+      search_terms << params[:word1]
+    end
+    if params[:word2].length >0
+      search_terms << params[:word2]
+    end
+    if params[:word3].length >0
+      search_terms << params[:word3]
+    end
+    if params[:word4].length >0
+      search_terms << params[:word4]
+    end
+    search_terms << "" << "" << "" << ""
+    logger.info "SearchQuery create search_terms: #{search_terms}"
+    self.first_search_term = search_terms[0];
+    self.second_search_term = search_terms[1];
+    self.third_search_term = search_terms[2];
+    self.fourth_search_term = search_terms[3];
     self.save
   end
 

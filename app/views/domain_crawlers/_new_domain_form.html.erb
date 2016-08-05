@@ -1,8 +1,8 @@
-<div class="domain-new">
+<div class="domain-new domain-field">
   <div class="float-left">
     <h3>New Domain</h3>
   </div>
-  <%= render 'domain_crawlers/showhide', div_name: "domain-new" %>
+
   <div class="float-clear" name="domain-new">
     <%= form_for args[:domain_crawler] do |f| %>
         <% if args[:domain_crawler].errors.any? %>

@@ -38,6 +38,7 @@ $menu-block-color:  lighten($menu-color, 10%);
   @include put-margin(10px);
   background-color: $menu-block-color;
   overflow: auto;
+  display: none;
 
 }
 
@@ -53,6 +54,7 @@ $menu-block-color:  lighten($menu-color, 10%);
   @include put-margin(10px);
   background-color: $menu-block-color;
   overflow: auto;
+  display: none;
 
 }
 .domain-pages{
@@ -217,12 +219,15 @@ ul{
 .move-location-group-name-radio{
   display: none;
 }
+.move-location-domain-name-radio{
+  display: none;
+}
 .add-result{
   display: none;
   cursor: pointer;
   margin: 0px 0px 0px 10px;
 }
-.remove-group{
+.remove-group, .remove-domain{
   display: none;
   cursor: pointer;
   margin: 0px 0px 0px 10px;
@@ -234,6 +239,9 @@ ul{
 }
 
 .group-field{
+  display: none;
+}
+.domain-field{
   display: none;
 }
 #group_notice, #search_notice{
@@ -333,8 +341,17 @@ ul{
     color: black;
   }
 }
+
+.page-results {
+  a:link {
+    color: black;
+  }
+  a:visited {
+    color: black;
+  }
+}
 .hidden{
-  display: none;
+display: none;
 }
 
 

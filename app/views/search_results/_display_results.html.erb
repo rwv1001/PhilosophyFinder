@@ -3,7 +3,7 @@
     <% crawler_page_id = @search_results[0].crawler_page_id %>
     <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
     <div class="page-results">
-      <%= crawler_page_name %>
+      <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
     </div>
       <%= form_tag add_result_path, :id => 'add_result_form', method: 'post', remote: true do %>
     <% @search_results.first(MAX_DISPLAY).each do |search_result| %>
@@ -11,7 +11,7 @@
             <% crawler_page_id = search_result.crawler_page_id %>
             <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
             <div class="page-results">
-              <%= crawler_page_name %>
+              <%=  link_to crawler_page_name, crawler_page_name, target: '_blank'  %>
             </div>
         <% end %>
         <div class="search-result-outer" name="search-result-<%= search_result.id%>">

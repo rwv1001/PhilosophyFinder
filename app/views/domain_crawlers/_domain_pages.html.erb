@@ -1,14 +1,18 @@
 <div class="domain-pages">
+
 <% if domain_crawler.crawler_page != nil %>
     <ul id="domain_page_list" name = "ul-crawler-page-1">
       <li>
 
         <%= render 'domain_crawlers/expand_buttons', id: domain_crawler.crawler_page.id %>
-        <%= render 'domain_crawlers/url', args: {:url => domain_crawler.short_name, :crawler_page_id => domain_crawler.crawler_page.id} %>
+        <%= render 'domain_crawlers/url', args: {:url => domain_crawler.short_name, :crawler_page_id => domain_crawler.crawler_page.id, :long_url =>  domain_crawler.crawler_page.URL,  :root => true} %>
       </li>
-      <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => domain_crawler.crawler_page.root.descendants.arrange, :parent_id => domain_crawler.crawler_page.id } %>
+      <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => domain_crawler.crawler_page.root.descendants.arrange(:order => :id), :parent_id => domain_crawler.crawler_page.id } %>
     </ul>
 <% else %>
     <p>something has gone wrong: <%= @domain_crawler.id %></p>
 <% end %>
+
+
+
 </div>

@@ -1,10 +1,17 @@
 
 <!--<div class="domain-url"  onclick="SelectDomain(<%=args[:crawler_page_id]%>,true)"><%= args[:url] %></div>-->
 <div class="domain-url">
-<%= link_to args[:url], set_header_path(:id => args[:crawler_page_id]), :remote => true %>
+<%= link_to args[:url], args[:long_url], target: '_blank'%>
 </div>
-<div class="domain-selector" name="domain-selector-<%= args[:crawler_page_id] %>">-</div>
-<div> <input type="checkbox" id="checkbox-domain-selector-<%= args[:crawler_page_id] %>" name ="row_in_list[]" class="check"  value=<%= args[:crawler_page_id] %> onclick="SelectCrawlerPage(<%=args[:crawler_page_id]%>);"></div>
-
+<div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= args[:crawler_page_id] %>" name ="row_in_list[]" class="check"  value=<%= args[:crawler_page_id] %> onclick="SelectCrawlerPage(<%=args[:crawler_page_id]%>);"></div>
+<div class="domain-name-radio domain-field" >
+  <input type="radio" name ="domain_radio" <% if args[:root] %> checked <% end %> value=<%=args[:crawler_page_id]%> id="domain-name-<%=args[:crawler_page_id]%>"  >
+</div>
+<div class="move-location-domain-name-radio domain-field" >
+  <input type="radio" name ="move_location_domain_radio" <% if args[:root] %> checked <% end %> value=<%=args[:crawler_page_id]%> id="move-location-domain-name-<%=args[:crawler_page_id]%>"  >
+</div>
+<div class="remove-domain domain-field" onclick="RemoveDomain(<%= args[:crawler_page_id]%>)">
+  Remove
+</div>
 
 
