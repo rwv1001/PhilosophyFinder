@@ -7,7 +7,7 @@ class SearchResult < ApplicationRecord
   # @param [String] base_url
   # @param [number] current_level
     # @return [Object]
-  has_many :group_elements
+  has_many :group_elements, :dependent => :destroy
 
   def self.ProcessHash(url, current_level)
 

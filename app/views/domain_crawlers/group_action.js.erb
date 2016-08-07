@@ -11,7 +11,7 @@ var $radios = $('input:radio[name=group_radio]');
 $radios.filter('[value=<%= @group_parent_id %>]').prop('checked', true);
 
 $("#group_notice").empty();
-$("#search_notice").empty();
+
 
 <% if @result_str.length >0 %>
 $("#group_notice").show();

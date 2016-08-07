@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160702135332) do
+ActiveRecord::Schema.define(version: 20160806222322) do
 
   create_table "crawler_pages", force: :cascade do |t|
     t.integer "result_page_id",    limit: 4
@@ -68,6 +68,13 @@ ActiveRecord::Schema.define(version: 20160702135332) do
 
   add_index "paragraphs", ["result_page_id"], name: "result_page_id_ix", using: :btree
 
+  create_table "prelim_results", force: :cascade do |t|
+    t.integer "search_query_id", limit: 4
+    t.integer "sentence_id",     limit: 4
+  end
+
+  add_index "prelim_results", ["search_query_id"], name: "index_prelim_results_on_search_query_id", using: :btree
+
   create_table "regex_instances", force: :cascade do |t|
     t.integer  "user_id",            limit: 4
     t.integer  "regex_templated_id", limit: 4
@@ -98,6 +105,7 @@ ActiveRecord::Schema.define(version: 20160702135332) do
 
   create_table "search_queries", force: :cascade do |t|
     t.integer  "user_id",            limit: 4
+    t.integer  "start_index",        limit: 4
     t.string   "first_search_term",  limit: 255
     t.string   "second_search_term", limit: 255
     t.string   "third_search_term",  limit: 255
@@ -155,6 +163,7 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer "sentence_id",    limit: 4
   end
 
+  add_index "word_pairs", ["result_page_id"], name: "index_word_pairs_on_result_page_id", using: :btree
   add_index "word_pairs", ["word_multiple"], name: "word_multiple_id_ix", using: :btree
 
   create_table "word_singletons", force: :cascade do |t|
@@ -163,6 +172,7 @@ ActiveRecord::Schema.define(version: 20160702135332) do
     t.integer "sentence_id",    limit: 4
   end
 
+  add_index "word_singletons", ["result_page_id"], name: "index_word_singletons_on_result_page_id", using: :btree
   add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
 
   create_table "words", force: :cascade do |t|

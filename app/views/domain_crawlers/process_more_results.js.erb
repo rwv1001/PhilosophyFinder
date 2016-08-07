@@ -1,0 +1,5 @@
+$("#search_notice").text("Showing <%= @first_index  %> to <%= @last_index %> of <%= @found_results %>, Unprocessed Results: <%= @unprocessed_sentence_count %>");
+
+<% if @unprocessed_sentence_count >0 %>
+ProcessMore()
+<% end %>

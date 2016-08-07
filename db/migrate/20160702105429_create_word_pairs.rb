@@ -3,7 +3,7 @@ class CreateWordPairs < ActiveRecord::Migration
     create_table :word_pairs do |t|
       t.integer :word_multiple, :limit => 8
       t.integer :separation
-      t.integer :result_page_id
+      t.integer :result_page_id, index: true
       t.integer :sentence_id
 
 

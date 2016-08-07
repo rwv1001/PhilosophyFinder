@@ -1,6 +1,6 @@
 class GroupName < ApplicationRecord
   has_ancestry
-  has_many :group_elements
+  has_many :group_elements,  :dependent => :destroy
   def AddResults(result_ids, current_user_id)
     logger.info "AddResult ids: #{result_ids}"
     add_count = 0;

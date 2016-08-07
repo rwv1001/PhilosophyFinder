@@ -93,10 +93,24 @@ function contractCrawlerPage( page_id) {
     expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
     expand_ref_obj.show();
 }
+function ProcessMore()
+{
+    form_obj = $('[id="process_more_results_form"]');
+    form_obj.submit();    
+}
+function MoreResults(more_results_current_index, more_results_range)
+{
+    $("#results_current_index").attr("value", more_results_current_index);
+    $("#results_range").attr("value", more_results_range);
+    form_obj = $('[id="more_results_form"]');
+    form_obj.submit();
+
+
+}
 
 function SelectDomainAction()
 {
-    $("#search_notice").empty();
+
     $("#group_notice").empty();
     obj = $("#select-domain-action option:selected");
     value = obj.val();

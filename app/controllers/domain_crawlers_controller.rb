@@ -38,22 +38,85 @@ class DomainCrawlersController < ApplicationController
     x =y
   end
 
+  def process_more_results
+    logger.info "process_more_results: #{params.inspect}"
+    process_output = SearchQuery.process_more_results(params[:more_results_query_id])
+    @unprocessed_sentence_count = process_output[:unprocessed_sentence_count]
+    @found_results = process_output[:found_results]
+    @first_index = [1, params[:more_results_first_result_id].to_i - process_output[:absolute_first]+1].max
+    @last_index = [params[:more_results_last_result_id].to_i,process_output[:absolute_last]].min - process_output[:absolute_first]+1
+
+
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  def more_results
+    fetch_output = SearchQuery.fetch(params[:results_query_id].to_i, params[:results_current_index].to_i, params[:results_range].to_i)
+    @search_results = fetch_output[:fetch_results]
+    @query_id = params[:results_query_id]
+    @first_result_id = @search_results[0].id
+    @last_result_id = @search_results[-1].id
+    @absolute_last = fetch_output[:absolute_last]
+    @absolute_first =fetch_output[:absolute_first]
+    logger.info "more_result - first item: #{@search_results[0].inspect}"
+
+    if @first_result_id > fetch_output[:absolute_first]
+      @show_previous = true
+    else
+      @show_previous = false
+    end
+    @unprocessed_sentence_count = fetch_output[:unprocessed_sentence_count]
+    if @last_result_id < fetch_output[:absolute_last] or @unprocessed_sentence_count > 0
+      @show_next = true
+    else
+      @show_next =false
+    end
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def search
     logger.info "DomainCrawlersController search called"
     logger.info "check #{params[:row_in_list]}"
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
-
+    @query_id = search_query.id
   #  crawler_debug
 
     if params[:row_in_list]== nil
       @domain_length = 0;
       @search_results = [];
+      @unprocessed_sentence_count = 0
+      @first_result_id = 0
+      @last_result_id = 0
+      @show_previous = false
+      @show_next = false
+
     else
-      @search_results = search_query.search(params[:row_in_list]);
+      search_output = search_query.search(params[:row_in_list]);
+
+      if search_output[:search_results].length  >0
+        @search_results = search_output[:search_results]
+       @first_result_id = @search_results[0].id
+       @last_result_id = @search_results[-1].id
+       @show_previous = false
+        if search_output[:unprocessed_sentence_count] >0
+          @show_next = true
+        else
+          @show_next = false
+        end
+        @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
+
+
+
+       end
       @domain_length = params[:row_in_list]
     end
-
 
     respond_to do |format|
       format.js

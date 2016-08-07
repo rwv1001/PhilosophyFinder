@@ -1,5 +1,30 @@
 <div id="search-results">
+  <% if args[:show_previous] %>
+  <span  class = "prev-link" onclick="MoreResults(<%=args[:first_result_id]%>,<%=-MAX_DISPLAY%>)">
+    (Previous <%= MAX_DISPLAY %>)
+  </span>
+      <% end %>
+  <% if args[:show_next]  %>
+  <span  class = "next-link"  onclick="MoreResults(<%=args[:last_result_id]%>,<%=MAX_DISPLAY%>)">
+    (Next  <%= MAX_DISPLAY %>)
+  </span>
+      <% end %>
+  <%= form_tag more_results_path, :id => 'more_results_form', method: 'get', remote: true do %>
+      <%= text_field_tag :results_current_index, params[:current_index] %>
+      <%= text_field_tag :results_range, params[:range] %>
+      <%= text_field_tag :results_query_id, params[:query_id], :value => args[:query_id] %>
+      <div class="next-prev" ><%= submit_tag "More Results", id: "next-prev-button" %></div>
+<% end %>
+  <%= form_tag process_more_results_path, :id => 'process_more_results_form', method: 'get', remote: true do %>
+      <%= text_field_tag :more_results_query_id, params[:query_id], :value => args[:query_id] %>
+      <%= text_field_tag :more_results_first_result_id, params[:first_result_id], :value => args[:first_result_id] %>
+      <%= text_field_tag :more_results_last_result_id, params[:last_result_id], :value => args[:last_result_id]%>
+      <div class="next-prev" ><%= submit_tag "Process More Results", id: "process-more-button" %></div>
+  <% end %>
+
 <% if @search_results.length >0 %>
+
+
     <% crawler_page_id = @search_results[0].crawler_page_id %>
     <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
     <div class="page-results">

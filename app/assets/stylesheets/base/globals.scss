@@ -69,6 +69,9 @@ $menu-block-color:  lighten($menu-color, 10%);
 
 
 }
+.next-link, .prev-link{
+  cursor: pointer;
+}
 .show-link{
   cursor: pointer;
   float: right;
@@ -303,6 +306,9 @@ ul{
 #search-result{
 
 }
+.search-results{
+  overflow: scroll;
+}
 .group-search-action-button{
   display:none;
 }
@@ -313,13 +319,13 @@ ul{
   display: none;
 }
 .main-panel-content{
-  background-color: #556474;
+  background-color: #cbd4d4;
 }
 .crawler_page_name{
   background-color: #72869c;
 }
 .search-result-outer, .group-search-result-outer{
-  background-color: #8a6d9c;
+  background-color: #b9c1c1;
   overflow: auto;
   margin: 0px 0px 5px 0px;
 }
