@@ -1,0 +1,36 @@
+<% previous_queries = SearchQuery.where(user_id: args[:user_id]).order('view_priority desc')%>
+<div id = "previous_queries_div" >
+  la la la la <%= "#{args[:user_id]} a a  #{previous_queries.length} "%>
+<% if previous_queries.length > 0 %>
+    <div class="search-old domain-field">
+      <div class="float-left">
+        <h3>Previous Search</h3>
+      </div>
+
+      <div class="float-clear" name="search-old">
+
+        <%= form_tag previous_search_path, :id => 'previous_search_form', method: 'get', remote: true do %>
+            <select id="select-previous-search" name="select-previous-search" onChange="SelectPreviousSearch()">
+              <% previous_queries.each do |previous_query| %>
+              <option  onselect = "SelectPreviousSearch(<%= previous_query.first_search_term %>,<%= previous_query.second_search_term %>,<%= previous_query.third_search_term %>,<%= previous_query.fourth_search_term%>)"
+                       value= <%= previous_query.id %> > 1:<%= previous_query.first_search_term%><% if previous_query.second_search_term.length >0 %>,
+                    2:<%= previous_query.second_search_term%><%end%><% if previous_query.third_search_term.length >0 %>,
+                    3:<%= previous_query.third_search_term%><%end%><% if previous_query.fourth_search_term.length >0 %>,
+                    4:<%= previous_query.fourth_search_term%><%end%></option>
+              <% end %>
+            </select>
+
+            <div class="field">
+              <%= label_tag :prev_query_id %><br />
+              <%= text_field_tag :prev_query_id, params[:query_id] %>
+            </div>
+            <div class="actions hidden "><%= submit_tag "Prev Search C" %>
+            </div>
+            <div><input type="button" name="previous search_button"  value="Prev Search" onclick= PreviousSearch() ></div>
+        <% end %>
+
+      </div>
+
+    </div>
+<% end %>
+</div>

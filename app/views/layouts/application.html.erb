@@ -21,7 +21,8 @@
       <div class="domain-crawler">
         <%= render 'domain_crawlers/domain_summary', args: {:selected => DOMAIN_ACTION[:select_action]}  %>
         <%= render 'domain_crawlers/new_domain_form', args: {:user_id => current_user.id, :domain_crawler => DomainCrawler.new} %>
-        <%= render 'domain_crawlers/new_search_form', args: {:user_id => current_user.id, :domain_crawler => DomainCrawler.new} %>
+        <%= render 'domain_crawlers/new_search_form', args: {:user_id => current_user.id} %>
+        <%= render 'domain_crawlers/old_search_form', args: {:user_id => current_user.id} %>
         <%= render 'domain_crawlers/groups', args: {:selected => GROUP_ACTION[:select_action]} %>
       </div>
 

@@ -61,6 +61,7 @@ class DomainCrawlersController < ApplicationController
     @last_result_id = @search_results[-1].id
     @absolute_last = fetch_output[:absolute_last]
     @absolute_first =fetch_output[:absolute_first]
+    @found_results = fetch_output[:found_results]
     logger.info "more_result - first item: #{@search_results[0].inspect}"
 
     if @first_result_id > fetch_output[:absolute_first]

@@ -6,7 +6,7 @@ $("#group_notice").empty();
 $("#search_notice").empty();
 $("#search_notice").show();
 <% if @search_results.length >0 %>
-$("#search_notice").text("Showing  <%= @first_result_id - @absolute_first +1 %> to <%= @last_result_id - @absolute_first +1  %> of <%= @search_results.length %>, Unprocessed Results: <%= @unprocessed_sentence_count %>");
+$("#search_notice").text("Showing  <%= @first_result_id - @absolute_first +1 %> to <%= @last_result_id - @absolute_first +1  %> of <%= @found_results %>, Unprocessed Results: <%= @unprocessed_sentence_count %>");
 
 
 <% end %>

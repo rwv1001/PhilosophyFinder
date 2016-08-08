@@ -106,6 +106,7 @@ ActiveRecord::Schema.define(version: 20160806222322) do
   create_table "search_queries", force: :cascade do |t|
     t.integer  "user_id",            limit: 4
     t.integer  "start_index",        limit: 4
+    t.integer  "view_priority",      limit: 4
     t.string   "first_search_term",  limit: 255
     t.string   "second_search_term", limit: 255
     t.string   "third_search_term",  limit: 255
@@ -113,6 +114,8 @@ ActiveRecord::Schema.define(version: 20160806222322) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "search_queries", ["user_id"], name: "index_search_queries_on_user_id", using: :btree
 
   create_table "search_results", force: :cascade do |t|
     t.integer  "user_id",                    limit: 4

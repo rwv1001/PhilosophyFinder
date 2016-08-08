@@ -50,7 +50,7 @@ $menu-block-color:  lighten($menu-color, 10%);
 
 }
 
-.search-new{
+.search-new, .search-old{
   @include put-margin(10px);
   background-color: $menu-block-color;
   overflow: auto;

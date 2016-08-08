@@ -76,7 +76,7 @@ class SearchQuery < ApplicationRecord
     if range >0
       fetch_output[:fetch_results] = SearchResult.where('search_query_id = ? and id > ?', query_id, current_index).limit(range).order('id asc')
     else
-      fetch_output[:fetch_results] = SearchResult.where('search_query_id = ? and id < ?', query_id, current_index).limit(-range).order('id asc')
+      fetch_output[:fetch_results] = SearchResult.where('search_query_id = ? and id < ?', query_id, current_index).limit(-range).order('id desc').reverse
     end
 
 
@@ -100,16 +100,23 @@ class SearchQuery < ApplicationRecord
 
       initialize_process_sentences()
       prelim_results.each do |prelim_result|
-        if @count < MAX_DISPLAY
+        if  @quit_processing == false and (@count < MAX_DISPLAY-1 or (@count >= MAX_DISPLAY-1 and Sentence.find_by_id(prelim_result.sentence_id).paragraph_id == @current_paragraph_id))
           process_sentence(prelim_result.sentence_id, tokens)
           delete_ids.push(prelim_result.id)
-
+        else
+          if @quit_processing == false
+            @quit_processing = true
+            complete_result
+          end
         end
 
-        if @search_result != nil and @count < MAX_DISPLAY
-          complete_result()
-        end
       end
+      if @search_result != nil and @quit_processing == false
+        complete_result()
+      end
+
+
+
       if delete_ids.length >0
 
       sql = "DELETE FROM prelim_results WHERE id IN (#{delete_ids.join(', ')})"
@@ -171,6 +178,8 @@ class SearchQuery < ApplicationRecord
     if @current_paragraph_id != paragraph.id
       if @search_result != nil
         complete_result()
+      else
+        logger.info "@search_result is nil"
       end
       @current_paragraph_id = paragraph.id
       @search_result = SearchResult.new
@@ -189,22 +198,28 @@ class SearchQuery < ApplicationRecord
     sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id)
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
-      sentence = Sentence.find_by_id(sentence_id1)
-      @highlighted_result << sentence.content << ". "
+      sentence1 = Sentence.find_by_id(sentence_id1)
+      @highlighted_result << sentence1.content << ". "
     end
     @highlighted_result << content << ". "
   end
 
   def process_sentences(sentence_set, tokens)
     initialize_process_sentences()
+
     sentence_inserts = []
     if sentence_set == nil
+      logger.info "sentence_set is nil"
+      return
+    end
+    if sentence_set.empty?
+      logger.info "sentence_set is empty"
       return
     end
     logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.length}"
 
     sentence_set.each do |sentence_id|
-      if @quit_processing == false and (@count < MAX_DISPLAY or (@count >= MAX_DISPLAY and Sentence.find_by_id(sentence_id).paragraph_id == @current_paragraph_id))
+      if @quit_processing == false and (@count < MAX_DISPLAY-1 or (@count >= MAX_DISPLAY-1 and Sentence.find_by_id(sentence_id).paragraph_id == @current_paragraph_id))
         process_sentence(sentence_id, tokens)
       else
         if @quit_processing == false
@@ -223,9 +238,9 @@ class SearchQuery < ApplicationRecord
       @connection.execute(sql)
     end
 
-   # if @search_result != nil and @count < MAX_DISPLAY
- #     complete_result()
-  #  end
+    if @search_result != nil and @quit_processing == false
+      complete_result()
+   end
   end
 
 
@@ -320,6 +335,9 @@ class SearchQuery < ApplicationRecord
       @search_result.save
       @count = @count +1
       @search_results << @search_result
+    else
+      logger.info "result already exists - set to @search_result to nil"
+      @search_result= nil
     end
 #    logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"
     @highlighted_result = "";
@@ -447,6 +465,14 @@ class SearchQuery < ApplicationRecord
     self.second_search_term = search_terms[1];
     self.third_search_term = search_terms[2];
     self.fourth_search_term = search_terms[3];
+    if SearchQuery.exists?(user_id: current_user)
+      z =
+      logger.info "z =#{z.inspect}"
+      self.view_priority = SearchQuery.where(user_id: current_user).maximum('view_priority')+1
+    else
+      self.view_priority = 1
+    end
+    logger.info "self.view_priority = #{self.view_priority}"
     self.save
   end
 

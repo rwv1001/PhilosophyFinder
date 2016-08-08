@@ -108,6 +108,20 @@ function MoreResults(more_results_current_index, more_results_range)
 
 }
 
+function SelectPreviousSearch(first_search_term, second_search_term, third_search_term, fourth_search_term)
+{
+    obj = $("#select-previous-search option:selected");
+    value = obj.val();
+    $("#word1").attr("value", first_search_term);
+    $("#word2").attr("value", second_search_term);
+    $("#word3").attr("value", third_search_term);
+    $("#word4").attr("value", fourth_search_term);
+    $("#prev_query_id").attr("value", value);
+
+
+}
+
+
 function SelectDomainAction()
 {
 
@@ -126,6 +140,7 @@ function SelectDomainAction()
             $( ".domain-field" ).hide();
             $(".domain-checkbox").show();
             $( ".search-new" ).show();
+            $(".search-old").show();
             break;
 
         case "move_domain":
