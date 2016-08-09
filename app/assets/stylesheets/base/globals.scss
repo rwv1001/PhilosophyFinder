@@ -5,6 +5,7 @@
 $crawler-color: #0000ff;
 $menu-color: #a593bf;
 $menu-block-color:  lighten($menu-color, 10%);
+
 @mixin put-margin($val) {
   margin: $val $val;
 }
@@ -16,7 +17,7 @@ $menu-block-color:  lighten($menu-color, 10%);
   width: 300px;
   float: left;
   overflow: hidden;
-  height:auto;
+  height: 100vh;
 }
 .user-header{
   @include put-margin(10px);
@@ -124,7 +125,8 @@ ul{
 }
 
 body {
-  background-color:$menu-color;
+  background-color: #cbd4d4;
+  overflow: hidden;
 }
 .float-left {
   float: left;
@@ -201,14 +203,16 @@ ul{
   &:not(:first-child){padding: 12px;}
 }
 .main-panel{
-  width: -moz-calc(100% - 330px);
-  width: -webkit-calc(100% - 330px);
-  width: calc(100% - 330px);
+  width: -moz-calc(100% - 301px);
+  width: -webkit-calc(100% - 301px);
+  width: calc(100% - 301px);
   overflow: auto;
-  background-color: $menu-block-color;
+  background-color: #cbd4d4;
+  height: 100vh;
 }
 .menu-div{
   overflow: auto;
+  background-color: $menu-block-color;
   width: 100%;
 }
 .menu-tab{
@@ -219,6 +223,10 @@ ul{
   cursor: pointer;
 
 }
+#process_more_results_form, #more_results_form{
+  display: none;
+}
+
 .move-location-group-name-radio{
   display: none;
 }

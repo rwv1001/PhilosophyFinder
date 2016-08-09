@@ -1,6 +1,6 @@
-<% previous_queries = SearchQuery.where(user_id: args[:user_id]).order('view_priority desc')%>
+<% previous_queries = SearchQuery.where(user_id: args[:user_id]).order('view_priority desc').first(MAX_QUERY_STORE)%>
 <div id = "previous_queries_div" >
-  la la la la <%= "#{args[:user_id]} a a  #{previous_queries.length} "%>
+
 <% if previous_queries.length > 0 %>
     <div class="search-old domain-field">
       <div class="float-left">
@@ -8,9 +8,13 @@
       </div>
 
       <div class="float-clear" name="search-old">
+        <% arg_array = [] %>
+        <% previous_queries.each do |previous_query| %>
+        <% arg_array.push("['#{previous_query.first_search_term }','#{previous_query.second_search_term}','#{previous_query.third_search_term}','#{previous_query.fourth_search_term}']") %>
+        <% end %>
 
-        <%= form_tag previous_search_path, :id => 'previous_search_form', method: 'get', remote: true do %>
-            <select id="select-previous-search" name="select-previous-search" onChange="SelectPreviousSearch()">
+           <%= form_tag previous_search_path, :id => 'previous_search_form', method: 'get', remote: true do %>
+            <select id="select-previous-search" name="select-previous-search" onchange = "SelectPreviousSearch([<%=arg_array.join(', ') %>])">
               <% previous_queries.each do |previous_query| %>
               <option  onselect = "SelectPreviousSearch(<%= previous_query.first_search_term %>,<%= previous_query.second_search_term %>,<%= previous_query.third_search_term %>,<%= previous_query.fourth_search_term%>)"
                        value= <%= previous_query.id %> > 1:<%= previous_query.first_search_term%><% if previous_query.second_search_term.length >0 %>,
@@ -21,12 +25,12 @@
             </select>
 
             <div class="field">
-              <%= label_tag :prev_query_id %><br />
-              <%= text_field_tag :prev_query_id, params[:query_id] %>
+
+              <%= hidden_field_tag :prev_query_id, params[:query_id], :value => previous_queries[0].id %>
             </div>
-            <div class="actions hidden "><%= submit_tag "Prev Search C" %>
+            <div class="actions"><%= submit_tag "Display" %>
             </div>
-            <div><input type="button" name="previous search_button"  value="Prev Search" onclick= PreviousSearch() ></div>
+
         <% end %>
 
       </div>

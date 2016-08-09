@@ -23,7 +23,7 @@ Rails.application.routes.draw do
   get 'more_results', to: 'domain_crawlers#more_results', as: 'more_results'
   get 'process_more_results', to: 'domain_crawlers#process_more_results', as: 'process_more_results'
   get 'previous_search', to: 'domain_crawlers#previous_search', as: 'previous_search'
-
+  get 'tidy_up', to: 'domain_crawlers#tidy_up', as: 'tidy_up'
   post 'add_result', to:'domain_crawlers#add_result', as: 'add_result'
   post 'remove_group_result', to:'domain_crawlers#remove_group_result', as: 'remove_group_result'
 

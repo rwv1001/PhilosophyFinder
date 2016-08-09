@@ -9,14 +9,14 @@ class DomainCrawlersController < ApplicationController
         logger.info "DomainCrawlersController case set_header"
 
       when "index"
-              logger.info "DomainCrawlersController case index"
+        logger.info "DomainCrawlersController case index"
       else
-                    logger.info "DomainCrawlersController case else"
+        logger.info "DomainCrawlersController case else"
     end
 
-   # @crawl_results = DomainCrawler.crawl(params[:domain], current_user.id)
-   # flash.now.alert = @crawl_results
-   # redirect_to action: "show", id: current_domain_crawler
+    # @crawl_results = DomainCrawler.crawl(params[:domain], current_user.id)
+    # flash.now.alert = @crawl_results
+    # redirect_to action: "show", id: current_domain_crawler
   end
 
   def new
@@ -25,7 +25,7 @@ class DomainCrawlersController < ApplicationController
     @domain_crawler = DomainCrawler.new
 
 
- #   logger.info "DomainCrawlersController new called @domain_crawler id set to #{@domain_crawler.id}"
+    #   logger.info "DomainCrawlersController new called @domain_crawler id set to #{@domain_crawler.id}"
   end
 
   def crawler_debug
@@ -33,9 +33,16 @@ class DomainCrawlersController < ApplicationController
     logger.info "crawler_page: #{crawler_page.inspect}"
     descendents = crawler_page.root.descendants.arrange
     descendents.each do |descendent|
-    logger.info "Descendent is #{descendent}"
+      logger.info "Descendent is #{descendent}"
     end
     x =y
+  end
+  def tidy_up
+    logger.info "tidy up params: #{params.inspect}"
+    SearchQuery.tidy_up(params[:tidy_user_id])
+    respond_to do |format|
+      format.js
+    end
   end
 
   def process_more_results
@@ -44,8 +51,7 @@ class DomainCrawlersController < ApplicationController
     @unprocessed_sentence_count = process_output[:unprocessed_sentence_count]
     @found_results = process_output[:found_results]
     @first_index = [1, params[:more_results_first_result_id].to_i - process_output[:absolute_first]+1].max
-    @last_index = [params[:more_results_last_result_id].to_i,process_output[:absolute_last]].min - process_output[:absolute_first]+1
-
+    @last_index = [params[:more_results_last_result_id].to_i, process_output[:absolute_last]].min - process_output[:absolute_first]+1
 
 
     respond_to do |format|
@@ -53,28 +59,52 @@ class DomainCrawlersController < ApplicationController
     end
   end
 
-  def more_results
-    fetch_output = SearchQuery.fetch(params[:results_query_id].to_i, params[:results_current_index].to_i, params[:results_range].to_i)
-    @search_results = fetch_output[:fetch_results]
-    @query_id = params[:results_query_id]
-    @first_result_id = @search_results[0].id
-    @last_result_id = @search_results[-1].id
-    @absolute_last = fetch_output[:absolute_last]
-    @absolute_first =fetch_output[:absolute_first]
-    @found_results = fetch_output[:found_results]
-    logger.info "more_result - first item: #{@search_results[0].inspect}"
+  def previous_search
+    logger.info "previous_search: #{params.inspect}"
+    current_index = 0
+    more_resultsa(params[:prev_query_id], current_index, MAX_DISPLAY)
+    respond_to do |format|
+      format.js
+    end
+  end
 
-    if @first_result_id > fetch_output[:absolute_first]
-      @show_previous = true
+  def more_resultsa(query_id, current_index, range)
+    fetch_output = SearchQuery.fetch(query_id, current_index, range)
+    @search_results = fetch_output[:fetch_results]
+    @query_id = query_id
+    if @search_results.length > 0
+      @first_result_id = @search_results[0].id
+      @last_result_id = @search_results[-1].id
+      @absolute_last = fetch_output[:absolute_last]
+      @absolute_first =fetch_output[:absolute_first]
+      @found_results = fetch_output[:found_results]
+      logger.info "more_result - first item: #{@search_results[0].inspect}"
+
+      if @first_result_id > fetch_output[:absolute_first]
+        @show_previous = true
+      else
+        @show_previous = false
+      end
+      @unprocessed_sentence_count = fetch_output[:unprocessed_sentence_count]
+      if @last_result_id < fetch_output[:absolute_last] or @unprocessed_sentence_count > 0
+        @show_next = true
+      else
+        @show_next =false
+      end
     else
+      @first_result_id =0
+      @last_result_id = 0
+      @absolute_last = 0
+      @absolute_first = 0
+      @found_results = 0
+      @show_next =false
       @show_previous = false
     end
-    @unprocessed_sentence_count = fetch_output[:unprocessed_sentence_count]
-    if @last_result_id < fetch_output[:absolute_last] or @unprocessed_sentence_count > 0
-      @show_next = true
-    else
-      @show_next =false
-    end
+
+  end
+
+  def more_results
+    more_resultsa(params[:results_query_id].to_i, params[:results_current_index].to_i, params[:results_range].to_i)
 
     respond_to do |format|
       format.js
@@ -87,25 +117,25 @@ class DomainCrawlersController < ApplicationController
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
     @query_id = search_query.id
-  #  crawler_debug
+    #  crawler_debug
 
-    if params[:row_in_list]== nil
-      @domain_length = 0;
-      @search_results = [];
-      @unprocessed_sentence_count = 0
-      @first_result_id = 0
-      @last_result_id = 0
-      @show_previous = false
-      @show_next = false
 
-    else
+    @domain_length = 0;
+    @search_results = [];
+    @unprocessed_sentence_count = 0
+    @first_result_id = 0
+    @last_result_id = 0
+    @show_previous = false
+    @show_next = false
+
+    if params[:row_in_list] != nil
       search_output = search_query.search(params[:row_in_list]);
 
-      if search_output[:search_results].length  >0
+      if search_output[:search_results].length >0
         @search_results = search_output[:search_results]
-       @first_result_id = @search_results[0].id
-       @last_result_id = @search_results[-1].id
-       @show_previous = false
+        @first_result_id = @search_results[0].id
+        @last_result_id = @search_results[-1].id
+        @show_previous = false
         if search_output[:unprocessed_sentence_count] >0
           @show_next = true
         else
@@ -114,8 +144,7 @@ class DomainCrawlersController < ApplicationController
         @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
 
 
-
-       end
+      end
       @domain_length = params[:row_in_list]
     end
 
@@ -137,25 +166,26 @@ class DomainCrawlersController < ApplicationController
     if @domain_crawler.save
       logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
       first_page_id = @domain_crawler.crawl
-       if first_page_id  !=0
-         logger.info "Crawl success first_id = #{first_page_id}"
-         @domain_crawler.crawler_page_id = first_page_id
-         @domain_crawler.save
+      if first_page_id !=0
+        logger.info "Crawl success first_id = #{first_page_id}"
+        @domain_crawler.crawler_page_id = first_page_id
+        @domain_crawler.save
 
-         current_user.current_domain_crawler_id = @domain_crawler.id
-         current_user.save
-         logger.info "DomainCrawlersController create, before redirect"
-         redirect_to domain_crawlers_url, notice: "Domain Analysis of #{@domain_crawler.domain_home_page} was successfull!"
-       else
-         logger.info "crawl failure"
-         @domain_crawler.destroy
-         logger.info "DomainCrawlersController create, before redirect"
-         redirect_to domain_crawlers_url, notice: "Domain Analysis failed of  #{@domain_crawler.domain_home_page} failed. Is the domain address correct?"
-       end
+        current_user.current_domain_crawler_id = @domain_crawler.id
+        current_user.save
+        logger.info "DomainCrawlersController create, before redirect"
+        redirect_to domain_crawlers_url, notice: "Domain Analysis of #{@domain_crawler.domain_home_page} was successfull!"
+      else
+        logger.info "crawl failure"
+        @domain_crawler.destroy
+        logger.info "DomainCrawlersController create, before redirect"
+        redirect_to domain_crawlers_url, notice: "Domain Analysis failed of  #{@domain_crawler.domain_home_page} failed. Is the domain address correct?"
+      end
     end
 
 
   end
+
   def delete_result
     logger.info "delete_result begin"
     @delete_id = params[:id]
@@ -308,7 +338,7 @@ class DomainCrawlersController < ApplicationController
         @crawler_parent_id = crawler_page_name.parent_id
         CrawlerPage.destroy(crawler_page_name.id)
         @result_str = ""
-        end
+      end
     else
       @result_str = "Page already deleted"
     end

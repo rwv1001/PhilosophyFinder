@@ -1,0 +1,12 @@
+<div  id = "show-prev-next">
+<% if args[:show_previous] %>
+    <span  class = "prev-link" onclick="MoreResults(<%=args[:first_result_id]%>,<%=-MAX_DISPLAY%>)">
+    (Previous <%= MAX_DISPLAY %>)
+  </span>
+<% end %>
+<% if args[:show_next]  %>
+    <span  class = "next-link"  onclick="MoreResults(<%=args[:last_result_id]%>,<%=MAX_DISPLAY%>)">
+    (Next  <%= MAX_DISPLAY %>)
+  </span>
+<% end %>
+</div>

@@ -2,4 +2,6 @@ $("#search_notice").text("Showing <%= @first_index  %> to <%= @last_index %> of 
 
 <% if @unprocessed_sentence_count >0 %>
 ProcessMore()
+<% else %>
+TidyUp()
 <% end %>

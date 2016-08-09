@@ -107,16 +107,22 @@ function MoreResults(more_results_current_index, more_results_range)
 
 
 }
-
-function SelectPreviousSearch(first_search_term, second_search_term, third_search_term, fourth_search_term)
+function TidyUp()
 {
-    obj = $("#select-previous-search option:selected");
-    value = obj.val();
-    $("#word1").attr("value", first_search_term);
-    $("#word2").attr("value", second_search_term);
-    $("#word3").attr("value", third_search_term);
-    $("#word4").attr("value", fourth_search_term);
-    $("#prev_query_id").attr("value", value);
+    form_obj = $('[id="tidy_up_form"]');
+    form_obj.submit();    
+}
+
+function SelectPreviousSearch(argss)
+{
+    val =  $("#select-previous-search option:selected").val();
+    index =  $("#select-previous-search").prop('selectedIndex');
+    args = argss[index];
+    $("#word1").attr("value", args[0]);
+    $("#word2").attr("value", args[1]);
+    $("#word3").attr("value", args[2]);
+    $("#word4").attr("value", args[3]);
+    $("#prev_query_id").attr("value", val);
 
 
 }

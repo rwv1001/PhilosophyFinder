@@ -1,6 +1,7 @@
 ShowSearchResults();
 
-$('#search-results').replaceWith('<%= j render "search_results/display_results", args: {:first_result_id => @first_result_id, :last_result_id => @last_result_id, :show_previous => @show_previous, :show_next => @show_next, :query_id => @query_id}%>');
+$('#search-results').replaceWith('<%= j render "search_results/display_results", args: {:user_id => current_user.id, :first_result_id => @first_result_id, :last_result_id => @last_result_id, :show_previous => @show_previous, :show_next => @show_next, :query_id => @query_id}%>');
+$('#show-prev-next').replaceWith('<%= j render "domain_crawlers/show_prev_next", args: {:first_result_id => @first_result_id, :last_result_id => @last_result_id, :show_previous => @show_previous, :show_next => @show_next}%>');
 
 $("#group_notice").empty();
 $("#search_notice").empty();
@@ -13,5 +14,7 @@ $("#search_notice").text("Showing  <%= @first_result_id - @absolute_first +1 %> 
 
 <% if @unprocessed_sentence_count >0 %>
 ProcessMore()
+<% else %>
+TidyUp()
 <% end %>
 

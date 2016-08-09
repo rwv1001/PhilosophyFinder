@@ -22,7 +22,7 @@ class SearchQuery < ApplicationRecord
     logger.info "SearchQuery search: #{first_search_term}, #{second_search_term}, #{third_search_term}, #{fourth_search_term}"
     page_hash(pages)
 
-    search_results = []
+    @search_results = []
     search_output = Hash.new
     search_terms = get_search_terms()
 
@@ -83,10 +83,38 @@ class SearchQuery < ApplicationRecord
     all_results = SearchResult.where(search_query_id: query_id)
     fetch_output[:unprocessed_sentence_count] = PrelimResult.where(search_query_id: query_id).count
     fetch_output[:found_results]= all_results.count
-    fetch_output[:absolute_first] = all_results[0].id
-    fetch_output[:absolute_last] = all_results[-1].id
+    if fetch_output[:found_results] >0
+      fetch_output[:absolute_first] = all_results[0].id
+      fetch_output[:absolute_last] = all_results[-1].id
+    else
+      fetch_output[:absolute_first] = 0
+      fetch_output[:absolute_last] = 0
+    end
+
+
+
 
     return fetch_output
+
+
+  end
+
+  def self.tidy_up(user_id)
+    search_queries = SearchQuery.where(user_id: user_id).order('view_priority desc')
+    if search_queries.length > MAX_QUERY_STORE
+      delete_priority = search_queries[MAX_QUERY_STORE].view_priority
+      del_str1 = "DELETE sr FROM search_results sr INNER JOIN search_queries on search_queries.id = sr.search_query_id
+                 WHERE sr.user_id = #{user_id} AND search_queries.view_priority <= #{delete_priority} AND NOT EXISTS (SELECT 1 FROM group_elements
+                 WHERE group_elements.search_result_id  = sr.id )"
+      del_str2 = "DELETE FROM search_queries WHERE view_priority <= #{delete_priority} AND NOT EXISTS (SELECT 1 FROM search_results WHERE search_results.search_query_id = search_queries.id)"
+      logger.info "del_str1 = #{del_str1}"
+      logger.info "del_str1 = #{del_str2}"
+      if @connection == nil
+        @connection = ActiveRecord::Base.connection
+      end
+      @connection.execute(del_str1)
+      @connection.execute(del_str2)
+    end
 
 
   end
@@ -283,7 +311,7 @@ class SearchQuery < ApplicationRecord
 
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.inspect"
+    logger.info "search_results: @search_results.length"
     return @search_results
   end
 
@@ -391,7 +419,7 @@ class SearchQuery < ApplicationRecord
 
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.inspect"
+    logger.info "search_results: @search_results.length"
     return @search_results
 
   end
@@ -422,7 +450,7 @@ class SearchQuery < ApplicationRecord
 
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.inspect"
+    logger.info "search_results: @search_results.length"
     return @search_results
   end
 
