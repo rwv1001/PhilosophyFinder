@@ -26,5 +26,5 @@
 <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => current_domain_crawler.crawler_page.root.descendants.arrange, :parent_id => current_domain_crawler.crawler_page.id } %>
     </ul>
     <% else %>
-    <p>something has gone wrong: <%= @domain_crawler.id %></p>
+    <p>something has gone wrong:</p>
 <% end %>

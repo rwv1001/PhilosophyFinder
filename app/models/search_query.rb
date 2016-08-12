@@ -300,7 +300,7 @@ class SearchQuery < ApplicationRecord
     sentence_set = SortedSet.new
     terms.each do |term|
       #   logger.info "01"
-      word_singletons = WordSingleton.where(word_id: term.id, result_page_id: @result_pages)
+      word_singletons = WordSingleton.where(word_id: term.id_value, result_page_id: @result_pages)
       #   logger.info "02"
       word_singletons.each do |word_singleton|
         #     logger.info "03"

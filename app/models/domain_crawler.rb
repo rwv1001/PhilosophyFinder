@@ -30,8 +30,206 @@ class DomainCrawler < ApplicationRecord
     end
 
   end
+  def GetNextPrime(n)
+    if n%2 == 0
+      possible_prime = n+1
+    else
+      possible_prime = n+2
+    end
+    if @@primes == nil
+      @@primes = Prime.instance
+    end
 
-  def ProcessSentence(sentence, result_page_id, paragraph_id)
+    while @@primes.prime?(possible_prime) == false
+      possible_prime = possible_prime + 2
+      #       logger.info "v8"
+    end
+    return possible_prime
+
+  end
+
+  def sql_save(sql_str)
+
+    @connection.execute(sql_str)
+    save_sql = SaveMySql.new
+    save_sql.save_str = sql_str[0..1000]
+    save_sql.save
+  end
+
+  def AddSentencesAndWords()
+    logger.info "AddSentencesAndWords begin"
+    if Sentence.where('id >0').length > 0
+      max_id = Sentence.maximum('id')
+    else
+      max_id = 0
+      logger.info "No sentences exist"
+    end
+    if @sentence_inserts.length >0
+
+      sql = "INSERT INTO sentences (content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
+      sql_save(sql)
+
+    else
+      logger.info "@sentence_inserts is empty"
+    end
+    @sentence_objects = Sentence.where("id > #{max_id}")
+
+    if @word_entries.length > 0
+
+      sql = "INSERT IGNORE INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
+      # logger.info "sql = #{sql}"
+      sql_save(sql)
+      if Word.where('id_value >-1').length >0
+        max_prime = Word.maximum('word_prime')
+        max_id = Word.maximum('id_value')
+      else
+        max_id = 0
+        max_prime = 2
+      end
+
+      new_words = Word.where(id_value: 0)
+      new_id = max_id + 1
+      new_prime = GetNextPrime(max_prime)
+
+
+      new_words_str = []
+      new_words.each do |new_word|
+        new_words_str << "(\"#{new_word.word_name}\",#{new_id}, #{new_prime})"
+        new_prime = GetNextPrime(new_prime)
+        new_id = new_id + 1
+      end
+      if new_words.length > 0
+
+        sql = "REPLACE INTO words (word_name, id_value, word_prime) VALUES #{new_words_str.to_a.join(', ')}"
+        sql_save(sql)
+      else
+        logger.info "new_words is empty"
+      end
+
+      new_word_list = "(#{@word_set.to_a.join(', ')})"
+      new_words_from_db_str = "word_name IN #{new_word_list}"
+ #     logger.info "new_words_from_db_str = #{new_words_from_db_str}"
+      new_words_from_db = Word.where("word_name IN #{new_word_list}")
+      new_words_from_db.each do |new_word_from_db|
+        @word_hash[new_word_from_db.word_name] = new_word_from_db.id_value
+        @word_prime_hash[new_word_from_db.word_name] = new_word_from_db.word_prime
+
+      end
+    end
+  end
+
+  def ProcessSentences(par_sentences,result_page_id)
+
+    @sentence_inserts = []
+    @word_inserts = Set.new
+    @word_singleton_inserts = []
+    @word_pairs_inserts = []
+    @word_set = Set.new
+    @word_hash = Hash.new
+    @word_prime_hash = Hash.new
+    @word_entries = Set.new
+
+    @sentence_objects = nil
+
+    par_sentences.each do |par_sentence|
+
+      par_sentence[:sentences].each do |sentence|
+        ProcessSentence(sentence, par_sentence[:paragraph_id])
+      end
+    end
+
+    AddSentencesAndWords()
+
+    @sentence_objects.each do |sentence_obj|
+      ProcessSingletonPairs(sentence_obj, result_page_id)
+    end
+    AddSingletonPairs()
+  end
+
+
+
+  def AddSingletonPairs()
+    logger.info "AddSingletonPairs"
+    if @word_singleton_inserts.length > 0
+      sql = "INSERT INTO word_singletons (word_id, sentence_id, result_page_id) VALUES #{@word_singleton_inserts.join(', ')}"
+      # logger.info "sql = #{sql}"
+      sql_save(sql)
+    else
+      logger.info "@word_singleton_inserts is empty"
+    end
+    if @word_pairs_inserts.length > 0
+      sql = "INSERT INTO word_pairs (word_multiple, separation, result_page_id,sentence_id) VALUES #{@word_pairs_inserts.join(', ')}"
+      # logger.info "sql = #{sql}"
+      sql_save(sql)
+    else
+      logger.info "@word_pairs_inserts is empty"
+    end
+
+
+  end
+
+
+
+
+
+  def ProcessSentence(sentence, paragraph_id)
+    @sentence_inserts.push "(\"#{sentence.gsub('"','\"')}\",#{paragraph_id})"
+    sentence = sentence.gsub(/[^a-zA-Z]/, ' ')
+    word_list = sentence.split(' ')
+
+    word_list.each do |word|
+      # logger.info "#{word_count}, Word: #{word}"
+
+      #   logger.info "v2"
+      if word.length > 0
+        #      logger.info "v3"
+        @word_entries.add "(\"#{word.downcase}\", 0, 0)"
+        @word_set.add("\"#{word.downcase}\"")
+      end
+      #  logger.info "v14"
+    end
+  end
+
+  def  ProcessSingletonPairs(sentence_obj, result_page_id)
+
+    sentence = sentence_obj.content.gsub(/[^a-zA-Z]/, ' ')
+    word_list = sentence.downcase.split(' ')
+    #   TimeLogger("03")
+    word_inserts = []
+    word_singleton_set = Set.new
+    word_list.each do |word|
+      word_singleton_set.add(word.downcase)
+    end
+
+    #  logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
+    word_singleton_set.each do |word|
+
+      @word_singleton_inserts.push "(#{@word_hash[word]},#{sentence_obj.id}, #{result_page_id})"
+    end
+  #  logger.info "@word_singleton_inserts = #{@word_singleton_inserts}"
+
+
+    for i in 0..word_list.length-1
+      word_1 = @word_prime_hash[word_list[i]]
+
+
+      if i<word_list.length-1
+        for j in (i+1) .. [i+@max_separation, word_list.length-1].min
+          word_2 = @word_prime_hash[word_list[j]]
+      #    logger.info "word_list[i] = #{word_list[i]}, word_list[j] = #{word_list[j]}, @word_prime_hash = [#{ @word_prime_hash[word_list[i]]},#{ @word_prime_hash[word_list[j]]}]"
+         @word_pairs_inserts.push "(#{word_1 * word_2},#{j-i}, #{result_page_id}, #{sentence_obj.id})"
+        end
+      end
+    end
+
+    #   TimeLogger("05")
+  #  logger.info "ProcessSentence end"
+
+
+
+  end
+
+  def ProcessSentenceOld(sentence, result_page_id, paragraph_id)
     logger.info "ProcessSentence begin"
     #logger.info "original sentence: #{sentence}"
 
@@ -107,7 +305,7 @@ class DomainCrawler < ApplicationRecord
     if word_inserts.length > 0
       sql = "INSERT INTO word_singletons (word_id, sentence_id, result_page_id) VALUES #{word_inserts.join(', ')}"
       # logger.info "sql = #{sql}"
-      @connection.execute(sql)
+      sql_save(sql)
     end
     # TimeLogger("04")
     pair_inserts = []
@@ -133,7 +331,7 @@ class DomainCrawler < ApplicationRecord
     if pair_inserts.length > 0
       sql = "INSERT INTO word_pairs (word_multiple, separation, result_page_id,sentence_id) VALUES #{pair_inserts.join(', ')}"
       # logger.info "sql = #{sql}"
-      @connection.execute(sql)
+      sql_save(sql)
     end
 
     #   TimeLogger("05")
@@ -143,58 +341,64 @@ class DomainCrawler < ApplicationRecord
   def ProcessParagraphs(paragraphs, result_page_id)
     logger.info "ProcessParagraphs begin, paragraphs length = #{paragraphs.length}"
     paragraph_count = 0
-=begin
-    logger.info "AANumber of paragraphs =  #{paragraphs.length}"
-    logger.info "AAParagraph 0 is #{paragraphs[0].text}"
-    logger.info "AAParagraph 1 is #{paragraphs[1].text}"
-    logger.info "AAParagraph 2 is #{paragraphs[2].text}"
-    logger.info "AAParagraph 3 is #{paragraphs[3].text}"
-=end
+    @paragraph_inserts =[]
+    paragraph_block_num = 100
+
     for par_count in 0..paragraphs.length-1
       par = paragraphs[par_count]
-#      logger.info "01"
 
       if @max_paragraph_number<0 || paragraph_count<@max_paragraph_number
-        #index_paragraphs
-        #        logger.info "02"
         par_text = par.text
-        #       logger.info "03"
+
         #the code below is to deal with a bug in reading paragraphs
         if par_count < (paragraphs.length-2)
-          #        logger.info "04"
           par_index = par_text.index(paragraphs[par_count+1].text)
-          #       logger.info "05"
-          #        logger.info "par_index = #{par_index}"
-
           if par_index != nil and par_text.index(paragraphs[par_count+2].text) !=nil
-            #        logger.info "06"
             par_text = par_text[0..par_index-1]
-            #       logger.info "07"
           end
-          #    logger.info "07a"
         end
-        #    logger.info "08"
         @last_paragraph = par_text
-        #      logger.info "#{paragraph_count}, Paragraph: #{par_text}"
         paragraph_count=paragraph_count+1
-        new_paragraph = Paragraph.new
-        new_paragraph.content = par_text
-        new_paragraph.result_page_id = result_page_id
-        new_paragraph.save
-        sentence_count =1
-        sentences = par_text.split('.')
-        logger.info "There are #{sentences.length} sentences to process"
-        par_text.split('.').each do |sentence|
-          if sentence.length>0
-            #        logger.info "#{sentence_count}, Sentence: #{sentence}"
-            ProcessSentence(sentence, result_page_id, new_paragraph.id)
-            sentence_count=sentence_count+1
-          end
+        @paragraph_inserts.push "(\"#{par_text.gsub('"','\"')}\",#{result_page_id})"
+
+        if @paragraph_inserts.length%paragraph_block_num == 0
+          save_paragraphs(result_page_id)
+
         end
       end
+
+    end
+    if @paragraph_inserts.length > 0
+      save_paragraphs(result_page_id)
+
+
+    end
+    logger.info "ProcessParagraphs end"
+
+  end
+
+  def save_paragraphs(result_page_id)
+    logger.info
+    if Paragraph.where('id >0').length >0
+      max_id = Paragraph.maximum('id')
+    else
+      max_id = 0;
+    end
+    sql = "INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
+    # logger.info "sql = #{sql}"
+    sql_save(sql)
+    paragraphs = Paragraph.where("id > #{max_id}")
+    par_sentences = []
+    paragraphs.each do |paragraph|
+      par_sentence = Hash.new
+      par_sentence[:sentences] = paragraph.content.split('.')
+      par_sentence[:paragraph_id] = paragraph.id
+      par_sentences.push(par_sentence)
     end
 
-    logger.info "ProcessParagraphs end"
+    ProcessSentences(par_sentences, result_page_id)
+    @paragraph_inserts =[]
+
 
   end
 
@@ -242,14 +446,30 @@ class DomainCrawler < ApplicationRecord
       logger.info "process_hash url: #{url}, base_url: #{base_url}, file_name: #{file_name}, level: #{current_level}"
       next_level = current_level+1
       new_pages = Set.new
-      logger.info "ProcessPage 01"
+
+      second_attempt = false
       begin
         doc = Nokogiri::HTML(open(url))
-        logger.info "let's sleep"
-        sleep(10)
-        #    logger.info "ProcessPage 02"
+      rescue Exception => e
+        second_attempt = true
+        logger.info "2nd attempt - Couldn't read \"#{ url }\": #{ e }"
+        sleep(20)
+        logger.info "let's sleep for 20s"
+      end
+      begin
+        if second_attempt == true
+          logger.info "2nd attempt read"
+          doc = Nokogiri::HTML(open(url))
 
-        #blogger.info "Body is #{body}"
+        end
+        @page_count = @page_count +1
+        logger.info "ProcessPage #{@page_count}"
+
+
+
+        logger.info "let's sleep for 5s"
+        sleep(5)
+
 
         # hash_value = Digest::MD5.hexdigest(body)
         #      logger.info "ProcessPage 03"
@@ -286,7 +506,7 @@ class DomainCrawler < ApplicationRecord
           ProcessParagraphs(paragraphs, result_page.id)
         else
 
-          logger.info "Page already processed or empty: #{url}"
+          logger.info "Page already processed or empty: #{url}, paragraphs.length = #{paragraphs.length}"
         end
 
         if CrawlerPage.exists?(URL: url, domain_crawler_id: self.id)
@@ -377,7 +597,7 @@ class DomainCrawler < ApplicationRecord
     #    logger.info "ProcessPage 13"
           #      logger.info "ProcessPage 4"
       rescue Exception => e
-        logger.info "Couldn't read \"#{ url }\": #{ e }"
+        logger.info "2nd attempt - Couldn't read \"#{ url }\": #{ e }"
 
       end
       old_parent_id = parent_id
@@ -414,6 +634,7 @@ class DomainCrawler < ApplicationRecord
     @max_level = 5
     @always_process = false
     @connection = ActiveRecord::Base.connection
+    @page_count = 0
 
 
     if DomainCrawler.exists?(domain_home_page: @domain_home_page) or DomainCrawler.exists?(domain_home_page: @domain_home_page[0..-2]) or DomainCrawler.exists?(domain_home_page: @domain_home_page+'/')

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160806222322) do
+ActiveRecord::Schema.define(version: 20160811221758) do
 
   create_table "crawler_pages", force: :cascade do |t|
     t.integer "result_page_id",    limit: 4
@@ -103,6 +103,14 @@ ActiveRecord::Schema.define(version: 20160806222322) do
 
   add_index "result_pages", ["hash_value"], name: "hash_value_ix", using: :btree
 
+  create_table "save_my_sqls", force: :cascade do |t|
+    t.text "save_str", limit: 65535
+  end
+
+  create_table "save_sqls", force: :cascade do |t|
+    t.text "sql_str", limit: 255
+  end
+
   create_table "search_queries", force: :cascade do |t|
     t.integer  "user_id",            limit: 4
     t.integer  "start_index",        limit: 4
@@ -178,11 +186,12 @@ ActiveRecord::Schema.define(version: 20160806222322) do
   add_index "word_singletons", ["result_page_id"], name: "index_word_singletons_on_result_page_id", using: :btree
   add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
 
-  create_table "words", force: :cascade do |t|
-    t.string  "word_name",  limit: 255
+  create_table "words", primary_key: "word_name", force: :cascade do |t|
+    t.integer "id_value",   limit: 4
     t.integer "word_prime", limit: 4
   end
 
-  add_index "words", ["word_name"], name: "word_name_ix", using: :btree
+  add_index "words", ["id_value"], name: "index_words_on_id_value", using: :btree
+  add_index "words", ["word_prime"], name: "index_words_on_word_prime", using: :btree
 
 end
