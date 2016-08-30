@@ -452,9 +452,10 @@ class DomainCrawler < ApplicationRecord
         doc = Nokogiri::HTML(open(url))
       rescue Exception => e
         second_attempt = true
-        logger.info "2nd attempt - Couldn't read \"#{ url }\": #{ e }"
-        sleep(20)
-        logger.info "let's sleep for 20s"
+        logger.info "Couldn't read \"#{ url }\": #{ e }"
+        logger.info "let's sleep for 4ss"
+        sleep(4)
+
       end
       begin
         if second_attempt == true
@@ -469,6 +470,11 @@ class DomainCrawler < ApplicationRecord
 
         logger.info "let's sleep for 5s"
         sleep(5)
+        crawler_page = CrawlerPage.where(URL: url)
+        read_page = true
+        if crawler_pages.length >0
+          read_page = false
+        end
 
 
         # hash_value = Digest::MD5.hexdigest(body)
@@ -495,6 +501,7 @@ class DomainCrawler < ApplicationRecord
         hash_value = Digest::MD5.hexdigest(content)
         #   logger.info "hash_value is #{hash_value}"
         result_page = ResultPage.find_by_hash_value(hash_value)
+
         #     logger.info "ProcessPage 05"
         if (result_page==nil or @always_process) and paragraphs.length > 0
           #     logger.info "ProcessPage 06"
@@ -561,6 +568,9 @@ class DomainCrawler < ApplicationRecord
             logger.info "Nil case: #{href_str}"
             href_str = ""
           end
+          if href_str =~/pdf$/ or href_str =~ /wav$/
+            href_str = ""
+          end
           if href_str =~ /^#{base_url}/
             logger.info "we have a match for #{href_str}"
             href_str.sub! base_url, ''
@@ -579,15 +589,16 @@ class DomainCrawler < ApplicationRecord
             logger.info "wrong domain: #{href_str}"
             href_str = ""
           end
+          new_url = (base_url+href_str).gsub(/\/[^\.\/]+\/\.\./,"")
           logger.info "base_url+href_str =  #{base_url+href_str}"
 
-          if href_str.length >0 and crawl_number < @max_crawl_number and CrawlerPage.exists?(URL: base_url+href_str, domain_crawler_id: self.id)== false
+          if href_str.length >0 and crawl_number < @max_crawl_number and CrawlerPage.exists?(URL: new_url, domain_crawler_id: self.id)== false
 
-            @current_pages[base_url+href_str] ||= next_level
-            new_pages.add(base_url+href_str)
+            @current_pages[new_url] ||= next_level
+            new_pages.add(new_url)
             crawl_number=crawl_number+1
             new_crawler_page = CrawlerPage.new
-            new_crawler_page.URL = base_url+href_str
+            new_crawler_page.URL = new_url
             new_crawler_page.domain_crawler_id = self.id
             new_crawler_page.save
             logger.info "new_crawler_page: #{new_crawler_page.inspect}"
@@ -631,7 +642,7 @@ class DomainCrawler < ApplicationRecord
     @last_paragraph = ""
     parent_id = 0
     @first_page_id = 0
-    @max_level = 5
+    @max_level = 4
     @always_process = false
     @connection = ActiveRecord::Base.connection
     @page_count = 0
