@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160811221758) do
+ActiveRecord::Schema.define(version: 20160902204234) do
 
   create_table "crawler_pages", force: :cascade do |t|
     t.integer "result_page_id",    limit: 4
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20160811221758) do
     t.string  "name",              limit: 255
     t.string  "ancestry",          limit: 255
     t.integer "domain_crawler_id", limit: 4
+    t.integer "match_value",       limit: 4
   end
 
   add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree

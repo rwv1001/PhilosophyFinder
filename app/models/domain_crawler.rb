@@ -30,6 +30,7 @@ class DomainCrawler < ApplicationRecord
     end
 
   end
+
   def GetNextPrime(n)
     if n%2 == 0
       possible_prime = n+1
@@ -108,7 +109,7 @@ class DomainCrawler < ApplicationRecord
 
       new_word_list = "(#{@word_set.to_a.join(', ')})"
       new_words_from_db_str = "word_name IN #{new_word_list}"
- #     logger.info "new_words_from_db_str = #{new_words_from_db_str}"
+      #     logger.info "new_words_from_db_str = #{new_words_from_db_str}"
       new_words_from_db = Word.where("word_name IN #{new_word_list}")
       new_words_from_db.each do |new_word_from_db|
         @word_hash[new_word_from_db.word_name] = new_word_from_db.id_value
@@ -118,7 +119,7 @@ class DomainCrawler < ApplicationRecord
     end
   end
 
-  def ProcessSentences(par_sentences,result_page_id)
+  def ProcessSentences(par_sentences, result_page_id)
 
     @sentence_inserts = []
     @word_inserts = Set.new
@@ -147,7 +148,6 @@ class DomainCrawler < ApplicationRecord
   end
 
 
-
   def AddSingletonPairs()
     logger.info "AddSingletonPairs"
     if @word_singleton_inserts.length > 0
@@ -169,11 +169,8 @@ class DomainCrawler < ApplicationRecord
   end
 
 
-
-
-
   def ProcessSentence(sentence, paragraph_id)
-    @sentence_inserts.push "(\"#{sentence.gsub('"','\"')}\",#{paragraph_id})"
+    @sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
     sentence = sentence.gsub(/[^a-zA-Z]/, ' ')
     word_list = sentence.split(' ')
 
@@ -190,7 +187,7 @@ class DomainCrawler < ApplicationRecord
     end
   end
 
-  def  ProcessSingletonPairs(sentence_obj, result_page_id)
+  def ProcessSingletonPairs(sentence_obj, result_page_id)
 
     sentence = sentence_obj.content.gsub(/[^a-zA-Z]/, ' ')
     word_list = sentence.downcase.split(' ')
@@ -206,7 +203,7 @@ class DomainCrawler < ApplicationRecord
 
       @word_singleton_inserts.push "(#{@word_hash[word]},#{sentence_obj.id}, #{result_page_id})"
     end
-  #  logger.info "@word_singleton_inserts = #{@word_singleton_inserts}"
+    #  logger.info "@word_singleton_inserts = #{@word_singleton_inserts}"
 
 
     for i in 0..word_list.length-1
@@ -216,15 +213,14 @@ class DomainCrawler < ApplicationRecord
       if i<word_list.length-1
         for j in (i+1) .. [i+@max_separation, word_list.length-1].min
           word_2 = @word_prime_hash[word_list[j]]
-      #    logger.info "word_list[i] = #{word_list[i]}, word_list[j] = #{word_list[j]}, @word_prime_hash = [#{ @word_prime_hash[word_list[i]]},#{ @word_prime_hash[word_list[j]]}]"
-         @word_pairs_inserts.push "(#{word_1 * word_2},#{j-i}, #{result_page_id}, #{sentence_obj.id})"
+          #    logger.info "word_list[i] = #{word_list[i]}, word_list[j] = #{word_list[j]}, @word_prime_hash = [#{ @word_prime_hash[word_list[i]]},#{ @word_prime_hash[word_list[j]]}]"
+          @word_pairs_inserts.push "(#{word_1 * word_2},#{j-i}, #{result_page_id}, #{sentence_obj.id})"
         end
       end
     end
 
     #   TimeLogger("05")
-  #  logger.info "ProcessSentence end"
-
+    #  logger.info "ProcessSentence end"
 
 
   end
@@ -359,7 +355,7 @@ class DomainCrawler < ApplicationRecord
         end
         @last_paragraph = par_text
         paragraph_count=paragraph_count+1
-        @paragraph_inserts.push "(\"#{par_text.gsub('"','\"')}\",#{result_page_id})"
+        @paragraph_inserts.push "(\"#{par_text.gsub('"', '\"')}\",#{result_page_id})"
 
         if @paragraph_inserts.length%paragraph_block_num == 0
           save_paragraphs(result_page_id)
@@ -448,6 +444,19 @@ class DomainCrawler < ApplicationRecord
       new_pages = Set.new
 
       second_attempt = false
+
+      if CrawlerPage.exists?(URL: url, domain_crawler_id: self.id)
+        new_crawler_results = CrawlerPage.where(URL: url, domain_crawler_id: self.id)
+        new_crawler_page = new_crawler_results.first
+        #        logger.info "ProcessPage 07 new_crawler_results length is #{new_crawler_results.length}"
+      else
+        new_crawler_page = CrawlerPage.new
+        new_crawler_page.URL = url
+        new_crawler_page.name = ""
+        new_crawler_page.domain_crawler_id = self.id
+        #       logger.info "ProcessPage 08"
+      end
+
       begin
         doc = Nokogiri::HTML(open(url))
       rescue Exception => e
@@ -467,12 +476,11 @@ class DomainCrawler < ApplicationRecord
         logger.info "ProcessPage #{@page_count}"
 
 
-
         logger.info "let's sleep for 5s"
         sleep(5)
-        crawler_page = CrawlerPage.where(URL: url)
+        crawler_pagea = CrawlerPage.where(URL: url)
         read_page = true
-        if crawler_pages.length >0
+        if crawler_pagea.length >0
           read_page = false
         end
 
@@ -516,16 +524,7 @@ class DomainCrawler < ApplicationRecord
           logger.info "Page already processed or empty: #{url}, paragraphs.length = #{paragraphs.length}"
         end
 
-        if CrawlerPage.exists?(URL: url, domain_crawler_id: self.id)
-          new_crawler_results = CrawlerPage.where(URL: url, domain_crawler_id: self.id)
-          new_crawler_page = new_crawler_results.first
-          #        logger.info "ProcessPage 07 new_crawler_results length is #{new_crawler_results.length}"
-        else
-          new_crawler_page = CrawlerPage.new
-          new_crawler_page.URL = url
-          new_crawler_page.domain_crawler_id = self.id
-          #       logger.info "ProcessPage 08"
-        end
+
         #      logger.info "ProcessPage 09"
         logger.info "new_crawler_page: #{new_crawler_page.inspect}"
 
@@ -534,7 +533,7 @@ class DomainCrawler < ApplicationRecord
 
 
         if parent_id!=0
-          new_crawler_page.parent_id = parent_id
+          #new_crawler_page.parent_id = parent_id *********************
         end
         #        logger.info "ProcessPage 10"
 
@@ -558,7 +557,8 @@ class DomainCrawler < ApplicationRecord
 
 
         #       logger.info "ProcessPage 3"
-        links = doc.xpath('//a')
+        if new_crawler_page.depth <  @max_level
+          links = doc.xpath('//a')
         links.each do |item|
 
           logger.info "Href1: #{item['href'].inspect}, #{item['href'].class}"
@@ -589,27 +589,61 @@ class DomainCrawler < ApplicationRecord
             logger.info "wrong domain: #{href_str}"
             href_str = ""
           end
-          new_url = (base_url+href_str).gsub(/\/[^\.\/]+\/\.\./,"")
+          new_url = (base_url+href_str).gsub(/\/[^\.\/]+\/\.\./, "")
           logger.info "base_url+href_str =  #{base_url+href_str}"
 
-          if href_str.length >0 and crawl_number < @max_crawl_number and CrawlerPage.exists?(URL: new_url, domain_crawler_id: self.id)== false
+          if href_str.length >0 and crawl_number < @max_crawl_number
+         #   match_value = get_match_value(new_url, url)
+            if CrawlerPage.exists?(URL: new_url, domain_crawler_id: self.id)== false
 
-            @current_pages[new_url] ||= next_level
-            new_pages.add(new_url)
-            crawl_number=crawl_number+1
-            new_crawler_page = CrawlerPage.new
-            new_crawler_page.URL = new_url
-            new_crawler_page.domain_crawler_id = self.id
-            new_crawler_page.save
-            logger.info "new_crawler_page: #{new_crawler_page.inspect}"
-
+              @current_pages[new_url] ||= next_level
+              new_pages.add(new_url)
+              crawl_number=crawl_number+1
+              aref_crawler_page = CrawlerPage.new
+              aref_crawler_page.name = ""
+              aref_crawler_page.URL = new_url
+           #   aref_crawler_page.match_value = match_value
+              aref_crawler_page.domain_crawler_id = self.id
+              aref_crawler_page.parent_id = new_parent_id
+              aref_crawler_page.save
+              logger.info "aref_crawler_page: #{aref_crawler_page.inspect}"
+            else
+              another_crawler_page = CrawlerPage.where(URL: new_url, domain_crawler_id: self.id).first
+              another_parent = another_crawler_page.parent
+              logger.info "another_crawler_page: #{another_crawler_page.inspect}"
+              logger.info "new_crawler_page: #{new_crawler_page.inspect}"
+              if another_crawler_page.depth > new_crawler_page.depth+1
+                logger.info "updating parent"
+                another_crawler_page.parent_id = new_parent_id
+                another_crawler_page.save
+                if another_crawler_page.result_page_id == nil
+                  new_pages.add(new_url)
+                end
+              end
+            #  if another_parent != nil
+              #  another_parent_url = another_parent.URL
+             #   if get_match_value(new_url, another_parent_url) < match_value
+              #    another_crawler_page.parent_id = new_parent_id
+               #   another_crawler_page.match_value = match_value
+                  #          another_crawler_page.save
+               # end
+             # end
+            end
           end
         end
-    #    logger.info "ProcessPage 13"
+        end
+          #    logger.info "ProcessPage 13"
           #      logger.info "ProcessPage 4"
       rescue Exception => e
         logger.info "2nd attempt - Couldn't read \"#{ url }\": #{ e }"
-
+        if new_crawler_page.result_page_id != nil
+          if new_crawler_page.result_page_id< 0
+            new_crawler_page.result_page_id = new_crawler_page.result_page_id - 1
+          end
+        else
+          new_crawler_page.result_page_id = -1
+        end
+        new_crawler_page.save
       end
       old_parent_id = parent_id
 
@@ -628,24 +662,62 @@ class DomainCrawler < ApplicationRecord
     end
   end
 
-  def crawl
-    logger.info "start crawl for URL #{@domain_home_page}"
+  def get_match_value(new_url, parent_url)
+    new_url_tokens = new_url.split('/')
+    parent_url_tokens = parent_url.split('/')
+    match_count = 0
+    while match_count< new_url_tokens.length and new_url_tokens[match_count] == parent_url_tokens[match_count]
+      match_count= match_count+1
+    end
+    return match_count
+
+
+  end
+
+  def fix_domain
+    initialize_crawl
+    bad_pages = CrawlerPage.where(["result_page_id< 0 and domain_crawler_id = ?", self.id])
+    orig_num_of_bad_pages = bad_pages.length
+    bad_pages.each do |bad_page|
+      logger.info "fixing bad page: #{bad_page}"
+    ProcessPage(bad_page.URL, 0, bad_page.parent_id)
+    end
+    afterwards_bad_pages = CrawlerPage.where(["result_page_id< 0 and domain_crawler_id = ?", self.id])
+    afterwards_num_of_bad_pages = afterwards_bad_pages.length
+    result_str = "Number of bad pages before fixing: #{orig_num_of_bad_pages}. Number of bad pages after fixing:#{afterwards_num_of_bad_pages}."
+    return result_str
+  end
+
+  def initialize_crawl
     @previous_time =0
     @a=0
 
-    update_domain = true
     @max_page_store = -1
     @max_crawl_number = 10000
     @max_paragraph_number =-1
     @max_separation = 10
     @current_page_store = 0
     @last_paragraph = ""
-    parent_id = 0
+
     @first_page_id = 0
     @max_level = 4
     @always_process = false
     @connection = ActiveRecord::Base.connection
     @page_count = 0
+    @current_pages = Hash.new()
+    @current_pages[domain_home_page] = 0
+
+  end
+
+  def crawl
+    logger.info "start crawl for URL #{@domain_home_page}"
+
+
+    update_domain = true
+    parent_id = 0
+
+    initialize_crawl
+
 
 
     if DomainCrawler.exists?(domain_home_page: @domain_home_page) or DomainCrawler.exists?(domain_home_page: @domain_home_page[0..-2]) or DomainCrawler.exists?(domain_home_page: @domain_home_page+'/')
@@ -663,8 +735,7 @@ class DomainCrawler < ApplicationRecord
 
 
     current_level = 0
-    @current_pages = Hash.new()
-    @current_pages[domain_home_page] = current_level
+
 
 
     ProcessPage(domain_home_page, current_level, parent_id)
@@ -680,7 +751,7 @@ class DomainCrawler < ApplicationRecord
     #return @current_pages
     return @first_page_id
 
-  end
 
+  end
 end
 

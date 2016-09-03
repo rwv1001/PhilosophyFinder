@@ -142,9 +142,18 @@ function SelectDomainAction()
             $( ".domain-field" ).hide();
             $( ".domain-new" ).show();         
             break;
+        case "fix_domain":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $(".bad_page").show();
+            $(".domain-name-radio").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Fix Domain');
+            break;
         case "search_domain":
             $( ".domain-field" ).hide();
             $(".domain-checkbox").show();
+            $(".bad_page").hide();
             $( ".search-new" ).show();
             $(".search-old").show();
             break;

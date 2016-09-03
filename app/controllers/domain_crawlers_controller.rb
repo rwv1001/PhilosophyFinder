@@ -1,5 +1,6 @@
 class DomainCrawlersController < ApplicationController
   def index
+    @result_str = ""
     logger.info "DomainCrawlersController index called with method #{params[:method]}"
     @users = User.all
     @domain_crawler = current_domain_crawler
@@ -23,6 +24,7 @@ class DomainCrawlersController < ApplicationController
     logger.info "DomainCrawlersController new called"
     @users = User.all
     @domain_crawler = DomainCrawler.new
+    @result_str = ""
 
 
     #   logger.info "DomainCrawlersController new called @domain_crawler id set to #{@domain_crawler.id}"
@@ -157,7 +159,7 @@ class DomainCrawlersController < ApplicationController
 
   def create
     logger.info "DomainCrawlersController create called"
-
+    @result_str = ""
     logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
     @domain_crawler = DomainCrawler.new(domain_crawler_params)
     logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
@@ -197,6 +199,7 @@ class DomainCrawlersController < ApplicationController
 
   def set_header
     logger.info "set_Header begin"
+    @result_str = ""
 
     @crawler_page_id = params[:id]
     @old_crawler_page_id = current_page;
@@ -213,6 +216,7 @@ class DomainCrawlersController < ApplicationController
   end
 
   def remove_group_result
+
     logger.info "remove_group_result begin"
     @group_search_result_list = params[:group_search_result_list].map(&:to_i)
     @group_search_result_list.each do |group_search_result|
@@ -286,6 +290,7 @@ class DomainCrawlersController < ApplicationController
 
   def group_action
     logger.info "group_action begin"
+    @result_str = ""
     case params[:commit]
       when "Create Group"
         create_group(params)
@@ -307,9 +312,12 @@ class DomainCrawlersController < ApplicationController
 
   def domain_action
     logger.info "domain_action begin"
+    @result_str = ""
     case params[:commit]
       when "Rename Page"
         rename_domain(params)
+      when "Fix Domain"
+        fix_domain(params)
       when "Move Selected"
         move_domain(params)
       when "Remove Domain"
@@ -321,6 +329,15 @@ class DomainCrawlersController < ApplicationController
     respond_to do |format|
       format.js
     end
+  end
+  def fix_domain(params)
+    logger.info "fix_domain begin"
+    @result_str = "hello"
+    domain_crawler_id = CrawlerPage.find_by_id(params[:domain_radio]).domain_crawler_id;
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
+    @result_str = domain_crawler.fix_domain()
+    logger.info "fix_domain result: #{@result_str}"
+    @selected = DOMAIN_ACTION[:fix_domain]
   end
 
   def remove_domain(params)
@@ -390,6 +407,7 @@ class DomainCrawlersController < ApplicationController
 
   def show
     logger.info "DomainCrawlersController show called"
+    @result_str = ""
     @domain_crawler = current_domain_crawler
 
     respond_to do |format|

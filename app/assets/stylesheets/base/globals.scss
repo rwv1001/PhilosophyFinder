@@ -16,7 +16,7 @@ $menu-block-color:  lighten($menu-color, 10%);
 
   width: 300px;
   float: left;
-  overflow: hidden;
+  overflow: auto;
   height: 100vh;
 }
 .user-header{
@@ -41,6 +41,9 @@ $menu-block-color:  lighten($menu-color, 10%);
   overflow: auto;
   display: none;
 
+}
+.bad_page{
+  display: none;
 }
 
 .result-groups{

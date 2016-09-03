@@ -11,6 +11,7 @@
 </head>
 
 <body>
+<% @result_str = "" %>
 <div class="sidemenu">
   <%= render 'users/user_header', current_user: current_user %>
   <% flash.each do |message_type, message| %>

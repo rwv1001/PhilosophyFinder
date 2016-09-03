@@ -1,18 +1,23 @@
 
 <ul class="child-crawler-page" name="ul-crawler-page-<%=args[:parent_id]%>" style="display: none" >
 
-  <% args[:crawler_pages].each do |crawler_page, children| %>
+  <% args[:crawler_pages].keys.sort_by { |crawler_page| crawler_page.name }.each  do  |crawler_page| %>
+      <% children = args[:crawler_pages][crawler_page] %>
+      <% if crawler_page.result_page_id == nil or crawler_page.result_page_id < 0 %>
 
-      <li>
+           <li class = "bad_page">  This page is bad <% good_page = false %>
+             <% else %>
+          <li class = "good_page"> <% good_page = true %>
+          <% end %>
         <% url = crawler_page.name%>
 
 
         <% if children.present? %>
             <%= render 'domain_crawlers/expand_buttons', id: crawler_page.id %>
-            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id, :long_url =>  crawler_page.URL,  :root => false} %>
+            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id, :long_url =>  crawler_page.URL,  :root => false, :good_page =>  good_page} %>
             <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => children, :parent_id => crawler_page.id}  %>
         <% else %>
-            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id, :long_url =>  crawler_page.URL} %>
+            <%= render 'domain_crawlers/url', args:{:url => url, :crawler_page_id => crawler_page.id, :long_url =>  crawler_page.URL, :good_page =>  good_page} %>
         <% end %>
       </li>
   <% end %>

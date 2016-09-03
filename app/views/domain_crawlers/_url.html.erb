@@ -3,7 +3,9 @@
 <div class="domain-url">
 <%= link_to args[:url], args[:long_url], target: '_blank'%>
 </div>
+<% if args[:good_page] == true %>
 <div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= args[:crawler_page_id] %>" name ="row_in_list[]" class="check"  value=<%= args[:crawler_page_id] %> onclick="SelectCrawlerPage(<%=args[:crawler_page_id]%>);"></div>
+<% end %>
 <div class="domain-name-radio domain-field" >
   <input type="radio" name ="domain_radio" <% if args[:root] %> checked <% end %> value=<%=args[:crawler_page_id]%> id="domain-name-<%=args[:crawler_page_id]%>"  >
 </div>

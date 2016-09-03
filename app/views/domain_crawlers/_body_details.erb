@@ -20,7 +20,7 @@
              style="display: none"
              onclick="contractCrawlerPage(<%=current_domain_crawler.crawler_page.id%>)">-
         </span>
-        <%= render 'domain_crawlers/url', args: {:url => current_domain_crawler.crawler_page.URL, :crawler_page_id => current_domain_crawler.crawler_page.id, :long_url =>  crawler_page.URL} %>
+        <%= render 'domain_crawlers/url', args: {:url => current_domain_crawler.crawler_page.URL, :crawler_page_id => current_domain_crawler.crawler_page.id, :long_url =>  crawler_page.URL,  :good_page =>  good_page} %>
         </span>
       </li>
 <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_pages => current_domain_crawler.crawler_page.root.descendants.arrange, :parent_id => current_domain_crawler.crawler_page.id } %>
