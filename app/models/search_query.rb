@@ -22,6 +22,7 @@ class SearchQuery < ApplicationRecord
     logger.info "SearchQuery search: #{first_search_term}, #{second_search_term}, #{third_search_term}, #{fourth_search_term}"
     page_hash(pages)
 
+    @truncate_length = -1
     @search_results = []
     search_output = Hash.new
     search_terms = get_search_terms()
@@ -34,6 +35,7 @@ class SearchQuery < ApplicationRecord
     end
     search_output[:search_results] = @search_results
     search_output[:unprocessed_sentence_count] =@unprocessed_sentence_count
+    search_output[:truncate_length]=@truncate_length
 
 
     return search_output
@@ -309,6 +311,7 @@ class SearchQuery < ApplicationRecord
     end
     tokens = get_tokens(search_term)
 
+    sentence_set = truncate(sentence_set.to_a)
     process_sentences(sentence_set, tokens)
 
     logger.info "search_results: @search_results.length"
@@ -379,6 +382,30 @@ class SearchQuery < ApplicationRecord
     return tokens
   end
 
+  def truncate(sentence_set)
+    sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY id "
+
+    logger.info("TRUNCATE QUERY: #{sql_str}")
+    paragraphs = Paragraph.find_by_sql(sql_str)
+    logger.info("paragraphs length = #{paragraphs.length}")
+    if paragraphs.length > MAX_RESULTS
+      @truncate_length = paragraphs.length
+      max_par = paragraphs[MAX_RESULTS-1]
+      max_sen = max_par.max_sen_id
+      ind = 0
+      while sentence_set[ind]<=max_sen and ind < sentence_set.length
+        ind = ind +1
+      end
+      return sentence_set = sentence_set[0..(ind-1)]
+
+
+    else
+      return sentence_set
+    end
+
+  end
+
+
   def multiple_search(search_terms)
     logger.info "multiple_search begin"
     terms = []
@@ -404,7 +431,7 @@ class SearchQuery < ApplicationRecord
         end
       end
       if word_multiples.length > 0
-        sql_str = "SELECT * FROM word_pairs WHERE result_page_id IN  #{result_pair_str} AND word_multiple IN  (#{word_multiples.join(', ')})"
+        sql_str = "SELECT * FROM word_pairs WHERE result_page_id IN  #{result_pair_str} AND separation <= #{self.word_separation} AND word_multiple IN  (#{word_multiples.join(', ')})"
         logger.info "sql_str = #{sql_str}"
         word_pairs= WordPair.find_by_sql(sql_str)
         sentence_pair = SortedSet.new
@@ -414,7 +441,11 @@ class SearchQuery < ApplicationRecord
         sentence_pairs << sentence_pair
       end
     end
-    sentence_set = sentence_pairs.inject(:&)
+    sentence_set = sentence_pairs.inject(:&).to_a
+
+    sentence_set= truncate(sentence_set)
+
+
 
 
     process_sentences(sentence_set, tokens)
@@ -436,8 +467,9 @@ class SearchQuery < ApplicationRecord
       second_terms.each do |second_term|
 
         word_multiple = first_term.word_prime * second_term.word_prime;
-        #   logger.info "01"
-        word_pairs = WordPair.where(word_multiple: word_multiple, result_page_id: @result_pages)
+        logger.info "word_separation: #{word_separation}, word_multiple: #{word_multiple}"
+        word_pairs = WordPair.where("word_multiple = ? and result_page_id = ? and separation <= ?", word_multiple, @result_pages, self.word_separation)
+       # word_pairs = WordPair.where(word_multiple: word_multiple, result_page_id: @result_pages)
         #   logger.info "02"
         word_pairs.each do |word_pair|
           #     logger.info "03"
@@ -493,6 +525,7 @@ class SearchQuery < ApplicationRecord
     self.second_search_term = search_terms[1];
     self.third_search_term = search_terms[2];
     self.fourth_search_term = search_terms[3];
+    self.word_separation = params[:word_separation];
     if SearchQuery.exists?(user_id: current_user)
       z =
       logger.info "z =#{z.inspect}"

@@ -147,6 +147,7 @@ class DomainCrawlersController < ApplicationController
 
 
       end
+      @truncate_length = search_output[:truncate_length]
       @domain_length = params[:row_in_list]
     end
 

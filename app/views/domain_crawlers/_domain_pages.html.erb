@@ -1,5 +1,7 @@
 <div class="domain-pages">
-
+  <% if domain_crawler.crawler_page == nil %>
+      <% domain_crawler.crawler_page = CrawlerPage.where(domain_crawler_id: domain_crawler.id).first %>
+  <% end %>
 <% if domain_crawler.crawler_page != nil %>
     <ul id="domain_page_list" name = "ul-crawler-page-1">
       <li>

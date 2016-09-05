@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160902204234) do
+ActiveRecord::Schema.define(version: 20160905023755) do
 
   create_table "crawler_pages", force: :cascade do |t|
     t.integer "result_page_id",    limit: 4
@@ -122,6 +122,7 @@ ActiveRecord::Schema.define(version: 20160902204234) do
     t.string   "fourth_search_term", limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "word_separation",    limit: 4
   end
 
   add_index "search_queries", ["user_id"], name: "index_search_queries_on_user_id", using: :btree

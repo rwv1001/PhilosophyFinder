@@ -6,6 +6,17 @@
   <div class="float-clear" name="search-new">
 
     <%= form_tag search_path, :id => 'search_form', method: 'post', remote: true do %>
+        <div>
+          <%= label_tag :Word_Separation %><br />
+          <select id="word_separation" name="word_separation" onChange="SelectDomainAction()">
+            <%  (1..10).to_a.reverse_each do |val| %>
+
+            <option <% if args[:val_selected] == val %> selected <% end %>  value= <%= val%> > Within <%= val%> </option>
+            <% end %>
+
+          </select>
+        </div>
+
         <div class="field">
           <%= label_tag :word1 %><br />
           <%= text_field_tag :word1, params[:word1] %>

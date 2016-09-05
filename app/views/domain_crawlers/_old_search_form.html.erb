@@ -10,7 +10,7 @@
       <div class="float-clear" name="search-old">
         <% arg_array = [] %>
         <% previous_queries.each do |previous_query| %>
-        <% arg_array.push("['#{previous_query.first_search_term }','#{previous_query.second_search_term}','#{previous_query.third_search_term}','#{previous_query.fourth_search_term}']") %>
+        <% arg_array.push("['#{previous_query.first_search_term }','#{previous_query.second_search_term}','#{previous_query.third_search_term}','#{previous_query.fourth_search_term}','#{previous_query.word_separation}']") %>
         <% end %>
 
            <%= form_tag previous_search_path, :id => 'previous_search_form', method: 'get', remote: true do %>

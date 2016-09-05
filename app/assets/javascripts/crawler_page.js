@@ -116,12 +116,15 @@ function TidyUp()
 function SelectPreviousSearch(argss)
 {
     val =  $("#select-previous-search option:selected").val();
+    
     index =  $("#select-previous-search").prop('selectedIndex');
     args = argss[index];
+
     $("#word1").attr("value", args[0]);
     $("#word2").attr("value", args[1]);
     $("#word3").attr("value", args[2]);
     $("#word4").attr("value", args[3]);
+    $("#word_separation").val(args[4]).change();
     $("#prev_query_id").attr("value", val);
 
 
