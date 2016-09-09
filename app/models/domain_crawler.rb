@@ -73,18 +73,18 @@ class DomainCrawler < ApplicationRecord
     else
       logger.info "@sentence_inserts is empty"
     end
-    @sentence_objects = Sentence.where("id > #{max_id}")
+    @sentence_objects = Sentence.where("id > #{max_id}").order("id asc")
 
     if @word_entries.length > 0
 
       #sql = "INSERT IGNORE INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
       sql = "INSERT INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
-      logger.info "sql = #{sql}"
+      #logger.info "sql = #{sql}"
       sql_save(sql)
       if Word.where('id_value >-1').length >0
         max_prime = Word.maximum('word_prime')
         max_id = Word.maximum('id_value')
-        logger.info "max_prime = #{max_prime}, max_id = #{max_id} "
+       # logger.info "max_prime = #{max_prime}, max_id = #{max_id} "
       else
         max_id = 0
         max_prime = 2
@@ -108,7 +108,7 @@ class DomainCrawler < ApplicationRecord
 
         sql = "UPDATE words AS w SET id_value = c.id_value, word_prime= c.word_prime FROM (VALUES  #{new_words_str.to_a.join(', ')}) as c(word_name, id_value, word_prime)
         where c.word_name = w.word_name;"
-        logger.info "sql = #{sql}"
+       # logger.info "sql = #{sql}"
         sql_save(sql)
       else
         logger.info "new_words is empty"
@@ -393,7 +393,7 @@ class DomainCrawler < ApplicationRecord
     sql = %Q"INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
     # logger.info "sql = #{sql}"
     sql_save(sql)
-    paragraphs = Paragraph.where("id > #{max_id}")
+    paragraphs = Paragraph.where("id > #{max_id}").order("id asc")
     par_sentences = []
     paragraphs.each do |paragraph|
       par_sentence = Hash.new

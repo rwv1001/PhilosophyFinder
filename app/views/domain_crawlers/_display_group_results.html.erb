@@ -1,7 +1,7 @@
 <div id="group-results">
   <% group_name = GroupName.find_by_id(args[:group_id]) %>
   <h3><%=group_name.name%></h3>
-  <% group_elements = GroupElement.where(group_name_id: args[:group_id]) %>
+  <% group_elements = GroupElement.where(group_name_id: args[:group_id]).order("id asc") %>
   <% if group_elements.length >0 %>
       <% search_result = SearchResult.find_by_id(group_elements[0].search_result_id) %>
       <% crawler_page_id =search_result.crawler_page_id %>

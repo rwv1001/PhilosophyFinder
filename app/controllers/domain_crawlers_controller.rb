@@ -54,7 +54,8 @@ class DomainCrawlersController < ApplicationController
     @found_results = process_output[:found_results]
     @first_index = [1, params[:more_results_first_result_id].to_i - process_output[:absolute_first]+1].max
     @last_index = [params[:more_results_last_result_id].to_i, process_output[:absolute_last]].min - process_output[:absolute_first]+1
-
+    logger.info "process_more_results @first_index= #{ @first_index }, @last_index = #{@last_index}, @unprocessed_sentence_count = #{@unprocessed_sentence_count}, "
+logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_result_id]}, process_output[:absolute_first] = #{process_output[:absolute_first]}, process_output[:absolute_last] = #{process_output[:absolute_last]}"
 
     respond_to do |format|
       format.js
@@ -144,6 +145,7 @@ class DomainCrawlersController < ApplicationController
           @show_next = false
         end
         @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
+        logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
 
 
       end

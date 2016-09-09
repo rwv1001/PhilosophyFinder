@@ -8,4 +8,4 @@
 SearchQuery.create([{first_search_term: '', second_search_term: ''}])
 pages = CrawlerPage.create([{URL: 'Not Set'}])
 domain_crawler = DomainCrawler.create([{short_name: 'Not Set', crawler_page: pages.first}])
-
+SuperUser.create(user_id: 1)

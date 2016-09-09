@@ -24,6 +24,7 @@ class SearchQuery < ApplicationRecord
 
     @truncate_length = -1
     @search_results = []
+
     search_output = Hash.new
     search_terms = get_search_terms()
 
@@ -63,12 +64,12 @@ class SearchQuery < ApplicationRecord
     search_query = SearchQuery.find_by_id(query_id)
     process_output = Hash.new
     process_output[:unprocessed_sentence_count] = search_query.process_more
-    all_results = SearchResult.where(search_query_id: query_id)
+    all_results = SearchResult.where(search_query_id: query_id).order("id asc")
     process_output[:found_results]= all_results.count
     process_output[:absolute_first] = all_results[0].id
     process_output[:absolute_last] = all_results[-1].id
     logger.info "process_output: #{process_output.inspect}"
-
+    logger.info "process_output ids: #{all_results[0].id}, #{all_results[1].id}, #{all_results[2].id}, #{all_results[-1].id}, "
     return process_output
 
   end
@@ -82,7 +83,7 @@ class SearchQuery < ApplicationRecord
     end
 
 
-    all_results = SearchResult.where(search_query_id: query_id)
+    all_results = SearchResult.where(search_query_id: query_id).order('id asc')
     fetch_output[:unprocessed_sentence_count] = PrelimResult.where(search_query_id: query_id).count
     fetch_output[:found_results]= all_results.count
     if fetch_output[:found_results] >0
@@ -108,13 +109,15 @@ class SearchQuery < ApplicationRecord
       del_str1 = "DELETE sr FROM search_results sr INNER JOIN search_queries on search_queries.id = sr.search_query_id
                  WHERE sr.user_id = #{user_id} AND search_queries.view_priority <= #{delete_priority} AND NOT EXISTS (SELECT 1 FROM group_elements
                  WHERE group_elements.search_result_id  = sr.id )"
+      del_str1_postgres = "DELETE FROM search_results sr WHERE user_id =  #{user_id} AND (SELECT COUNT(*) FROM search_queries sq where sq.view_priority <= #{delete_priority}  AND sq.id = sr.search_query_id ) >0 AND (SELECT COUNT(*) FROM group_elements WHERE group_elements.search_result_id = sr.id) = 0;
+"
       del_str2 = "DELETE FROM search_queries WHERE view_priority <= #{delete_priority} AND NOT EXISTS (SELECT 1 FROM search_results WHERE search_results.search_query_id = search_queries.id)"
-      logger.info "del_str1 = #{del_str1}"
-      logger.info "del_str1 = #{del_str2}"
+      logger.info "del_str1_postgres = #{del_str1_postgres}"
+      logger.info "del_str2 = #{del_str2}"
       if @connection == nil
         @connection = ActiveRecord::Base.connection
       end
-      @connection.execute(del_str1)
+      @connection.execute(del_str1_postgres)
       @connection.execute(del_str2)
     end
 
@@ -122,7 +125,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def process_more
-    prelim_results = PrelimResult.where(search_query_id: self.id)
+    prelim_results = PrelimResult.where(search_query_id: self.id).order("id asc")
     delete_ids = []
     if prelim_results.length > 0
       search_terms = get_search_terms()
@@ -225,7 +228,7 @@ class SearchQuery < ApplicationRecord
       @search_result.begin_display_paragraph_id = paragraph.id
       @search_result.end_display_paragraph_id = paragraph.id
     end
-    sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id)
+    sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id).order("id asc")
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
       sentence1 = Sentence.find_by_id(sentence_id1)
@@ -302,7 +305,7 @@ class SearchQuery < ApplicationRecord
     sentence_set = SortedSet.new
     terms.each do |term|
       #   logger.info "01"
-      word_singletons = WordSingleton.where(word_id: term.id_value, result_page_id: @result_pages)
+      word_singletons = WordSingleton.where(word_id: term.id_value, result_page_id: @result_pages).order("id asc")
       #   logger.info "02"
       word_singletons.each do |word_singleton|
         #     logger.info "03"
@@ -351,7 +354,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def complete_result
-    sentence_ids = Sentence.where("paragraph_id = ? and id > ?", @current_paragraph_id, @last_sentence_id)
+    sentence_ids = Sentence.where("paragraph_id = ? and id > ?", @current_paragraph_id, @last_sentence_id).order("id asc")
 
     sentence_ids.each do |sentence_id|
       sentence = Sentence.find_by_id(sentence_id)
@@ -383,6 +386,9 @@ class SearchQuery < ApplicationRecord
   end
 
   def truncate(sentence_set)
+    if sentence_set.length == 0
+      return sentence_set
+    end
     sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY par.id ORDER BY par.id ASC;"
 
     logger.info("TRUNCATE QUERY: #{sql_str}")
@@ -396,7 +402,9 @@ class SearchQuery < ApplicationRecord
       while sentence_set[ind]<=max_sen and ind < sentence_set.length
         ind = ind +1
       end
+      logger.info "max_par.id = #{max_par.id}, max_sen = #{max_sen}, sentence_set[ind-1] = #{sentence_set[ind-1]}, ind = #{ind}"
       return sentence_set = sentence_set[0..(ind-1)]
+
 
 
     else
@@ -468,7 +476,7 @@ class SearchQuery < ApplicationRecord
 
         word_multiple = first_term.word_prime * second_term.word_prime;
         logger.info "word_separation: #{word_separation}, word_multiple: #{word_multiple}"
-        word_pairs = WordPair.where("word_multiple = ? and result_page_id = ? and separation <= ?", word_multiple, @result_pages, self.word_separation)
+        word_pairs = WordPair.where("word_multiple = ? and result_page_id = ? and separation <= ?", word_multiple, @result_pages, self.word_separation).order("id asc")
        # word_pairs = WordPair.where(word_multiple: word_multiple, result_page_id: @result_pages)
         #   logger.info "02"
         word_pairs.each do |word_pair|

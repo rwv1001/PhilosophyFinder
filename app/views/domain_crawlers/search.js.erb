@@ -24,6 +24,7 @@ TidyUp()
 
 <% if @domain_length == 0 %>
 alert("You haven't selected any domains!");
+<% @truncate_length = 0 %>
 <% end %>
 
 <% if @truncate_length > 0 %>

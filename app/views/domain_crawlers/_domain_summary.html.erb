@@ -2,7 +2,7 @@
   <div class="float-left">
     <h3>Domain Summary</h3></div>
   <%= render 'domain_crawlers/showhide', div_name: "domain_summary" %>
-
+<% if SuperUser.exists?(user_id: current_user) %>
   <div>
     <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
       <option <% if args[:selected] == DOMAIN_ACTION[:select_action] %> selected <% end %> value= <%= DOMAIN_ACTION[:select_action] %> > Select Domain Action</option>
@@ -14,6 +14,13 @@
       <option <% if args[:selected] == DOMAIN_ACTION[:remove_domain] %> selected <% end %>  value= <%= DOMAIN_ACTION[:remove_domain]%> > Remove Domain</option>
     </select>
   </div>
+      <% else %>
+      <div>
+        <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
+          <option  selected   value= <%= DOMAIN_ACTION[:search_domain]%> > Search Domain</option>
+        </select>
+      </div>
+      <% end %>
 
   <div class="float-clear" name="domain_summary">
     <%= form_tag domain_action_path, :id => 'domain_action_form', method: 'get', remote: true do %>
