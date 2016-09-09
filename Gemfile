@@ -51,3 +51,5 @@ end
 gem 'nokogiri'
 
 gem 'ancestry'
+
+gem 'rails_12factor', group: :production
