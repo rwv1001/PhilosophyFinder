@@ -10,6 +10,7 @@ class CreateSearchQueries < ActiveRecord::Migration
       t.string :second_search_term
       t.string :third_search_term
       t.string :fourth_search_term
+      t.integer :word_separation
   #    t.boolean :order_sensitive
 
       t.timestamps

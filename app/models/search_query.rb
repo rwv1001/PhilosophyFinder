@@ -383,7 +383,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def truncate(sentence_set)
-    sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY id "
+    sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY par.id ORDER BY par.id ASC;"
 
     logger.info("TRUNCATE QUERY: #{sql_str}")
     paragraphs = Paragraph.find_by_sql(sql_str)

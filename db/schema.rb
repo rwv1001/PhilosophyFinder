@@ -11,29 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160905023755) do
+ActiveRecord::Schema.define(version: 20160811221758) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
 
   create_table "crawler_pages", force: :cascade do |t|
-    t.integer "result_page_id",    limit: 4
-    t.string  "URL",               limit: 255
-    t.string  "name",              limit: 255
-    t.string  "ancestry",          limit: 255
-    t.integer "domain_crawler_id", limit: 4
-    t.integer "match_value",       limit: 4
+    t.integer "result_page_id"
+    t.string  "URL"
+    t.string  "name"
+    t.string  "ancestry"
+    t.integer "domain_crawler_id"
   end
 
   add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree
   add_index "crawler_pages", ["domain_crawler_id"], name: "index_crawler_pages_on_domain_crawler_id", using: :btree
 
   create_table "domain_crawlers", force: :cascade do |t|
-    t.integer  "user_id",              limit: 4
-    t.integer  "permissions",          limit: 4
-    t.integer  "permissions_group_id", limit: 4
-    t.integer  "version",              limit: 4,     default: 1
-    t.string   "domain_home_page",     limit: 255
-    t.string   "short_name",           limit: 255
-    t.integer  "crawler_page_id",      limit: 4
-    t.text     "description",          limit: 65535
+    t.integer  "user_id"
+    t.integer  "permissions"
+    t.integer  "permissions_group_id"
+    t.integer  "version",              default: 1
+    t.string   "domain_home_page"
+    t.string   "short_name"
+    t.integer  "crawler_page_id"
+    t.text     "description"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -41,11 +43,11 @@ ActiveRecord::Schema.define(version: 20160905023755) do
   add_index "domain_crawlers", ["crawler_page_id"], name: "index_domain_crawlers_on_crawler_page_id", using: :btree
 
   create_table "group_elements", force: :cascade do |t|
-    t.integer  "user_id",          limit: 4
-    t.text     "note",             limit: 65535
-    t.integer  "group_name_id",    limit: 4
-    t.integer  "search_result_id", limit: 4
-    t.string   "hash_value",       limit: 255
+    t.integer  "user_id"
+    t.text     "note"
+    t.integer  "group_name_id"
+    t.integer  "search_result_id"
+    t.string   "hash_value"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -55,49 +57,49 @@ ActiveRecord::Schema.define(version: 20160905023755) do
   add_index "group_elements", ["search_result_id"], name: "index_group_elements_on_search_result_id", using: :btree
 
   create_table "group_names", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4
-    t.string   "name",       limit: 255
-    t.string   "ancestry",   limit: 255
+    t.integer  "user_id"
+    t.string   "name"
+    t.string   "ancestry"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "paragraphs", force: :cascade do |t|
-    t.text    "content",        limit: 65535
-    t.integer "result_page_id", limit: 4
+    t.text    "content"
+    t.integer "result_page_id"
   end
 
   add_index "paragraphs", ["result_page_id"], name: "result_page_id_ix", using: :btree
 
   create_table "prelim_results", force: :cascade do |t|
-    t.integer "search_query_id", limit: 4
-    t.integer "sentence_id",     limit: 4
+    t.integer "search_query_id"
+    t.integer "sentence_id"
   end
 
   add_index "prelim_results", ["search_query_id"], name: "index_prelim_results_on_search_query_id", using: :btree
 
   create_table "regex_instances", force: :cascade do |t|
-    t.integer  "user_id",            limit: 4
-    t.integer  "regex_templated_id", limit: 4
-    t.string   "argument",           limit: 255
+    t.integer  "user_id"
+    t.integer  "regex_templated_id"
+    t.string   "argument"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "regex_templates", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4
-    t.string   "name",       limit: 255
-    t.string   "expression", limit: 255
-    t.string   "arg_names",  limit: 255
-    t.text     "help",       limit: 65535
-    t.string   "join_code",  limit: 255
+    t.integer  "user_id"
+    t.string   "name"
+    t.string   "expression"
+    t.string   "arg_names"
+    t.text     "help"
+    t.string   "join_code"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "result_pages", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4
-    t.string   "hash_value", limit: 255
+    t.integer  "user_id"
+    t.string   "hash_value"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -105,41 +107,41 @@ ActiveRecord::Schema.define(version: 20160905023755) do
   add_index "result_pages", ["hash_value"], name: "hash_value_ix", using: :btree
 
   create_table "save_my_sqls", force: :cascade do |t|
-    t.text "save_str", limit: 65535
+    t.text "save_str"
   end
 
   create_table "save_sqls", force: :cascade do |t|
-    t.text "sql_str", limit: 255
+    t.text "sql_str"
   end
 
   create_table "search_queries", force: :cascade do |t|
-    t.integer  "user_id",            limit: 4
-    t.integer  "start_index",        limit: 4
-    t.integer  "view_priority",      limit: 4
-    t.string   "first_search_term",  limit: 255
-    t.string   "second_search_term", limit: 255
-    t.string   "third_search_term",  limit: 255
-    t.string   "fourth_search_term", limit: 255
+    t.integer  "user_id"
+    t.integer  "start_index"
+    t.integer  "view_priority"
+    t.string   "first_search_term"
+    t.string   "second_search_term"
+    t.string   "third_search_term"
+    t.string   "fourth_search_term"
+    t.integer  "word_separation"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "word_separation",    limit: 4
   end
 
   add_index "search_queries", ["user_id"], name: "index_search_queries_on_user_id", using: :btree
 
   create_table "search_results", force: :cascade do |t|
-    t.integer  "user_id",                    limit: 4
-    t.integer  "permissions",                limit: 4
-    t.integer  "permissions_group_id",       limit: 4
-    t.integer  "search_query_id",            limit: 4
-    t.text     "highlighted_result",         limit: 65535
-    t.string   "hash_value",                 limit: 255
-    t.integer  "sentence_id",                limit: 4
-    t.integer  "crawler_page_id",            limit: 4
-    t.boolean  "hidden",                                   default: false
-    t.boolean  "selected",                                 default: false
-    t.integer  "begin_display_paragraph_id", limit: 4
-    t.integer  "end_display_paragraph_id",   limit: 4
+    t.integer  "user_id"
+    t.integer  "permissions"
+    t.integer  "permissions_group_id"
+    t.integer  "search_query_id"
+    t.text     "highlighted_result"
+    t.string   "hash_value"
+    t.integer  "sentence_id"
+    t.integer  "crawler_page_id"
+    t.boolean  "hidden",                     default: false
+    t.boolean  "selected",                   default: false
+    t.integer  "begin_display_paragraph_id"
+    t.integer  "end_display_paragraph_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -147,50 +149,50 @@ ActiveRecord::Schema.define(version: 20160905023755) do
   add_index "search_results", ["search_query_id"], name: "search_query_id_ix", using: :btree
 
   create_table "sentences", force: :cascade do |t|
-    t.text    "content",      limit: 65535
-    t.integer "paragraph_id", limit: 4
+    t.text    "content"
+    t.integer "paragraph_id"
   end
 
   add_index "sentences", ["paragraph_id"], name: "paragraph_id_ix", using: :btree
 
   create_table "users", force: :cascade do |t|
-    t.string   "email",                     limit: 255
-    t.string   "first_name",                limit: 255
-    t.string   "second_name",               limit: 255
-    t.string   "password_digest",           limit: 255
-    t.integer  "current_page",              limit: 4,   default: 0
-    t.integer  "current_domain_crawler_id", limit: 4,   default: 1
+    t.string   "email"
+    t.string   "first_name"
+    t.string   "second_name"
+    t.string   "password_digest"
+    t.integer  "current_page",              default: 0
+    t.integer  "current_domain_crawler_id", default: 1
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "auth_token",                limit: 255
-    t.string   "password_reset_token",      limit: 255
+    t.string   "auth_token"
+    t.string   "password_reset_token"
     t.datetime "password_reset_sent_at"
-    t.integer  "group_id",                  limit: 4
-    t.integer  "search_query_id",           limit: 4
+    t.integer  "group_id"
+    t.integer  "search_query_id"
   end
 
   create_table "word_pairs", force: :cascade do |t|
     t.integer "word_multiple",  limit: 8
-    t.integer "separation",     limit: 4
-    t.integer "result_page_id", limit: 4
-    t.integer "sentence_id",    limit: 4
+    t.integer "separation"
+    t.integer "result_page_id"
+    t.integer "sentence_id"
   end
 
   add_index "word_pairs", ["result_page_id"], name: "index_word_pairs_on_result_page_id", using: :btree
   add_index "word_pairs", ["word_multiple"], name: "word_multiple_id_ix", using: :btree
 
   create_table "word_singletons", force: :cascade do |t|
-    t.integer "word_id",        limit: 4
-    t.integer "result_page_id", limit: 4
-    t.integer "sentence_id",    limit: 4
+    t.integer "word_id"
+    t.integer "result_page_id"
+    t.integer "sentence_id"
   end
 
   add_index "word_singletons", ["result_page_id"], name: "index_word_singletons_on_result_page_id", using: :btree
   add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
 
   create_table "words", primary_key: "word_name", force: :cascade do |t|
-    t.integer "id_value",   limit: 4
-    t.integer "word_prime", limit: 4
+    t.integer "id_value"
+    t.integer "word_prime"
   end
 
   add_index "words", ["id_value"], name: "index_words_on_id_value", using: :btree

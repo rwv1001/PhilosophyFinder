@@ -67,7 +67,7 @@ class DomainCrawler < ApplicationRecord
     end
     if @sentence_inserts.length >0
 
-      sql = "INSERT INTO sentences (content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
+      sql = %Q"INSERT INTO sentences (content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
       sql_save(sql)
 
     else
@@ -77,12 +77,14 @@ class DomainCrawler < ApplicationRecord
 
     if @word_entries.length > 0
 
-      sql = "INSERT IGNORE INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
-      # logger.info "sql = #{sql}"
+      #sql = "INSERT IGNORE INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
+      sql = "INSERT INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
+      logger.info "sql = #{sql}"
       sql_save(sql)
       if Word.where('id_value >-1').length >0
         max_prime = Word.maximum('word_prime')
         max_id = Word.maximum('id_value')
+        logger.info "max_prime = #{max_prime}, max_id = #{max_id} "
       else
         max_id = 0
         max_prime = 2
@@ -95,13 +97,18 @@ class DomainCrawler < ApplicationRecord
 
       new_words_str = []
       new_words.each do |new_word|
-        new_words_str << "(\"#{new_word.word_name}\",#{new_id}, #{new_prime})"
+        new_words_str << "(\'#{new_word.word_name}\',#{new_id}, #{new_prime})"
         new_prime = GetNextPrime(new_prime)
         new_id = new_id + 1
       end
       if new_words.length > 0
 
-        sql = "REPLACE INTO words (word_name, id_value, word_prime) VALUES #{new_words_str.to_a.join(', ')}"
+        #sql = "REPLACE INTO words (word_name, id_value, word_prime) VALUES #{new_words_str.to_a.join(', ')}"
+
+
+        sql = "UPDATE words AS w SET id_value = c.id_value, word_prime= c.word_prime FROM (VALUES  #{new_words_str.to_a.join(', ')}) as c(word_name, id_value, word_prime)
+        where c.word_name = w.word_name;"
+        logger.info "sql = #{sql}"
         sql_save(sql)
       else
         logger.info "new_words is empty"
@@ -170,7 +177,9 @@ class DomainCrawler < ApplicationRecord
 
 
   def ProcessSentence(sentence, paragraph_id)
-    @sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
+    #@sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
+    @sentence_inserts.push "(\'#{sentence.gsub("'","''")}\',#{paragraph_id})" # psql
+
     sentence = sentence.gsub(/[^a-zA-Z]/, ' ')
     word_list = sentence.split(' ')
 
@@ -180,8 +189,8 @@ class DomainCrawler < ApplicationRecord
       #   logger.info "v2"
       if word.length > 0
         #      logger.info "v3"
-        @word_entries.add "(\"#{word.downcase}\", 0, 0)"
-        @word_set.add("\"#{word.downcase}\"")
+        @word_entries.add "(\'#{word.downcase}\', 0, 0)"
+        @word_set.add("\'#{word.downcase}\'")
       end
       #  logger.info "v14"
     end
@@ -355,7 +364,8 @@ class DomainCrawler < ApplicationRecord
         end
         @last_paragraph = par_text
         paragraph_count=paragraph_count+1
-        @paragraph_inserts.push "(\"#{par_text.gsub('"', '\"')}\",#{result_page_id})"
+        #@paragraph_inserts.push "(\"#{par_text.gsub('"', '\"')}\",#{result_page_id})"
+        @paragraph_inserts.push "(\'#{par_text.gsub("'","''")}\',#{result_page_id})" # psql
 
         if @paragraph_inserts.length%paragraph_block_num == 0
           save_paragraphs(result_page_id)
@@ -380,7 +390,7 @@ class DomainCrawler < ApplicationRecord
     else
       max_id = 0;
     end
-    sql = "INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
+    sql = %Q"INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
     # logger.info "sql = #{sql}"
     sql_save(sql)
     paragraphs = Paragraph.where("id > #{max_id}")
