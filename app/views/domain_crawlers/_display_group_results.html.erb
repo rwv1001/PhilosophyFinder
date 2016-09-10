@@ -7,7 +7,7 @@
       <% crawler_page_id =search_result.crawler_page_id %>
       <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
       <div class="page-results">
-        <%= crawler_page_name %>
+        <%=  link_to crawler_page_name, crawler_page_name, target: '_blank'  %>
       </div>
       <%= form_tag remove_group_result_path, :id => 'remove_group_result_form', method: 'post', remote: true do %>
           <% group_elements.each do |group_element| %>
@@ -16,7 +16,7 @@
                   <% crawler_page_id = search_result.crawler_page_id %>
                   <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
                   <div class="page-results">
-                    <%= crawler_page_name %>
+                    <%=  link_to crawler_page_name, crawler_page_name, target: '_blank'  %>
                   </div>
               <% end %>
               <div class="group-search-result-outer" name="group-search-result-<%= group_element.id%>">
