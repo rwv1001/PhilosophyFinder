@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3ab608ba-9c73-4252-8f89-3bd7ce8e6d0c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/base/globals.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/base/globals.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/domain_crawlers_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/domain_crawlers_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/domain_crawler.rb" afterPath="$PROJECT_DIR$/app/models/domain_crawler.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/search_query.rb" afterPath="$PROJECT_DIR$/app/models/search_query.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/domain_crawlers/_display_group_results.html.erb" afterPath="$PROJECT_DIR$/app/views/domain_crawlers/_display_group_results.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/domain_crawlers/_domain_summary.html.erb" afterPath="$PROJECT_DIR$/app/views/domain_crawlers/_domain_summary.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/domain_crawlers/search.js.erb" afterPath="$PROJECT_DIR$/app/views/domain_crawlers/search.js.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/layouts/application.html.erb" afterPath="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/initializers/my_constants.rb" afterPath="$PROJECT_DIR$/config/initializers/my_constants.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/schema.rb" afterPath="$PROJECT_DIR$/db/schema.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/seeds.rb" afterPath="$PROJECT_DIR$/db/seeds.rb" />
-    </list>
+    <list default="true" id="3ab608ba-9c73-4252-8f89-3bd7ce8e6d0c" name="Default" comment="" />
     <ignored path="PhilosophyFinder.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />
@@ -807,12 +794,12 @@
       <workItem from="1473268973780" duration="5966000" />
       <workItem from="1473307693629" duration="1283000" />
       <workItem from="1473381631347" duration="11987000" />
-      <workItem from="1473446170039" duration="8346000" />
+      <workItem from="1473446170039" duration="8944000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="519426000" />
+    <option name="totallyTimeSpent" value="520024000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="24" width="1855" height="1056" extended-state="6" />
