@@ -59,7 +59,7 @@ class DomainCrawler < ApplicationRecord
 
   def AddSentencesAndWords()
     logger.info "AddSentencesAndWords begin"
-    if Sentence.where('id >0').length > 0
+    if Sentence.exists?('id >0')
       max_id = Sentence.maximum('id')
     else
       max_id = 0
@@ -81,7 +81,7 @@ class DomainCrawler < ApplicationRecord
       sql = "INSERT INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
       #logger.info "sql = #{sql}"
       sql_save(sql)
-      if Word.where('id_value >-1').length >0
+      if Word.exists?('id_value >-1')
         max_prime = Word.maximum('word_prime')
         max_id = Word.maximum('id_value')
        # logger.info "max_prime = #{max_prime}, max_id = #{max_id} "
@@ -385,7 +385,7 @@ class DomainCrawler < ApplicationRecord
 
   def save_paragraphs(result_page_id)
     logger.info
-    if Paragraph.where('id >0').length >0
+    if Paragraph.exists?('id >0')
       max_id = Paragraph.maximum('id')
     else
       max_id = 0;
