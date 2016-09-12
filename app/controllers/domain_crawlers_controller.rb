@@ -35,7 +35,7 @@ class DomainCrawlersController < ApplicationController
     logger.info "crawler_page: #{crawler_page.inspect}"
     descendents = crawler_page.root.descendants.arrange
     descendents.each do |descendent|
-      logger.info "Descendent is #{descendent}"
+  #    logger.info "Descendent is #{descendent}"
     end
     x =y
   end
@@ -54,8 +54,8 @@ class DomainCrawlersController < ApplicationController
     @found_results = process_output[:found_results]
     @first_index = [1, params[:more_results_first_result_id].to_i - process_output[:absolute_first]+1].max
     @last_index = [params[:more_results_last_result_id].to_i, process_output[:absolute_last]].min - process_output[:absolute_first]+1
-    logger.info "process_more_results @first_index= #{ @first_index }, @last_index = #{@last_index}, @unprocessed_sentence_count = #{@unprocessed_sentence_count}, "
-logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_result_id]}, process_output[:absolute_first] = #{process_output[:absolute_first]}, process_output[:absolute_last] = #{process_output[:absolute_last]}"
+#    logger.info "process_more_results @first_index= #{ @first_index }, @last_index = #{@last_index}, @unprocessed_sentence_count = #{@unprocessed_sentence_count}, "
+# logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_result_id]}, process_output[:absolute_first] = #{process_output[:absolute_first]}, process_output[:absolute_last] = #{process_output[:absolute_last]}"
 
     respond_to do |format|
       format.js
@@ -81,7 +81,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
       @absolute_last = fetch_output[:absolute_last]
       @absolute_first =fetch_output[:absolute_first]
       @found_results = fetch_output[:found_results]
-      logger.info "more_result - first item: #{@search_results[0].inspect}"
+  #    logger.info "more_result - first item: #{@search_results[0].inspect}"
 
       if @first_result_id > fetch_output[:absolute_first]
         @show_previous = true
@@ -116,7 +116,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
 
   def search
     logger.info "DomainCrawlersController search called"
-    logger.info "check #{params[:row_in_list]}"
+#    logger.info "check #{params[:row_in_list]}"
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
     @query_id = search_query.id
@@ -145,7 +145,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
           @show_next = false
         end
         @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
-        logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
+     #   logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
 
 
       end
@@ -163,27 +163,27 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
   def create
     logger.info "DomainCrawlersController create called"
     @result_str = ""
-    logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
+   # logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
     @domain_crawler = DomainCrawler.new(domain_crawler_params)
-    logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
+  #  logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
 
-    logger.info "DomainCrawlersController create, after new"
+ #   logger.info "DomainCrawlersController create, after new"
     if @domain_crawler.save
-      logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
+  #    logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
       first_page_id = @domain_crawler.crawl
       if first_page_id !=0
-        logger.info "Crawl success first_id = #{first_page_id}"
+    #    logger.info "Crawl success first_id = #{first_page_id}"
         @domain_crawler.crawler_page_id = first_page_id
         @domain_crawler.save
 
         current_user.current_domain_crawler_id = @domain_crawler.id
         current_user.save
-        logger.info "DomainCrawlersController create, before redirect"
+     #   logger.info "DomainCrawlersController create, before redirect"
         redirect_to domain_crawlers_url, notice: "Domain Analysis of #{@domain_crawler.domain_home_page} was successfull!"
       else
-        logger.info "crawl failure"
+     #   logger.info "crawl failure"
         @domain_crawler.destroy
-        logger.info "DomainCrawlersController create, before redirect"
+     #   logger.info "DomainCrawlersController create, before redirect"
         redirect_to domain_crawlers_url, notice: "Domain Analysis failed of  #{@domain_crawler.domain_home_page} failed. Is the domain address correct?"
       end
     end
@@ -211,8 +211,8 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
     current_user.current_domain_crawler_id = new_crawler_page.domain_crawler.id
     current_user.current_page = @crawler_page_id
     current_user.save
-    logger.info "new crawler_page = #{@crawler_page_id}, domain_crawler = #{current_domain_crawler.id}"
-    logger.info "set_Header end"
+  #  logger.info "new crawler_page = #{@crawler_page_id}, domain_crawler = #{current_domain_crawler.id}"
+  #  logger.info "set_Header end"
     respond_to do |format|
       format.js
     end
@@ -263,7 +263,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
     group_name = GroupName.find_by_id(params[:group_radio]);
     new_parent = GroupName.find_by_id(params[:move_location_group_radio]);
     ancestor_ids = new_parent.ancestor_ids
-    logger.info "move_group ancestors: #{ancestor_ids}, group_name_id = #{group_name.id}"
+#    logger.info "move_group ancestors: #{ancestor_ids}, group_name_id = #{group_name.id}"
     if ancestor_ids.index(group_name.id) != nil
 
       @result_str = "You cannot move a parent to one of its children"
@@ -272,7 +272,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
       group_name.save;
       @result_str = ""
     end
-    logger.info "move_group result_str = #{@result_str}"
+ #   logger.info "move_group result_str = #{@result_str}"
 
     @selected = GROUP_ACTION[:move_group]
     @group_parent_id = group_name.parent_id
@@ -306,7 +306,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
       else
         remove_group(params)
     end
-    logger.info "group_action result_str = #{@result_str}"
+ #   logger.info "group_action result_str = #{@result_str}"
     respond_to do |format|
       format.js
     end
@@ -328,7 +328,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
       else
         remove_domain(params)
     end
-    logger.info "domain_action result_str = #{@result_str}"
+  #  logger.info "domain_action result_str = #{@result_str}"
     respond_to do |format|
       format.js
     end
@@ -339,7 +339,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
     domain_crawler_id = CrawlerPage.find_by_id(params[:domain_radio]).domain_crawler_id;
     domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
     @result_str = domain_crawler.fix_domain()
-    logger.info "fix_domain result: #{@result_str}"
+  #  logger.info "fix_domain result: #{@result_str}"
     @selected = DOMAIN_ACTION[:fix_domain]
   end
 
@@ -382,7 +382,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
     crawler_page_name = CrawlerPage.find_by_id(params[:domain_radio]);
     new_parent = CrawlerPage.find_by_id(params[:move_location_domain_radio]);
     ancestor_ids = new_parent.ancestor_ids
-    logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
+ #   logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
     if ancestor_ids.index(crawler_page_name.id) != nil
 
       @result_str = "You cannot move a parent to one of its children"
@@ -391,7 +391,7 @@ logger.info "params[:more_results_last_result_id] = #{params[:more_results_last_
       crawler_page_name.save;
       @result_str = ""
     end
-    logger.info "move_domain result_str = #{@result_str}"
+ #   logger.info "move_domain result_str = #{@result_str}"
 
     @selected = DOMAIN_ACTION[:move_domain]
     @crawler_parent_id = crawler_page_name.parent_id

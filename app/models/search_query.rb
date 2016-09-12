@@ -317,7 +317,7 @@ class SearchQuery < ApplicationRecord
     sentence_set = truncate(sentence_set.to_a)
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.length"
+ #   logger.info "search_results: @search_results.length"
     return @search_results
   end
 
@@ -458,7 +458,7 @@ class SearchQuery < ApplicationRecord
 
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.length"
+  #  logger.info "search_results: @search_results.length"
     return @search_results
 
   end
@@ -490,7 +490,7 @@ class SearchQuery < ApplicationRecord
 
     process_sentences(sentence_set, tokens)
 
-    logger.info "search_results: @search_results.length"
+   # logger.info "search_results: @search_results.length"
     return @search_results
   end
 
@@ -502,7 +502,7 @@ class SearchQuery < ApplicationRecord
       @result_pages << crawler_page.result_page_id
       @result_hash[crawler_page.result_page_id] = crawler_page.id
     end
-    logger.info "page_hash @result_pages: #{@result_pages}"
+#    logger.info "page_hash @result_pages: #{@result_pages}"
   end
 
   def new
@@ -541,7 +541,7 @@ class SearchQuery < ApplicationRecord
     else
       self.view_priority = 1
     end
-    logger.info "self.view_priority = #{self.view_priority}"
+  #  logger.info "self.view_priority = #{self.view_priority}"
     self.save
   end
 
