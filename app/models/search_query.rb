@@ -68,8 +68,8 @@ class SearchQuery < ApplicationRecord
     process_output[:found_results]= all_results.count
     process_output[:absolute_first] = all_results[0].id
     process_output[:absolute_last] = all_results[-1].id
-    logger.info "process_output: #{process_output.inspect}"
-    logger.info "process_output ids: #{all_results[0].id}, #{all_results[1].id}, #{all_results[2].id}, #{all_results[-1].id}, "
+  #  logger.info "process_output: #{process_output.inspect}"
+   # logger.info "process_output ids: #{all_results[0].id}, #{all_results[1].id}, #{all_results[2].id}, #{all_results[-1].id}, "
     return process_output
 
   end
@@ -112,8 +112,8 @@ class SearchQuery < ApplicationRecord
       del_str1_postgres = "DELETE FROM search_results sr WHERE user_id =  #{user_id} AND (SELECT COUNT(*) FROM search_queries sq where sq.view_priority <= #{delete_priority}  AND sq.id = sr.search_query_id ) >0 AND (SELECT COUNT(*) FROM group_elements WHERE group_elements.search_result_id = sr.id) = 0;
 "
       del_str2 = "DELETE FROM search_queries WHERE view_priority <= #{delete_priority} AND NOT EXISTS (SELECT 1 FROM search_results WHERE search_results.search_query_id = search_queries.id)"
-      logger.info "del_str1_postgres = #{del_str1_postgres}"
-      logger.info "del_str2 = #{del_str2}"
+   #   logger.info "del_str1_postgres = #{del_str1_postgres}"
+    #  logger.info "del_str2 = #{del_str2}"
       if @connection == nil
         @connection = ActiveRecord::Base.connection
       end
@@ -172,7 +172,7 @@ class SearchQuery < ApplicationRecord
     #   logger.info "05"
     content = sentence.content.gsub(/\n/, ' ')
 
-    logger.info "@count #{@count} content: #{content}"
+  #  logger.info "@count #{@count} content: #{content}"
 
     highlights = Hash.new
 
@@ -249,7 +249,7 @@ class SearchQuery < ApplicationRecord
       logger.info "sentence_set is empty"
       return
     end
-    logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.length}"
+  #  logger.info "process_sentences: tokens: #{tokens}, sentence_set: #{sentence_set.length}"
 
     sentence_set.each do |sentence_id|
       if @quit_processing == false and (@count < MAX_DISPLAY-1 or (@count >= MAX_DISPLAY-1 and Sentence.find_by_id(sentence_id).paragraph_id == @current_paragraph_id))
@@ -290,7 +290,7 @@ class SearchQuery < ApplicationRecord
       end
 
     end
-    logger.info "term_str: #{term_str}"
+ #   logger.info "term_str: #{term_str}"
     terms = Word.where(term_str)
     return terms;
 
@@ -301,7 +301,7 @@ class SearchQuery < ApplicationRecord
 
     # terms = Word.where("word_name LIKE (?)", "#{search_term}")
     terms = get_terms(search_term)
-    logger.info "single_search words = #{terms.inspect}"
+  #  logger.info "single_search words = #{terms.inspect}"
     sentence_set = SortedSet.new
     terms.each do |term|
       #   logger.info "01"
@@ -330,25 +330,25 @@ class SearchQuery < ApplicationRecord
       if or_item[0]=="%"
         or_item[0]=""
         or_item.insert(0, "\\b\\w*")
-        logger.info "a #{or_item}"
+     #   logger.info "a #{or_item}"
       else
         or_item.insert(0, "\\b")
-        logger.info "b #{or_item}"
+    #    logger.info "b #{or_item}"
       end
       if or_item[-1]=="%"
         or_item[-1]=""
         or_item.insert(-1, "\\w*\\b")
-        logger.info "c #{or_item}"
+   #     logger.info "c #{or_item}"
       else
         or_item.insert(-1, "\\b")
-        logger.info "d #{or_item}"
+   #     logger.info "d #{or_item}"
       end
       or_item = or_item.gsub("%", "\\w*")
-      logger.info "e #{or_item}"
+   #   logger.info "e #{or_item}"
       tokens << or_item
     end
-    logger.info "get_tokens, search_term: #{search_term}"
-    logger.info "get_tokens, tokens: #{tokens}"
+ #   logger.info "get_tokens, search_term: #{search_term}"
+ #   logger.info "get_tokens, tokens: #{tokens}"
     return tokens
 
   end
@@ -391,9 +391,9 @@ class SearchQuery < ApplicationRecord
     end
     sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY par.id ORDER BY par.id ASC;"
 
-    logger.info("TRUNCATE QUERY: #{sql_str}")
+  #  logger.info("TRUNCATE QUERY: #{sql_str}")
     paragraphs = Paragraph.find_by_sql(sql_str)
-    logger.info("paragraphs length = #{paragraphs.length}")
+ #   logger.info("paragraphs length = #{paragraphs.length}")
     if paragraphs.length > MAX_RESULTS
       @truncate_length = paragraphs.length
       max_par = paragraphs[MAX_RESULTS-1]
@@ -402,7 +402,7 @@ class SearchQuery < ApplicationRecord
       while sentence_set[ind]<=max_sen and ind < sentence_set.length
         ind = ind +1
       end
-      logger.info "max_par.id = #{max_par.id}, max_sen = #{max_sen}, sentence_set[ind-1] = #{sentence_set[ind-1]}, ind = #{ind}"
+ #     logger.info "max_par.id = #{max_par.id}, max_sen = #{max_sen}, sentence_set[ind-1] = #{sentence_set[ind-1]}, ind = #{ind}"
       return sentence_set = sentence_set[0..(ind-1)]
 
 
@@ -426,7 +426,7 @@ class SearchQuery < ApplicationRecord
 
     term_indicies = (0..search_terms.length-1).to_a
     term_pairs=term_indicies.combination(2).to_a
-    logger.info "term_pairs: #{term_pairs.inspect}"
+  #  logger.info "term_pairs: #{term_pairs.inspect}"
     result_pair_str = "(#{@result_pages.join(', ')})"
     sql_str = []
     sentence_pairs = []
@@ -440,7 +440,7 @@ class SearchQuery < ApplicationRecord
       end
       if word_multiples.length > 0
         sql_str = "SELECT * FROM word_pairs WHERE result_page_id IN  #{result_pair_str} AND separation <= #{self.word_separation} AND word_multiple IN  (#{word_multiples.join(', ')})"
-        logger.info "sql_str = #{sql_str}"
+    #    logger.info "sql_str = #{sql_str}"
         word_pairs= WordPair.find_by_sql(sql_str)
         sentence_pair = SortedSet.new
         word_pairs.each do |word_pair|
@@ -468,14 +468,14 @@ class SearchQuery < ApplicationRecord
     #Word.where("word_name LIKE (?)", "#{first_search_term}")
     second_terms = get_terms(second_search_term);
     #Word.where("word_name LIKE (?)", "#{second_search_term}")
-    logger.info "first_search words = #{first_terms.inspect}"
-    logger.info "second_search words = #{second_terms.inspect}"
+  #  logger.info "first_search words = #{first_terms.inspect}"
+   # logger.info "second_search words = #{second_terms.inspect}"
     sentence_set = SortedSet.new
     first_terms.each do |first_term|
       second_terms.each do |second_term|
 
         word_multiple = first_term.word_prime * second_term.word_prime;
-        logger.info "word_separation: #{word_separation}, word_multiple: #{word_multiple}"
+    #    logger.info "word_separation: #{word_separation}, word_multiple: #{word_multiple}"
         word_pairs = WordPair.where("word_multiple = ? and result_page_id = ? and separation <= ?", word_multiple, @result_pages, self.word_separation).order("id asc")
        # word_pairs = WordPair.where(word_multiple: word_multiple, result_page_id: @result_pages)
         #   logger.info "02"

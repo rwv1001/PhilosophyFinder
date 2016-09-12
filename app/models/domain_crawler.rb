@@ -686,13 +686,13 @@ class DomainCrawler < ApplicationRecord
 
   def fix_domain
     initialize_crawl
-    bad_pages = CrawlerPage.where(["(result_page_id  <0 or result_page_id is NULL) and domain_crawler_id = ?", self.id])
+    bad_pages = CrawlerPage.where(["(result_page_id  <0 or result_page_id is NULL) and domain_crawler_id = ?", self.id]).order("id asc")
     orig_num_of_bad_pages = bad_pages.length
     bad_pages.each do |bad_page|
       logger.info "fixing bad page: #{bad_page}"
     ProcessPage(bad_page.URL, 0, bad_page.parent_id)
     end
-    afterwards_bad_pages = CrawlerPage.where(["(result_page_id  <0 or result_page_id is NULL) and domain_crawler_id = ?", self.id])
+    afterwards_bad_pages = CrawlerPage.where(["(result_page_id  <0 or result_page_id is NULL) and domain_crawler_id = ?", self.id]).order("id asc")
     afterwards_num_of_bad_pages = afterwards_bad_pages.length
     result_str = "Number of bad pages before fixing: #{orig_num_of_bad_pages}. Number of bad pages after fixing:#{afterwards_num_of_bad_pages}."
     return result_str
