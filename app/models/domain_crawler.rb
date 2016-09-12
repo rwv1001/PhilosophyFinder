@@ -59,16 +59,19 @@ class DomainCrawler < ApplicationRecord
 
   def AddSentencesAndWords()
     logger.info "AddSentencesAndWords begin"
-    if Sentence.exists?('id >0')
+    logger.info "rwv1001 g"
+    if Sentence.exists?
       max_id = Sentence.maximum('id')
+      logger.info "rwv1001 h"
     else
       max_id = 0
       logger.info "No sentences exist"
     end
     if @sentence_inserts.length >0
-
+      logger.info "rwv1001 i"
       sql = %Q"INSERT INTO sentences (content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
       sql_save(sql)
+      logger.info "rwv1001 j"
 
     else
       logger.info "@sentence_inserts is empty"
@@ -81,9 +84,12 @@ class DomainCrawler < ApplicationRecord
       sql = "INSERT INTO words (word_name, id_value, word_prime) VALUES #{@word_entries.to_a.join(', ')}"
       #logger.info "sql = #{sql}"
       sql_save(sql)
-      if Word.exists?('id_value >-1')
+      logger.info "rwv1001 k"
+      if Word.where('id_value >-1').limit(1).length >0
+        logger.info "rwv1001 l"
         max_prime = Word.maximum('word_prime')
         max_id = Word.maximum('id_value')
+        logger.info "rwv1001 m"
        # logger.info "max_prime = #{max_prime}, max_id = #{max_id} "
       else
         max_id = 0
@@ -109,7 +115,9 @@ class DomainCrawler < ApplicationRecord
         sql = "UPDATE words AS w SET id_value = c.id_value, word_prime= c.word_prime FROM (VALUES  #{new_words_str.to_a.join(', ')}) as c(word_name, id_value, word_prime)
         where c.word_name = w.word_name;"
        # logger.info "sql = #{sql}"
+        logger.info "rwv1001 o"
         sql_save(sql)
+        logger.info "rwv1001 v"
       else
         logger.info "new_words is empty"
       end
@@ -347,7 +355,7 @@ class DomainCrawler < ApplicationRecord
     logger.info "ProcessParagraphs begin, paragraphs length = #{paragraphs.length}"
     paragraph_count = 0
     @paragraph_inserts =[]
-    paragraph_block_num = 50
+    paragraph_block_num = 100
 
     for par_count in 0..paragraphs.length-1
       par = paragraphs[par_count]
@@ -384,16 +392,21 @@ class DomainCrawler < ApplicationRecord
   end
 
   def save_paragraphs(result_page_id)
-    logger.info
-    if Paragraph.exists?('id >0')
+    logger.info "rwv1001 a"
+    if Paragraph.exists?()
+      logger.info "rwv1001 b"
       max_id = Paragraph.maximum('id')
+      logger.debug ""
     else
       max_id = 0;
     end
+    logger.debug ""
     sql = %Q"INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
     # logger.info "sql = #{sql}"
     sql_save(sql)
+    logger.info "rwv1001 c"
     paragraphs = Paragraph.where("id > #{max_id}").order("id asc")
+    logger.info "rwv1001 d"
     par_sentences = []
     paragraphs.each do |paragraph|
       par_sentence = Hash.new
@@ -401,8 +414,9 @@ class DomainCrawler < ApplicationRecord
       par_sentence[:paragraph_id] = paragraph.id
       par_sentences.push(par_sentence)
     end
-
+    logger.info "rwv1001 e"
     ProcessSentences(par_sentences, result_page_id)
+    logger.info "rwv1001 ee"
     @paragraph_inserts =[]
 
 
