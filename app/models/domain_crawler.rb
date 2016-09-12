@@ -347,7 +347,7 @@ class DomainCrawler < ApplicationRecord
     logger.info "ProcessParagraphs begin, paragraphs length = #{paragraphs.length}"
     paragraph_count = 0
     @paragraph_inserts =[]
-    paragraph_block_num = 100
+    paragraph_block_num = 50
 
     for par_count in 0..paragraphs.length-1
       par = paragraphs[par_count]
