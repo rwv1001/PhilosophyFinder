@@ -337,7 +337,10 @@ class DomainCrawlersController < ApplicationController
     logger.info "fix_domain begin"
     @result_str = "hello"
     domain_crawler_id = CrawlerPage.find_by_id(params[:domain_radio]).domain_crawler_id;
-    call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
+    result_str = domain_crawler.fix_domain()
+
+ #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
     flash[:notice] = "fixing domain"
 
 
