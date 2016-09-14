@@ -31,13 +31,101 @@
 
   <% end %>
   <%= yield %>
+
+
 </div>
 <div class="main-panel">
   <div class="menu-div">
-    <div class="menu-tab"  onclick="ShowSearchResults()" > searches</div>
-    <div class="menu-tab"   onclick="ShowGroupResults()" > groups</div>
+    <div class="menu-tab"  onclick="ShowSearchResults()" > Searches</div>
+    <div class="menu-tab"   onclick="ShowGroupResults()" > Groups</div>
+    <div class="menu-tab"   onclick="ShowHelp()" > Help</div>
   </div>
   <div class="main-panel-content">
+
+    <div id="instructions">
+      <h1>St. Thomas Aquinas Search Utility</h1>
+      <h2> Functionality</h2>
+      <p> This web application allows you to search through the works of Aquinas in both English and Latin. It allows you to do proximity word searches. For each result found,
+        the paragraph containing the result will be displayed together with a link to the website where the full text can be found. Furthermore, if desired, one can save and categorize
+        results in user defined groups of results.
+      </p>
+      <h2> Motivation </h2>
+      <p>
+        The main reason I wrote this web application was to implement the proximity word search functionality. Most major search engines already have a proximity word search facility where one can
+         search for pages which contain the specified words within a certain separation from each other. However, once the page is found by these search engines, it is not easy to
+        actually find all the instances in the page where these two words occur near each other. My web application therefore displays each complete paragraph where such
+        instances occur. Before I wrote this web application, I had been doing such proximity searches on a huge text file containing many of Aquinas' works. I
+        used what are called regular expressions to find particular instances. I found that these proximity searches produced extremely relevant results. However, using regular
+        expressions was rather cumbersome and not the sort of technique I could easily teach other Thomists who might find proximity searches useful. Therefore, I wrote this
+        web application as a more user friendly way of doing proximity searches.
+      </p>
+      <h2> Instructions </h2>
+      <p>
+        (1) If you have not already done so, click on 'Sign Up' to create a user account. Otherwise click on 'Log in' <br>
+        (2) Make sure you have selected some pages to search by clicking on the checkboxes in the 'Domain Summary' pane.<br>
+        (3) In the 'New Search' pane, fill any one of the word1 to word4 text fields with words you would like to find near to each other. You can specify the separation
+        of the words by using the drop down menu. You can specify wild cards by using the '%' character. You can use the 'OR' keyword within a text field to specify
+        different alternatives you would like to find. For example, you could set the following:
+      <ul>
+        <li>word1: faith OR belie%</li>
+        <li>word2: intel% OR understand% </li>
+      </ul> <br>
+      Here is one of the results: To the further question, whether it is wisdom, it should be answered that it is wisdom in the most proper sense, as has been said. To the objection that no one is most certain about this doctrine, we say it is false. The believer more firmly assents to the things that are of faith than to the first principles of reason. The statement that faith is below science is not true of infused faith, but of acquired faith, which is opinion fortified by argument. The habit of these principles, namely, of the articles, is called
+      <span class="highlight">faith</span>
+      and not
+      <span class="highlight">understanding</span>
+      because these principles are above reason and human reason is unable to grasp them perfectly. There results a kind of defective knowledge, but not from any defect of certitude in the things known, but from a defect in the knower. Reason led by
+      <span class="highlight">faith</span>
+      grows in such a way that it more fully comprehends what is
+      <span class="highlight">believed</span>
+      and thus in a way
+      <span class="highlight">understands</span>
+      them. Hence Isaiah 7:9 says in one version, ‘Unless you
+      <span class="highlight">believe</span>
+      , you will not
+      <span class="highlight">understand</span>
+      . ’.    <br>
+      (4) If desired, you can create groups of results that you can save for later reference. To do so, do the following: (a) click on the 'New Group'
+      drop down menu item in the 'Groups' pane. (b) Select the directory you would like it to be in by selecting a radio button.
+      (c) Use the text field to enter an appropriate group name. (d) Create the group by clicking on 'Create Group' (e) Do a search. (f) Among the search results,
+      click on the corresponding check boxes if you want to add the search results to the group. (g) Click on 'Add Search Results' drop down menu item in the
+      'Groups' pane. (h) Click on the 'add results' link next to the group you want to add the results to.<br><br>
+      <b> !!!!!!!!!!  WARNING  !!!!!!!!! </b> <br>
+      As this web application is still in development, I may have to reset the database at any time. If I have to do this, you will lose all your saved results. Therefore,
+      for the time being do not rely on this 'Groups' functionality if you want to save valualbe results.
+      </p>
+
+      <h2> Further Developments</h2>
+
+      There are a number of bugs in this application and I would also like to implement some further functionality.
+      <h3>Bugs</h3>
+      <p>
+      <ul>
+        <li>1. Clicking on the Domain Summary check boxes often doesn't select and deselect items properly</li>
+        <li>2. Selecting previous results often doesn't fill in the word fields properly in the 'New Search' pane. </li>
+        <li>3. If the database is reset, the site doesn't load unless you delete the cookie for this site from your browser.</li>
+        <li>4. Clicking on the group links doesn't display subgroup results.</li>
+        <li>5. Remove extra period displayed at the end of every paragraph.</li>
+      </ul>
+      </p><br><br><br><br>
+      <p>
+      <h3>Further Functionality</h3>
+
+      <ul>
+        <li>1. Implement number searches (e.g. 'Rom. 1:20')</li>
+        <li>2. Implement exact phrase searches</li>
+        <li>3. Have a 'create pdf' button to create pdfs of search results and groups</li>
+        <li>4. Implement a captcha to stop bots creating user accounts.</li>
+        <li>5. Add the Latin works from the corpusthomisticum site that are not present on the dhspriory site. </li>
+        <li>6. Save not only the words of searches, but also the selection of pages searched.</li>
+      </ul>
+      </p><br><br><br><br><br>
+      <p>
+      If you notice any other bugs or functionality you would like this web application to provide, please contact searchstthomas@english.op.org.
+      Thank you for your patience.
+      </p>
+
+    </div>
     <div id="search-results" ></div>
     <div id="group-results"></div>
   </div>

@@ -220,8 +220,12 @@ class SearchQuery < ApplicationRecord
       @search_result.search_query_id = self.id
       @search_result.sentence_id = sentence.id
       if @result_hash.key?(paragraph.result_page_id) == false
-        crawler_id = CrawlerPage.where(result_page_id: paragraph.result_page_id).first.id
-        @result_hash[paragraph.result_page_id] = crawler_id
+        if CrawlerPage.exists?(result_page_id: paragraph.result_page_id)
+          crawler_id = CrawlerPage.where(result_page_id: paragraph.result_page_id).first.id
+          @result_hash[paragraph.result_page_id] = crawler_id
+        else
+          @result_hash[paragraph.result_page_id] = -1
+        end
       end
       @search_result.crawler_page_id = @result_hash[paragraph.result_page_id]
 

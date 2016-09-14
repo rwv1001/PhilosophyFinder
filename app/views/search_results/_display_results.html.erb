@@ -4,51 +4,56 @@
       <%= text_field_tag :results_current_index, params[:current_index] %>
       <%= text_field_tag :results_range, params[:range] %>
       <%= text_field_tag :results_query_id, params[:query_id], :value => args[:query_id] %>
-      <div class="next-prev" ><%= submit_tag "More Results", id: "next-prev-button" %></div>
-<% end %>
+      <div class="next-prev"><%= submit_tag "More Results", id: "next-prev-button" %></div>
+  <% end %>
   <%= form_tag process_more_results_path, :id => 'process_more_results_form', method: 'get', remote: true do %>
       <%= text_field_tag :more_results_query_id, params[:query_id], :value => args[:query_id] %>
       <%= text_field_tag :more_results_first_result_id, params[:first_result_id], :value => args[:first_result_id] %>
-      <%= text_field_tag :more_results_last_result_id, params[:last_result_id], :value => args[:last_result_id]%>
-      <div class="next-prev" ><%= submit_tag "Process More Results", id: "process-more-button" %></div>
+      <%= text_field_tag :more_results_last_result_id, params[:last_result_id], :value => args[:last_result_id] %>
+      <div class="next-prev"><%= submit_tag "Process More Results", id: "process-more-button" %></div>
   <% end %>
 
   <%= form_tag tidy_up_path, :id => 'tidy_up_form', method: 'get', remote: true do %>
-      <%= text_field_tag :tidy_user_id, params[:tidy_user_id], :value => args[:user_id]%>
-      <div class="next-prev" ><%= submit_tag "Tidy Up Now", id: "tidy-up-button" %></div>
+      <%= text_field_tag :tidy_user_id, params[:tidy_user_id], :value => args[:user_id] %>
+      <div class="next-prev"><%= submit_tag "Tidy Up Now", id: "tidy-up-button" %></div>
   <% end %>
 
-<% if @search_results.length >0 %>
+  <% if @search_results.length >0 %>
 
 
-    <% crawler_page_id = @search_results[0].crawler_page_id %>
-    <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
-    <div class="page-results">
-      <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
-    </div>
+      <% crawler_page_id = @search_results[0].crawler_page_id %>
+      <% if crawler_page_id != -1 %>
+          <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
+      <% end %>
+      <div class="page-results">
+        <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
+      </div>
       <%= form_tag add_result_path, :id => 'add_result_form', method: 'post', remote: true do %>
-    <% @search_results.first(MAX_DISPLAY).each do |search_result| %>
-        <% if search_result.crawler_page_id != crawler_page_id %>
-            <% crawler_page_id = search_result.crawler_page_id %>
-            <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
-            <div class="page-results">
-              <%=  link_to crawler_page_name, crawler_page_name, target: '_blank'  %>
-            </div>
-        <% end %>
-        <div class="search-result-outer" name="search-result-<%= search_result.id%>">
-          <div class="search-result-text">
-          <%= raw(search_result.highlighted_result) %>
-          </div>
+          <% @search_results.first(MAX_DISPLAY).each do |search_result| %>
+              <% if search_result.crawler_page_id != -1 %>
+
+                  <% if search_result.crawler_page_id != crawler_page_id %>
+                      <% crawler_page_id = search_result.crawler_page_id %>
+                      <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
+                      <div class="page-results">
+                        <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
+                      </div>
+                  <% end %>
+                  <div class="search-result-outer" name="search-result-<%= search_result.id %>">
+                    <div class="search-result-text">
+                      <%= raw(search_result.highlighted_result) %>
+                    </div>
           <span class="search-check-box ">
-            <input type="checkbox"  id="checkbox-search-result-<%= search_result.id %>" name ="search_result_list[]"  class="check"  value=<%= search_result.id %>  >
+            <input type="checkbox" id="checkbox-search-result-<%= search_result.id %>" name="search_result_list[]" class="check" value=<%= search_result.id %>>
           </span>
-          <span class="delete-link"> <%= link_to 'delete', delete_result_path(:id => search_result.id), :remote => true %> </span>
-        </div>
-    <% end %>
-          <%= text_field_tag :add_elements_group_id, params[:add_elements_group_id] %>
-          <div class="actions search-action-button" ><%= submit_tag "Add Selected", id: "search-action-button" %></div>
+                    <span class="delete-link"> <%= link_to 'delete', delete_result_path(:id => search_result.id), :remote => true %> </span>
+                  </div>
+              <% end %>
           <% end %>
-<% else %>
-    <div>No results found</div>
-<% end %>
+          <%= text_field_tag :add_elements_group_id, params[:add_elements_group_id] %>
+          <div class="actions search-action-button"><%= submit_tag "Add Selected", id: "search-action-button" %></div>
+      <% end %>
+  <% else %>
+      <div>No results found</div>
+  <% end %>
 </div>

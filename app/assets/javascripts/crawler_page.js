@@ -17,6 +17,8 @@ function ShowSearchResults()
 {
     var $search_div = $('[id="search-results"]');
     $search_div.show();
+    var $search_div = $('[id="instructions"]');
+    $search_div.hide();
     var $group_div = $('[id="group-results"]');
     $group_div.hide();
     
@@ -26,8 +28,21 @@ function ShowGroupResults()
 {
     var $search_div = $('[id="search-results"]');
     $search_div.hide();
+    var $search_div = $('[id="instructions"]');
+    $search_div.hide();
     var $group_div = $('[id="group-results"]');
     $group_div.show();
+
+}
+
+function ShowHelp()
+{
+    var $search_div = $('[id="search-results"]');
+    $search_div.hide();
+    var $search_div = $('[id="instructions"]');
+    $search_div.show();
+    var $group_div = $('[id="group-results"]');
+    $group_div.hide();
 
 }
 
