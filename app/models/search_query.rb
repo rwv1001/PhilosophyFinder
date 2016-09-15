@@ -290,11 +290,11 @@ class SearchQuery < ApplicationRecord
         if term_str.length >0
           term_str << " OR "
         end
-        term_str << "word_name LIKE '#{term}'"
+        term_str << "word_name ILIKE '#{term}'"
       end
 
     end
- #   logger.info "term_str: #{term_str}"
+   logger.info "term_str: #{term_str}"
     terms = Word.where(term_str)
     return terms;
 

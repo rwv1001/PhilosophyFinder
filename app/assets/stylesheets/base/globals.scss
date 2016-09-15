@@ -14,7 +14,7 @@ $menu-block-color:  lighten($menu-color, 10%);
   background-color: $menu-color;
 
 
-  width: 300px;
+  width: 350px;
   float: left;
   overflow: auto;
   height: 100vh;
@@ -206,9 +206,9 @@ ul{
   &:not(:first-child){padding: 12px;}
 }
 .main-panel{
-  width: -moz-calc(100% - 301px);
-  width: -webkit-calc(100% - 301px);
-  width: calc(100% - 301px);
+  width: -moz-calc(100% - 351px);
+  width: -webkit-calc(100% - 351px);
+  width: calc(100% - 351px);
   overflow: auto;
   background-color: #cbd4d4;
   height: 100vh;
