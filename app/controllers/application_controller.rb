@@ -10,7 +10,9 @@ class ApplicationController < ActionController::Base
    # else
    #   logger.debug "cookie undefined"
   #  end
-    @current_user ||= User.find_by_auth_token!(cookies[:auth_token]) if cookies[:auth_token]
+    #logger.info "current_user: #{cookies[:auth_token]}"
+   # @current_user ||= User.find_by_auth_token!(cookies[:auth_token]) if cookies[:auth_token]
+    @current_user ||= User.where("auth_token =?", cookies[:auth_token]).first if cookies[:auth_token]
     #if @current_user
      # logger.debug "current_user = #{@current_user.id}"
    # else
