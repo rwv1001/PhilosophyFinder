@@ -1,3 +1,32 @@
+GIT
+  remote: git://github.com/capistrano/capistrano.git
+  revision: ff686ef80200440e154cb88ba3f00a1d7d39f0d4
+  ref: master
+  specs:
+    capistrano (3.6.1)
+      airbrussh (>= 1.0.0)
+      capistrano-harrow
+      i18n
+      rake (>= 10.0.0)
+      sshkit (>= 1.9.0)
+
+GIT
+  remote: git://github.com/capistrano/rails.git
+  revision: 18b8fd111ac51dfdf32049adeead889ba4624b7e
+  ref: master
+  specs:
+    capistrano-rails (1.1.8)
+      capistrano (~> 3.1)
+      capistrano-bundler (~> 1.1)
+
+GIT
+  remote: git://github.com/capistrano/rbenv.git
+  revision: e056efc0c361cc15b76ff961d6c5f65ed5e2c57e
+  specs:
+    capistrano-rbenv (2.0.4)
+      capistrano (~> 3.1)
+      sshkit (~> 1.3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -36,6 +65,8 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    airbrussh (1.1.1)
+      sshkit (>= 1.6.1, != 1.7.0)
     ancestry (2.1.0)
       activerecord (>= 3.0.0)
     arel (6.0.3)
@@ -44,6 +75,10 @@ GEM
       debug_inspector (>= 0.0.1)
     builder (3.2.2)
     byebug (9.0.5)
+    capistrano-bundler (1.2.0)
+      capistrano (~> 3.1)
+      sshkit (~> 1.2)
+    capistrano-harrow (0.5.3)
     coffee-rails (4.1.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.1.x)
@@ -76,6 +111,9 @@ GEM
     mini_portile2 (2.1.0)
     minitest (5.9.0)
     multi_json (1.12.1)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
+    net-ssh (3.2.0)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
@@ -113,7 +151,7 @@ GEM
       activesupport (= 4.2.6)
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
-    rake (11.2.2)
+    rake (11.3.0)
     rdoc (4.2.2)
       json (~> 1.4)
     sass (3.4.22)
@@ -134,6 +172,9 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
+    sshkit (1.11.3)
+      net-scp (>= 1.1.2)
+      net-ssh (>= 2.8.0)
     thor (0.19.1)
     thread_safe (0.3.5)
     tilt (2.0.5)
@@ -157,6 +198,10 @@ DEPENDENCIES
   ancestry
   bcrypt (~> 3.1.7)
   byebug
+  capistrano!
+  capistrano-bundler
+  capistrano-rails!
+  capistrano-rbenv!
   coffee-rails (~> 4.1.0)
   jbuilder (~> 2.0)
   jquery-rails
