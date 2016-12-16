@@ -3,26 +3,76 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 $crawler-color: #0000ff;
-$menu-color: #a593bf;
+$menu-color: #3c7cbf;
 $menu-block-color:  lighten($menu-color, 10%);
+$black-border-width: 20px;
+$div-border-width: 3px;
+$thomas-face-color: #bbbbbb;
+$red-border-color: #db0000;
+$menu-width: 350px;
+
 
 @mixin put-margin($val) {
   margin: $val $val;
 }
+@mixin full-height {
+
+  height: -moz-calc(100vh - 67px);
+  height: -webkit-calc(100vh - 67px);
+  height: calc(100vh - 67px);
+}
+
+
+
+@mixin div-border($color, $width){
+  border-style: solid;
+  border-color: $color;
+  border-width: $width;
+}
 
 .sidemenu{
   background-color: $menu-color;
+  @include div-border(black, $black-border-width);
+  padding: 10px;
+  @include full-height;
 
 
-  width: 350px;
+  width: $menu-width;
   float: left;
   overflow: auto;
-  height: 100vh;
+
+
 }
+
+.dominican-logo{
+
+
+  height: 167px;
+  padding-bottom: 10px;
+  background: image-url('DominicanLogo.png') center no-repeat;
+
+}
+.thomas-header{
+
+  font-size: 1.5em;
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+}
+.login-status-div{
+  font-size: 0.75em;
+  text-align: center;
+}
+
 .user-header{
   @include put-margin(10px);
-  background-color: $menu-block-color;
+  background-color: $thomas-face-color;
+  padding: 10px;
+  @include div-border(black, $div-border-width);
+
 }
+
+
 .domain-crawler{
 
 
@@ -31,6 +81,8 @@ $menu-block-color:  lighten($menu-color, 10%);
   @include put-margin(10px);
   background-color: $menu-block-color;
   overflow: auto;
+  padding: 10px;
+  @include div-border($red-border-color, $div-border-width);
 
 
 }
@@ -40,6 +92,8 @@ $menu-block-color:  lighten($menu-color, 10%);
   background-color: $menu-block-color;
   overflow: auto;
   display: none;
+  padding: 10px;
+  @include div-border($red-border-color, $div-border-width);
 
 }
 .bad_page{
@@ -50,6 +104,8 @@ $menu-block-color:  lighten($menu-color, 10%);
   @include put-margin(10px);
   background-color: $menu-block-color;
   overflow: auto;
+  padding: 10px;
+  @include div-border($red-border-color, $div-border-width);
 
 
 }
@@ -59,6 +115,8 @@ $menu-block-color:  lighten($menu-color, 10%);
   background-color: $menu-block-color;
   overflow: auto;
   display: none;
+  padding: 10px;
+  @include div-border($red-border-color, $div-border-width);
 
 }
 .domain-pages{
@@ -205,26 +263,89 @@ ul{
   &:first-child{padding: 5px;}
   &:not(:first-child){padding: 12px;}
 }
+@mixin main-width($val) {
+  margin: $val $val;
+  width: -moz-calc(#{$val});
+  width: -webkit-calc(#{$val});
+  width: calc(#{$val});
+
+}
+@mixin full-height-p {
+
+  height: -moz-calc(100vh - 122px);
+  height: -webkit-calc(100vh - 122px);
+  height: calc(100vh - 122px);
+}
+#instructions{
+  background-color: #BBBBBB;
+  padding: 10px;
+}
+
+
 .main-panel{
-  width: -moz-calc(100% - 351px);
-  width: -webkit-calc(100% - 351px);
-  width: calc(100% - 351px);
-  overflow: auto;
-  background-color: #cbd4d4;
-  height: 100vh;
+  @include main-width(100% - #{$menu-width} - 23.5px - #{$black-border-width}*3);
+
+
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #454848;
+
+  @include full-height-p;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-left-style: none;
+  border-color: black;
+  border-right-width: $black-border-width;
+  border-top-width: $black-border-width;
+  border-bottom-width: $black-border-width;
+
 }
 .menu-div{
-  overflow: auto;
-  background-color: $menu-block-color;
-  width: 100%;
-}
-.menu-tab{
-  margin: 0px 0px 0px 23px;
-  background-color: #888888;
-  width: 75px;
-  float: left;
-  cursor: pointer;
+  @include main-width(100vw  - #{$black-border-width}*2);
 
+  background: image-url('Tileable-Wood-Texture1.png') repeat-x;
+
+
+  //background-color: $menu-block-color;
+  height: 55px;
+
+  border-top-style: solid;
+  border-right-style: solid;
+  border-color: black;
+  border-right-width: $black-border-width;
+  border-top-width: $black-border-width;
+}
+.menu-tab-container{
+  float: left;
+  width: calc((100% - #{$menu-width} - 27px - #{$black-border-width}*3)/4.1);
+}
+
+@mixin menu-tab-image($val){
+  margin: 0 auto;
+
+
+  width: 150px;
+  height: 55px;
+
+  cursor: pointer;
+  background: image-url($val) center;
+}
+
+.menu-tab-search{
+  @include menu-tab-image('search-menu-item1.png');
+}
+
+.menu-tab-groups{
+  @include menu-tab-image('groups-menu-item1.png');
+}
+
+.menu-tab-help{
+  @include menu-tab-image('help-menu-item1.png');
+}
+
+.menu-tab-dominicans{
+  @include menu-tab-image('dominicans-menu-item1.png');
 }
 #process_more_results_form, #more_results_form, #tidy_up_form{
   display: none;
@@ -312,6 +433,9 @@ ul{
 }
 #group-results{
   display:none;
+  h3{
+    background-color: #BBBBBB;
+  }
 
 }
 #search-result{
@@ -330,25 +454,40 @@ ul{
   display: none;
 }
 .main-panel-content{
-  background-color: #cbd4d4;
+  background-color: #4c4f4f;
+
 }
 .crawler_page_name{
   background-color: #72869c;
 }
-.search-result-outer, .group-search-result-outer{
+.group-search-result-outer{
+  background-color: #b9c1c1;
+  overflow: auto;
+  margin: 0px 0px 5px 0px;
+}
+
+
+.search-result-outer{
   background-color: #b9c1c1;
   overflow: auto;
   margin: 0px 0px 5px 0px;
 }
 .search-result-text, .group-search-result-text{
-  background-color: #93adc9;
-  margin: 0px 0px 0px 23px;
+  background-color: #cecece;
+  padding: 0px 0px 0px 23px;
+  //margin: 0px 0px 0px 23px;
   width: -moz-calc(100% - 124px);
   width: -webkit-calc(100% - 124px);
   width: calc(100% - 124px);
   float: left;
 }
-.search-check-box, .group-search-check-box{
+
+.group-search-check-box{
+  height: 100%;
+  float: left;
+
+}
+.search-check-box {
   width: 20px;
   float: left;
 }
@@ -359,7 +498,14 @@ ul{
   }
 }
 
+.no-results{
+  padding: 3px;
+  background-color: #999999;
+}
+
 .page-results {
+  padding: 3px;
+  background-color: #999999;
   a:link {
     color: black;
   }

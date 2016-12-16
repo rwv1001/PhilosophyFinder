@@ -519,16 +519,16 @@ class SearchQuery < ApplicationRecord
 
     self.user_id = current_user.id
     search_terms=[]
-    if params[:word1].length >0
+    if params[:word1].length >0 && params[:word1] !~ /^\s*$/
       search_terms << params[:word1]
     end
-    if params[:word2].length >0
+    if params[:word2].length >0 && params[:word2] !~ /^\s*$/
       search_terms << params[:word2]
     end
-    if params[:word3].length >0
+    if params[:word3].length >0 && params[:word3] !~ /^\s*$/
       search_terms << params[:word3]
     end
-    if params[:word4].length >0
+    if params[:word4].length >0 && params[:word4] !~ /^\s*$/
       search_terms << params[:word4]
     end
     search_terms << "" << "" << "" << ""

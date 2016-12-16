@@ -15,7 +15,7 @@ class UsersController < ApplicationController
     if @user.save
       cookies[:auth_token] = @user.auth_token
 
-      redirect_to new_domain_crawler_path, notice: "Thank you for signing up!"
+      redirect_to new_domain_crawler_path
     else
       render "new"
     end

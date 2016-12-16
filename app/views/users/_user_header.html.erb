@@ -1,4 +1,7 @@
 <div class="user-header">
+  <div class="dominican-logo"></div>
+  <div class="thomas-header"> St. Thomas the Search Engine </div>
+  <div class="login-status-div">
   <% if current_user %>
       Logged in as <%= current_user.email %>.
       <%= link_to "Log Out", logout_path %>
@@ -6,4 +9,5 @@
       <%= link_to "Sign Up", signup_path %> or
       <%= link_to "Log In", login_path %>
   <% end %>
+  </div>
 </div>

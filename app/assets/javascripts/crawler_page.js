@@ -45,6 +45,11 @@ function ShowHelp()
     $group_div.hide();
 
 }
+function ShowDominicans()
+{
+    var win = window.open("http://www.op.org", '_blank');
+    win.focus();
+}
 
 function Search()
 {
@@ -53,6 +58,9 @@ function Search()
     var $specific_div = $('[id="specific_action_variables"]');
     $specific_div = $specific_div.empty();
     $specific_div.html($cloned_summary);
+    $("#search_notice").empty();
+    $("#search_notice").text("Please wait ...");
+    $("#search_notice").show();
     form_obj = $('[id="search_form"]');
     form_obj.submit();
 }

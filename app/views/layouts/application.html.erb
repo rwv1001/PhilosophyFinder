@@ -34,16 +34,18 @@
 
 
 </div>
-<div class="main-panel">
+
   <div class="menu-div">
-    <div class="menu-tab"  onclick="ShowSearchResults()" > Searches</div>
-    <div class="menu-tab"   onclick="ShowGroupResults()" > Groups</div>
-    <div class="menu-tab"   onclick="ShowHelp()" > Help</div>
+    <div  class="menu-tab-container"><div class="menu-tab-search"  onclick="ShowSearchResults()" > </div></div>
+    <div  class="menu-tab-container"><div class="menu-tab-groups"   onclick="ShowGroupResults()" > </div></div>
+    <div  class="menu-tab-container"><div class="menu-tab-help"   onclick="ShowHelp()" > </div></div>
+    <div  class="menu-tab-container"><div class="menu-tab-dominicans"   onclick="ShowDominicans()" > </div></div>
   </div>
+<div class="main-panel">
   <div class="main-panel-content">
 
     <div id="instructions">
-      <h1>St. Thomas the Search Engine</h1>
+
       <h2> Functionality</h2>
       <p> This web application allows you to search through the works of Aquinas in both English and Latin. It allows you to do proximity word searches. For each result found,
         the paragraph containing the result will be displayed together with a link to the website where the full text can be found. Furthermore, if desired, one can save and categorize

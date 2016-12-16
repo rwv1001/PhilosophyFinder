@@ -23,9 +23,9 @@
                 <div class="group-search-result-text">
                   <%= raw(search_result.highlighted_result) %>
                 </div>
-          <span class="group-search-check-box ">
+          <div class="group-search-check-box ">
             <input type="checkbox"  id="checkbox-group-search-result-<%= group_element.id %>" name ="group_search_result_list[]"  class="check"  value=<%= group_element.id %>  >
-          </span>
+          </div>
               </div>
           <% end %>
           <div class="actions group-search-action-button" ><%= submit_tag "Add Selected", id: "group-search-action-button" %></div>
