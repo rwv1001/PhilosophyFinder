@@ -283,7 +283,7 @@ ul{
 
 
 .main-panel{
-  @include main-width(100% - #{$menu-width} - 23.5px - #{$black-border-width}*3);
+  @include main-width("100% - #{$menu-width} - 23.5px - #{$black-border-width}*3");
 
 
   overflow-x: hidden;
@@ -302,7 +302,7 @@ ul{
 
 }
 .menu-div{
-  @include main-width(100vw  - #{$black-border-width}*2);
+  @include main-width("100vw  - #{$black-border-width}*2");
 
   background: image-url('Tileable-Wood-Texture1.png') repeat-x;
 
