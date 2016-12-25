@@ -180,23 +180,39 @@ class SearchQuery < ApplicationRecord
     #   logger.info "05"
     content = sentence.content.gsub(/\n/, ' ')
 
-  #  logger.info "@count #{@count} content: #{content}"
+   logger.info "@count #{@count} content: #{content}"
 
     highlights = Hash.new
 
-    tokens.each do |token|
-      if token.length >0
-        matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
-        matches.each do |match|
-          if highlights.key?(match.offset(0)[0]) == false
-            highlights[match.offset(0)[0]]= match.offset(0)[1]
-          elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
-            highlights[match.offset(0)[0]] = match.offset(0)[1]
+    token_found = false
+    search_ok = true
+    tokens.each do |search_fields|
+      token_found = false
+      search_fields.each do |token|
+
+        if token.length >0 and search_ok
+          matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+          if matches.length > 0
+            token_found = true
+            matches.each do |match|
+              if highlights.key?(match.offset(0)[0]) == false
+                highlights[match.offset(0)[0]]= match.offset(0)[1]
+              elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
+                highlights[match.offset(0)[0]] = match.offset(0)[1]
+              end
+            end
+          else
+            logger.info "search_ok = false for token = #{token}, content = #{content}"
+
           end
         end
       end
+      if token_found == false
+        search_ok = false
+      end
 
     end
+    if search_ok
     #  logger.info "highlights: #{highlights}"
     sorted_highlights = Hash[highlights.sort]
 
@@ -247,6 +263,7 @@ class SearchQuery < ApplicationRecord
       @highlighted_result << sentence1.content << ". "
     end
     @highlighted_result << '<span class="highlight-sentence">' << content << ". " << "</span>"
+      end
   end
 
   def process_sentences(sentence_set, tokens)
@@ -298,6 +315,7 @@ class SearchQuery < ApplicationRecord
       term = term.gsub(/(^\s*|\s*$)/, "")
       if term.length >0
         phrase_split = term.split(' ')
+
         if phrase_split.length == 1
           if term_str.length >0
             term_str << " OR "
@@ -310,6 +328,7 @@ class SearchQuery < ApplicationRecord
 
               phrase << Word.where("word_name ILIKE '#{phrase_word}'");
             else
+              logger.info "get_terms failed, phrase_word = #{phrase_word.inspect}, phrase = #{phrase.inspect}"
               #Supose we have a phrase of the form 'on ioj% first'. After processing ioj% we know we aren't going to get a match
             end
           end
@@ -362,6 +381,12 @@ class SearchQuery < ApplicationRecord
 
     # terms = Word.where("word_name LIKE (?)", "#{search_term}")
     terms_hash = get_terms(search_term)
+    no_terms = false
+    if terms_hash[:single_terms].length == 0 and terms_hash[:phrases].length == 0
+      no_terms = true
+      logger.info "single search: no terms found for search_term = #{search_term.inspect}"
+      initialize_process_sentences()
+    else
     terms = terms_hash[:single_terms]
     logger.info "single_search words = #{terms.inspect}"
     sentence_set = SortedSet.new
@@ -376,32 +401,49 @@ class SearchQuery < ApplicationRecord
       end
     end
     phrases = terms_hash[:phrases]
-    phrases_multiples = phrases.map { |phrase| get_phrase_multiples(phrase) }
+    if phrases.length >0
+    phrases_multiples = get_phrase_multiples(phrases);
+    logger.info "phrases = #{phrases}"
+    logger.info "phrases_multiples = #{phrases_multiples.length}"
 
+    sql_str_array = (0..(phrases_multiples.length-1)).to_a.map {|jj|
+      "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+        "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')}
+
+   sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
+    sentence_set|= sentence_phrase_set
+    end
 
     # sql_str= "SELECT * FROM word_pairs wp1 INNER JOIN word_pairs wp2 ON wp2.sentence_id = wp1.sentence_id INNER JOIN word_pairs wp3 ON  wp3.sentence_id = wp1.sentence_id
     #WHERE wp1.separtion =1 AND  wp2.separtion =1  wp3.separtion =1 AND wp1.word_mulitple IN (#{word_multiples.to_a.join(', ')}) "
 
-    sql_str = "SELECT * FROM word_pairs wp "
+=begin
+    sql_str = "SELECT DISTINCT sentenced_id FROM word_pairs wp "
     for i in 0..phrases_multiples.length-1
       for j in 0..phrases_multiples[i].length - 1
         sql_str << "INNER JOIN word_pairs wp#{i}_#{j} ON wp#{i}_#{j}.sentence_id = wp.sentence_id "
       end
       sql_str << " WHERE ("
-      sql_str << (0..(phrase_multiples.length-1)).to_a.map { |i| (0..(phrase_multiples[i].length-1)).to_a.map {
-        "wp#{i}_#{j}.separation = 1 AND wp#{i}_#{j}.word_multiple IN (#{phrase_multiples[i][j].to_a.join(', ')}) " }.join(' AND ') }.join(') OR (')<< ")"
+      sql_str << (0..(phrases_multiples.length-1)).to_a.map { |i| (0..(phrases_multiples[i].length-1)).to_a.map {
+        "wp#{i}_#{j}.separation = 1 AND wp#{i}_#{j}.word_multiple IN (#{phrases_multiples[i][j].to_a.join(', ')}) " }.join(' AND ') }.join(') OR (')<< ")"
 
       logger.info "**************** sql_str = #{ sql_str } "
       word_phrase_sentences = WordPair.find_by_sql(sql_str)
       logger.info "word_phrase_sentences = #{word_phrase_sentences.inspect}"
       word_phrase_sentences.map { |sentence| sentence_set.add(sentence.sentence_id) }
     end
-    tokens = get_tokens(search_term)
+=end
+    tokens = [get_tokens(search_term)]
 
+    logger.info "***********************sentence_set = #{sentence_set.inspect}"
     sentence_set = truncate(sentence_set.to_a)
     process_sentences(sentence_set, tokens)
 
     #   logger.info "search_results: @search_results.length"
+
+    end
+
     return @search_results
   end
 
@@ -464,7 +506,7 @@ class SearchQuery < ApplicationRecord
   def get_all_tokens(search_terms)
     tokens = []
     search_terms.each do |search_term|
-      tokens.concat(get_tokens(search_term))
+      tokens << get_tokens(search_term)
     end
     return tokens
   end
@@ -524,11 +566,18 @@ class SearchQuery < ApplicationRecord
     logger.info "multiple_search begin"
     zero_multiples = false
     terms = []
+    no_terms = false
 
     search_terms.each do |search_term|
+      term = get_terms(search_term)
+      if term[:single_terms].length == 0 and term[:phrases].length == 0
+        no_terms = true
+      else
+        terms << term
+      end
 
-      terms << get_terms(search_term)
     end
+    if no_terms == false
     tokens = get_all_tokens(search_terms)
 
     term_indicies = (0..search_terms.length-1).to_a
@@ -750,6 +799,9 @@ class SearchQuery < ApplicationRecord
       sentence_set= truncate(sentence_set)
       end
       process_sentences(sentence_set, tokens)
+    else
+      initialize_process_sentences()
+    end
       #  logger.info "search_results: @search_results.length"
       return @search_results
 
