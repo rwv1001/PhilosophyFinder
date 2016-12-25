@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160909034812) do
+ActiveRecord::Schema.define(version: 20161220023204) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -185,6 +185,7 @@ ActiveRecord::Schema.define(version: 20160909034812) do
   end
 
   add_index "word_pairs", ["result_page_id"], name: "index_word_pairs_on_result_page_id", using: :btree
+  add_index "word_pairs", ["sentence_id"], name: "sentence_id_ix", using: :btree
   add_index "word_pairs", ["word_multiple"], name: "word_multiple_id_ix", using: :btree
 
   create_table "word_singletons", force: :cascade do |t|

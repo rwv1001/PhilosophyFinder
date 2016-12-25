@@ -9,6 +9,9 @@
         <div>
           <%= label_tag :Word_Separation %><br />
           <select id="word_separation" name="word_separation" onChange="SelectDomainAction()">
+
+            <option <% if args[:val_selected] == PARAGRAPH_SEPARATION %> selected <% end %>  value= <%= PARAGRAPH_SEPARATION %> > Within paragraph </option>
+            <option <% if args[:val_selected] == SENTENCE_SEPARATION %> selected <% end %>  value= <%= SENTENCE_SEPARATION %> > Within sentence </option>
             <%  (1..10).to_a.reverse_each do |val| %>
 
             <option <% if args[:val_selected] == val %> selected <% end %>  value= <%= val%> > Within <%= val%> </option>

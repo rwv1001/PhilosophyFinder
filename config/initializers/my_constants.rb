@@ -6,6 +6,8 @@ DOMAIN_ACTION = {:select_action => "select_action", :search_domain => "search_do
 MAX_DISPLAY = 50
 MAX_RESULTS = 1000
 MAX_QUERY_STORE = 10
+SENTENCE_SEPARATION = 11
+PARAGRAPH_SEPARATION = 12
 
 
 
