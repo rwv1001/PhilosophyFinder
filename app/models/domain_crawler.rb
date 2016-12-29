@@ -166,7 +166,7 @@ class DomainCrawler < ApplicationRecord
   def AddSingletonPairs()
     logger.info "AddSingletonPairs"
     if @word_singleton_inserts.length > 0
-      sql = "INSERT INTO word_singletons (word_id, sentence_id, result_page_id) VALUES #{@word_singleton_inserts.join(', ')}"
+      sql = "INSERT INTO word_singletons (word_id, sentence_id, result_page_id, paragraph_id) VALUES #{@word_singleton_inserts.join(', ')}"
       # logger.info "sql = #{sql}"
       sql_save(sql)
     else
@@ -218,7 +218,7 @@ class DomainCrawler < ApplicationRecord
     #  logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
     word_singleton_set.each do |word|
 
-      @word_singleton_inserts.push "(#{@word_hash[word]},#{sentence_obj.id}, #{result_page_id})"
+      @word_singleton_inserts.push "(#{@word_hash[word]},#{sentence_obj.id}, #{result_page_id}, #{sentence_obj.paragraph_id})"
     end
     #  logger.info "@word_singleton_inserts = #{@word_singleton_inserts}"
 

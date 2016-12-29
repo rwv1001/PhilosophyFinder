@@ -321,6 +321,8 @@ class DomainCrawlersController < ApplicationController
         rename_domain(params)
       when "Fix Domain"
         fix_domain(params)
+      when "Set Paragraphs"
+        set_paragraphs(params)
       when "Move Selected"
         move_domain(params)
       when "Remove Domain"
@@ -347,6 +349,27 @@ class DomainCrawlersController < ApplicationController
 
   #  logger.info "fix_domain result: #{@result_str}"
     @selected = DOMAIN_ACTION[:fix_domain]
+  end
+
+  def set_paragraphs(params)
+    logger.info "set_paragraphs begin"
+      first_null_id = WordSingleton.find_by_sql("SELECT * FROM word_singletons WHERE paragraph_id IS NULL LIMIT 1").first;
+    if first_null_id != nil
+      last_id = WordSingleton.find_by_sql("SELECT * FROM word_singletons ORDER BY id DESC LIMIT 1").first.id
+      first_id = first_null_id.id
+      block_size = 1000
+      while first_id < last_id
+        update_str = "UPDATE word_singletons AS ws SET paragraph_id = s.paragraph_id FROM sentences s WHERE s.id = sentence_id AND ws.id >=  #{first_id} AND ws.id < #{first_id+block_size}"
+        ActiveRecord::Base.connection.execute(update_str)
+        first_id = first_id+block_size;
+      end
+    end
+    last_id
+
+
+
+
+    flash[:notice] = "setting paragraphs"
   end
 
   def remove_domain(params)

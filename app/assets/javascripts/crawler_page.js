@@ -176,6 +176,16 @@ function SelectDomainAction()
             $( ".domain-action-button" ).show();
             $("#domain-action-button").prop('value', 'Fix Domain');
             break;
+        
+        case "set_paragraphs":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $(".bad_page").show();
+            $(".domain-name-radio").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Set Paragraphs');
+
+            break;
         case "search_domain":
             $( ".domain-field" ).hide();
             $(".domain-checkbox").show();

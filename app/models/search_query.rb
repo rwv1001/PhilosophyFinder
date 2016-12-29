@@ -31,15 +31,13 @@ class SearchQuery < ApplicationRecord
     if search_terms.length == 1
       single_search(self.first_search_term)
     elsif search_terms.length > 1
-
-    case self.word_separation
-      when SENTENCE_SEPARATION
-        sentence_search(search_terms)
-      when PARAGRAPH_SEPARATION
-        paragraph_search(search_terms)
-      else
+      case self.word_separation
+        when SENTENCE_SEPARATION, PARAGRAPH_SEPARATION
+          sentence_paragraph_search(search_terms)
+        else
           multiple_search(search_terms)
-       end
+      end
+
     end
 
     search_output[:search_results] = @search_results
@@ -180,39 +178,99 @@ class SearchQuery < ApplicationRecord
     #   logger.info "05"
     content = sentence.content.gsub(/\n/, ' ')
 
-   logger.info "@count #{@count} content: #{content}"
+   logger.info "@count #{@count}, sentence_id = #{sentence_id}, content: #{content}"
 
     highlights = Hash.new
 
-    token_found = false
-    search_ok = true
-    tokens.each do |search_fields|
+    if self.word_separation == PARAGRAPH_SEPARATION and @current_paragraph_id != paragraph.id
+      paragraph_content = paragraph.content
       token_found = false
-      search_fields.each do |token|
+      @search_ok = true
+      tokens.each do |search_fields|
+        token_found = false
+        search_fields.each do |token|
 
-        if token.length >0 and search_ok
-          matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
-          if matches.length > 0
-            token_found = true
-            matches.each do |match|
-              if highlights.key?(match.offset(0)[0]) == false
-                highlights[match.offset(0)[0]]= match.offset(0)[1]
-              elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
-                highlights[match.offset(0)[0]] = match.offset(0)[1]
+          if token.length >0 and @search_ok
+            matches =paragraph_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            if matches.length > 0
+              token_found = true
+              matches.each do |match|
+                if highlights.key?(match.offset(0)[0]) == false
+                  highlights[match.offset(0)[0]]= match.offset(0)[1]
+                elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
+                  highlights[match.offset(0)[0]] = match.offset(0)[1]
+                end
               end
-            end
-          else
-            logger.info "search_ok = false for token = #{token}, content = #{content}"
+            else
+              logger.info "search_ok = false for token = #{token}, paragraph_content = #{paragraph_content}"
 
+            end
           end
         end
-      end
-      if token_found == false
-        search_ok = false
+        if token_found == false
+          @search_ok = false
+        end
+
       end
 
     end
-    if search_ok
+    if self.word_separation == PARAGRAPH_SEPARATION
+      if @search_ok
+        tokens.each do |search_fields|
+          token_found = false
+          search_fields.each do |token|
+
+            if token.length >0
+              matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+              if matches.length > 0
+                token_found = true
+                matches.each do |match|
+                  if highlights.key?(match.offset(0)[0]) == false
+                    highlights[match.offset(0)[0]]= match.offset(0)[1]
+                  elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
+                    highlights[match.offset(0)[0]] = match.offset(0)[1]
+                  end
+                end
+              else
+                logger.info "search_ok = false for token = #{token}, content = #{content}"
+
+              end
+            end
+          end
+        end
+      end
+    else
+      token_found = false
+      @search_ok = true
+      tokens.each do |search_fields|
+        token_found = false
+        search_fields.each do |token|
+
+          if token.length >0 and @search_ok
+            matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            if matches.length > 0
+              token_found = true
+              matches.each do |match|
+                if highlights.key?(match.offset(0)[0]) == false
+                  highlights[match.offset(0)[0]]= match.offset(0)[1]
+                elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
+                  highlights[match.offset(0)[0]] = match.offset(0)[1]
+                end
+              end
+            else
+              logger.info "search_ok = false for token = #{token}, content = #{content}"
+
+            end
+          end
+        end
+        if token_found == false
+          @search_ok = false
+        end
+
+      end
+
+    end
+    if @search_ok and highlights.length>0
     #  logger.info "highlights: #{highlights}"
     sorted_highlights = Hash[highlights.sort]
 
@@ -363,11 +421,13 @@ class SearchQuery < ApplicationRecord
       phrase_multiples = []
       for i in 0..phrase.length-2
         word_multiples = []
+        logger.info "begin phrase #{phrase.inspect}"
         phrase[i].each do |wild_word_1|
           phrase[i+1].each do |wild_word_2|
             word_multiples << wild_word_1.word_prime * wild_word_2.word_prime
             # logger.info "wild_word_1 = #{wild_word_1.inspect}, wild_word_2 = #{wild_word_2.inspect}"
           end
+          logger.info "end phrase #{phrase.inspect}"
         end
         phrase_multiples <<  word_multiples
       end
@@ -418,26 +478,12 @@ class SearchQuery < ApplicationRecord
     # sql_str= "SELECT * FROM word_pairs wp1 INNER JOIN word_pairs wp2 ON wp2.sentence_id = wp1.sentence_id INNER JOIN word_pairs wp3 ON  wp3.sentence_id = wp1.sentence_id
     #WHERE wp1.separtion =1 AND  wp2.separtion =1  wp3.separtion =1 AND wp1.word_mulitple IN (#{word_multiples.to_a.join(', ')}) "
 
-=begin
-    sql_str = "SELECT DISTINCT sentenced_id FROM word_pairs wp "
-    for i in 0..phrases_multiples.length-1
-      for j in 0..phrases_multiples[i].length - 1
-        sql_str << "INNER JOIN word_pairs wp#{i}_#{j} ON wp#{i}_#{j}.sentence_id = wp.sentence_id "
-      end
-      sql_str << " WHERE ("
-      sql_str << (0..(phrases_multiples.length-1)).to_a.map { |i| (0..(phrases_multiples[i].length-1)).to_a.map {
-        "wp#{i}_#{j}.separation = 1 AND wp#{i}_#{j}.word_multiple IN (#{phrases_multiples[i][j].to_a.join(', ')}) " }.join(' AND ') }.join(') OR (')<< ")"
 
-      logger.info "**************** sql_str = #{ sql_str } "
-      word_phrase_sentences = WordPair.find_by_sql(sql_str)
-      logger.info "word_phrase_sentences = #{word_phrase_sentences.inspect}"
-      word_phrase_sentences.map { |sentence| sentence_set.add(sentence.sentence_id) }
-    end
-=end
     tokens = [get_tokens(search_term)]
 
     logger.info "***********************sentence_set = #{sentence_set.inspect}"
     sentence_set = truncate(sentence_set.to_a)
+
     process_sentences(sentence_set, tokens)
 
     #   logger.info "search_results: @search_results.length"
@@ -511,6 +557,18 @@ class SearchQuery < ApplicationRecord
     return tokens
   end
 
+  def truncate_sentence_paragraph(sentence_paragraph_set)
+    if self.word_separation == SENTENCE_SEPARATION
+      return truncate(sentence_paragraph_set)
+    else
+      if sentence_paragraph_set.length > MAX_RESULTS
+        return sentence_paragraph_set = sentence_paragraph_set[0..(MAX_RESULTS-1)]
+      else
+        return sentence_paragraph_set
+      end
+    end
+  end
+
   def truncate(sentence_set)
     if sentence_set.length == 0
       return sentence_set
@@ -539,8 +597,186 @@ class SearchQuery < ApplicationRecord
 
   end
 
-  def sentence_search(search_terms)
+  def get_term_ids(single_terms)
+    single_terms
+    sql_str = "SELECT * FROM words WHERE word_name LIKE "
+
+  end
+
+  def get_phrase_terms(phrases)
+    #this method choses a representative wild_word list from each phrase
+    word_ids = SortedSet.new
+    phrases.each do |phrase|
+      min_length_wild_words = phrase.map{|wild_words| wild_words.length}.min
+      min_wild_words = phrase.size.times.select{|mm| phrase[mm].length == min_length_wild_words}.map{|nn| phrase[nn]}
+      wild_words_lengths = min_wild_words.map{|wild_words| [wild_words.map{|wild_word| wild_word.word_name.length}.max, wild_words.map{|wild_word| wild_word.word_name.length}.min]}
+      max_wild_word_length = wild_words_lengths.map{|max_min| max_min[0]}.max
+      max_wild_word = wild_words_lengths.size.times.select{|mm| wild_words_lengths[mm][0] == max_wild_word_length}
+      min_max_wild_word_length = max_wild_word.map{|mm| wild_words_lengths[mm][1]}.max
+      min_max_index = wild_words_lengths.map{|max_min| max_min[1]}.index(min_max_wild_word_length)
+      word_ids|= min_wild_words[min_max_index].map{|word| word.id_value}.to_set
+    end
+    logger.info "word_ids = #{word_ids.inspect} for phrases = #{phrases.inspect}"
+    return word_ids
+  end
+
+  def get_phrase_sentence_paragraphs(phrases)
+    if phrases.length == 0
+      return nil
+    end
+    phrases_multiples = get_phrase_multiples(phrases)
+    sql_str_array = (0..phrases_multiples.length - 1).map{|jj|  "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+      "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')}
+
+    sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
+    if self.word_separation == SENTENCE_SEPARATION
+      return sentence_phrase_set
+    else
+      paragraph_set = Sentence.find_by_sql("SELECT * FROM sentences WHERE id IN (#{sentence_phrase_set.to_a.join(' ,')})").map{|ss| ss.paragraph_id}.to_set
+      return paragraph_set
+      end
+
+
+
+
+
+  end
+
+  def find_sql_sentence_paragraph(sql_str)
+    if self.word_separation == SENTENCE_SEPARATION
+    ret_value =WordSingleton.find_by_sql(sql_str).map{|word_singleton| word_singleton.sentence_id}.to_set
+    else
+      ret_value =WordSingleton.find_by_sql(sql_str).map{|word_singleton| word_singleton.paragraph_id}.to_set
+      end
+  end
+  def sentence_paragraph_search(search_terms)
     logger.info "sentence_search begin"
+    zero_multiples = false
+    terms = []
+    no_terms = false
+
+    search_terms.each do |search_term|
+      term = get_terms(search_term)
+      if term[:single_terms].length == 0 and term[:phrases].length == 0
+        no_terms = true
+      else
+        terms << term
+      end
+
+    end
+    if no_terms == false
+      tokens = get_all_tokens(search_terms)
+
+      term_indicies = (0..search_terms.length-1).to_a
+      term_pairs=term_indicies.combination(2).to_a
+      #  logger.info "term_pairs: #{term_pairs.inspect}"
+      result_pair_str = "(#{@result_pages.join(', ')})"
+      sql_str = []
+      sentence_pairs = []
+
+      wml = [] # this is the main multiple structure*************************
+      sql_intersect_header = ""
+      phrase_terms = term_indicies.map{|term_index| get_phrase_terms(terms[term_index][:phrases])}
+      if  self.word_separation == SENTENCE_SEPARATION
+              @separation_str = "sentence_id"
+              phrase_ids = term_indicies.map { |term_index|  get_phrase_sentence_paragraphs(terms[term_index][:phrases]) }
+
+
+           else
+             @separation_str = "paragraph_id"
+             phrase_ids = term_indicies.map { |term_index|  get_phrase_sentence_paragraphs(terms[term_index][:phrases]) }
+
+      end
+
+      logger.info "a"
+      word_ids = term_indicies.map{|term_index| terms[term_index][:single_terms]}
+
+      logger.info "term_indicies = #{term_indicies.inspect}"
+      logger.info "phrase_ids = #{phrase_ids.inspect}"
+      logger.info "b"
+      term_pairs.each do |term_pair|
+        pair_list = SortedSet.new
+        if !zero_multiples
+          #******************* term x term multiples **************************
+          inter_term_ids = [word_ids[term_pair[0]],word_ids[term_pair[1]]]
+          logger.info "inter_term_ids = #{inter_term_ids.inspect}"
+
+          if inter_term_ids[0].length > 0 and inter_term_ids[1].length > 0
+            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' , ')})"
+            pair_list |= find_sql_sentence_paragraph(sql_str)
+          end
+          #******************* term x phrase multiples **************************
+
+
+          if word_ids[term_pair[0]].length>0 && phrase_ids[term_pair[1]]!=nil
+            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' , ')})"
+            pair_list |= (find_sql_sentence_paragraph(sql_str) & phrase_ids[term_pair[1]])
+          end
+          #******************* phrase x term multiples **************************
+
+
+          if word_ids[term_pair[1]].length>0 && phrase_ids[term_pair[0]]!=nil
+            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE ws1.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' , ')})"
+            pair_list |= (find_sql_sentence_paragraph(sql_str) & phrase_ids[term_pair[0]])
+          end
+          #******************* phrase x phrase multiples **************************
+
+
+          if phrase_ids[term_pair[0]]!=nil && phrase_ids[term_pair[1]]!=nil
+            logger.info "c"
+            sql_str = "SELECT  DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE ws1.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' ,')})"
+           # pair_list |= (WordSingleton.find_by_sql(sql_str).map{|word_singleton| word_singleton.sentence_id}.to_set & phrase_ids[term_pair[0]])
+            pair_list |= phrase_ids[term_pair[0]] & phrase_ids[term_pair[1]]
+            logger.info "d"
+          end
+
+          if pair_list.length >0
+            wml << pair_list
+          else
+            zero_multiples = true
+          end
+          logger.info "e"
+        end
+
+      end
+            #word_multiples_list = [word_multiples_pair_list, (and) word_multiples_pair_list, (and) word_multiples_pair_list, ...]
+      #word_multiples_pair_list = [[inter_term_multiples, (and) phrase_multiples], or [inter_term_multiples, and phrase_multiples], or [inter_term_multiples, and phrase_multiples], ...]
+      logger.info "wml = #{wml.inspect}"
+
+
+      if wml.length>0 and !zero_multiples
+        sentence_paragraph_set = wml.inject(:&)
+
+
+
+
+
+        logger.info "***************************** before truncate sentence_set = #{sentence_paragraph_set.inspect}"
+        sentence_paragraph_set = truncate_sentence_paragraph(sentence_paragraph_set)
+
+      end
+      if self.word_separation == SENTENCE_SEPARATION
+        sentence_set = sentence_paragraph_set
+      elsif sentence_paragraph_set.length >0
+        sentence_set = Sentence.find_by_sql("SELECT * FROM sentences WHERE paragraph_id IN (#{sentence_paragraph_set.to_a.join(' ,')})").map{|ss| ss.id}.to_set
+      else
+        sentence_set = sentence_paragraph_set
+      end
+      logger.info "***************************** sentence_set = #{sentence_set.inspect}"
+      process_sentences(sentence_set, tokens)
+    else
+      initialize_process_sentences()
+    end
+    #  logger.info "search_results: @search_results.length"
+    return @search_results
+
+
+
     terms = []
   end
 
@@ -682,49 +918,22 @@ class SearchQuery < ApplicationRecord
 
     sentence_set = SortedSet.new
     if wml.length>0 and !zero_multiples
-      sql_str = "SELECT DISTINCT wp.sentence_id FROM word_pairs wp "
-      for kk in 0..wml.length-1
-        word_multiples_pair_list = wml[kk]
-        inter_term_multiples = word_multiples_pair_list[0]
 
 
-##word_multiples_pair_list << [inter_term_multiples, [phrase_multiples_f,                      phrase_multiples_s]]
-#(wp, wp, ...),       [phrase,                  phrase, ...],                  [phrase, phrase, ...]]
-#                     [(wp,wp,..),(wp,wp,...)]
-        for ii in 0..wml[kk].length-1 #
-          sql_str << "INNER JOIN word_pairs wp#{kk}_#{ii} ON wp#{kk}_#{ii}.sentence_id = wp.sentence_id " #k indexes term_pairs, i indexes word_multiples_pair_list (inter_term multiples)
-          if wml[kk][ii][1].length >0
-            phrase_multiples_f = wml[kk][ii][1][0]
-            for jj in 0..wml[kk][ii][1][0].length - 1
-              for mm in 0..phrase_multiples_f[jj].length - 1
-              sql_str << "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "
-                end
-            end
-            if wml[kk][ii][1].length >1
-              phrase_multiples_s = wml[kk][ii][1][1]
-              for jj in 0..phrase_multiples_s.length - 1
-                for mm in 0..phrase_multiples_s[jj].length - 1
-                  sql_str << "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "
-                end
-              end
-            end
-          end
-        end
-      end
 
-
-      sql_str_array =  (0..(wml.length-1)).to_a.map {\
+          sql_str_array =  (0..(wml.length-1)).to_a.map {\
          |kk| (0..(wml[kk].length-1)).to_a.map {\
            |ii| ["SELECT DISTINCT wp#{kk}_#{ii}.sentence_id FROM word_pairs wp#{kk}_#{ii}\
  WHERE wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) ", ((wml[kk][ii][1].length>0) ?\
               (0..(wml[kk][ii][1][0].length-1)).to_a.map {|jj|
-                     "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
-                       "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
+            "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
+              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
  "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})"}.join(' AND ')} :[]),((wml[kk][ii][1].length>1) ? \
  (0..(wml[kk][ii][1][1].length-1)).to_a.map {|jj|
-        "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
-          "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|\
+            "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
+              "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|\
  "wps#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wps#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][1][jj][mm].join(', ')})"}.join(' AND ')} :[])] }}
+
 
       sql_str_array.each do |kk|
         (0..kk.length - 1).each.each do |ii|
