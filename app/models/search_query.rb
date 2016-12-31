@@ -194,13 +194,6 @@ class SearchQuery < ApplicationRecord
             matches =paragraph_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
             if matches.length > 0
               token_found = true
-              matches.each do |match|
-                if highlights.key?(match.offset(0)[0]) == false
-                  highlights[match.offset(0)[0]]= match.offset(0)[1]
-                elsif match.offset(0)[1] > highlights[match.offset(0)[0]]
-                  highlights[match.offset(0)[0]] = match.offset(0)[1]
-                end
-              end
             else
               logger.info "search_ok = false for token = #{token}, paragraph_content = #{paragraph_content}"
 
@@ -284,7 +277,8 @@ class SearchQuery < ApplicationRecord
       end
     end
     compressed_highlights.reverse_each do |pair|
-      #       logger.info "inserting pair #{pair}"
+      logger.info "inserting pair #{pair} into content #{content}"
+
       content.insert(pair[1], '</span>')
       content.insert(pair[0], '<span class="highlight">')
     end
@@ -761,11 +755,11 @@ class SearchQuery < ApplicationRecord
 
       end
       if self.word_separation == SENTENCE_SEPARATION
-        sentence_set = sentence_paragraph_set
+        sentence_set = sentence_paragraph_set.sort
       elsif sentence_paragraph_set.length >0
-        sentence_set = Sentence.find_by_sql("SELECT * FROM sentences WHERE paragraph_id IN (#{sentence_paragraph_set.to_a.join(' ,')})").map{|ss| ss.id}.to_set
+        sentence_set = Sentence.find_by_sql("SELECT * FROM sentences WHERE paragraph_id IN (#{sentence_paragraph_set.to_a.join(' ,')})").map{|ss| ss.id}.to_set.sort
       else
-        sentence_set = sentence_paragraph_set
+        sentence_set = sentence_paragraph_set.sort
       end
       logger.info "***************************** sentence_set = #{sentence_set.inspect}"
       process_sentences(sentence_set, tokens)
