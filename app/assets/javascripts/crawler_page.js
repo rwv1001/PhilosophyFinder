@@ -88,33 +88,60 @@ function SelectCrawlerPage( page_id) {
    // expand_ref_obj.hide();
 }
 
+function CrawlerPageRange(page_id)
+{
+    crawler_page_id_obj = $('[id="crawler_page_id"]');
+    crawler_page_id_obj.attr("value", page_id);
+    crawler_page_action_obj = $('[id="crawler_page_action"]');
+    crawler_page_action_obj.attr("value", "page-range");
+    expand_contract_radio_obj = $('[name="expand_contract_radio"]');
+    expand_contract_radio_obj.attr("value", true);
+    expand_contract_form_obj = $('[id="expand_contract_form"]');
+    expand_contract_form_obj.submit();
+}
 
 
 function expandCrawlerPage( page_id) {
 
-    ul_ref_obj_str = 'ul-crawler-page-' + page_id;
-    ul_ref_obj = $('[name="ul-crawler-page-'+ page_id+'"]');
+    //ul_ref_obj_str = 'ul-crawler-page-' + page_id;
+    //ul_ref_obj = $('[name="ul-crawler-page-'+ page_id+'"]');
 
     
-    ul_ref_obj.show();
+    //ul_ref_obj.show();
 
-    contract_ref_obj = $('[name="contract-button-'+ page_id+'"]');
-    contract_ref_obj.show();
-    expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
-    expand_ref_obj.hide();
+  //  contract_ref_obj = $('[name="contract-button-'+ page_id+'"]');
+   // contract_ref_obj.show();
+   // expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
+  //  expand_ref_obj.hide();
+    crawler_page_id_obj = $('[id="crawler_page_id"]');
+    crawler_page_id_obj.attr("value", page_id);
+    crawler_page_action_obj = $('[id="crawler_page_action"]');
+    crawler_page_action_obj.attr("value", "expand-contract");
+    expand_contract_radio_obj = $('[name="expand_contract_radio"]');
+    expand_contract_radio_obj.attr("value", true);
+    expand_contract_form_obj = $('[id="expand_contract_form"]');
+    expand_contract_form_obj.submit();
 }
 
 function contractCrawlerPage( page_id) {
-    ul_ref_obj_str = 'ul-crawler-page-' + page_id;
-    ul_ref_obj = $('[name="ul-crawler-page-'+ page_id+'"]');
+  //  ul_ref_obj_str = 'ul-crawler-page-' + page_id;
+  //  ul_ref_obj = $('[name="ul-crawler-page-'+ page_id+'"]');
 
 
-    ul_ref_obj.hide();
+ //   ul_ref_obj.hide();
 
-    contract_ref_obj = $('[name="contract-button-'+ page_id+'"]');
-    contract_ref_obj.hide();
-    expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
-    expand_ref_obj.show();
+//    contract_ref_obj = $('[name="contract-button-'+ page_id+'"]');
+ //   contract_ref_obj.hide();
+ //   expand_ref_obj = $('[name="expand-button-'+ page_id+'"]');
+//    expand_ref_obj.show();
+    crawler_page_id_obj = $('[id="crawler_page_id"]');
+    crawler_page_id_obj.attr("value", page_id);
+    crawler_page_action_obj = $('[id="crawler_page_action"]');
+    crawler_page_action_obj.attr("value", "expand-contract");
+    expand_contract_radio_obj = $('[name="expand_contract_radio"]');
+    expand_contract_radio_obj.attr("value", false);
+    expand_contract_form_obj = $('[id="expand_contract_form"]');
+    expand_contract_form_obj.submit();
 }
 function ProcessMore()
 {
@@ -175,8 +202,15 @@ function SelectDomainAction()
             $(".domain-name-radio").show();
             $( ".domain-action-button" ).show();
             $("#domain-action-button").prop('value', 'Fix Domain');
+            break;reorder_pages
+        case "reorder_pages":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $(".bad_page").show();
+            $(".domain-name-radio").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Reorder Pages');
             break;
-        
         case "set_paragraphs":
             $( ".domain-field" ).hide();
             $( ".domain-new" ).show();
@@ -192,8 +226,18 @@ function SelectDomainAction()
             $(".bad_page").hide();
             $( ".search-new" ).show();
             $(".search-old").show();
+            $('[id="search_type"]').prop('value', "search_domains");
             break;
-
+        
+        case "search_groups":
+            $( ".domain-field" ).hide();
+            $(".domain-checkbox").show();
+            $(".bad_page").hide();
+            $( ".search-new" ).show();
+            $(".search-old").show();
+            $('[id="search_type"]').prop('value', "search_groups");
+            break;
+        
         case "move_domain":
             $(".domain-field").hide();
             $(".domain-name-radio").show();

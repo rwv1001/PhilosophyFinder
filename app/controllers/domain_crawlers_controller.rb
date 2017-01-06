@@ -35,10 +35,11 @@ class DomainCrawlersController < ApplicationController
     logger.info "crawler_page: #{crawler_page.inspect}"
     descendents = crawler_page.root.descendants.arrange
     descendents.each do |descendent|
-  #    logger.info "Descendent is #{descendent}"
+      #    logger.info "Descendent is #{descendent}"
     end
     x =y
   end
+
   def tidy_up
     logger.info "tidy up params: #{params.inspect}"
     SearchQuery.tidy_up(params[:tidy_user_id])
@@ -81,7 +82,7 @@ class DomainCrawlersController < ApplicationController
       @absolute_last = fetch_output[:absolute_last]
       @absolute_first =fetch_output[:absolute_first]
       @found_results = fetch_output[:found_results]
-  #    logger.info "more_result - first item: #{@search_results[0].inspect}"
+      #    logger.info "more_result - first item: #{@search_results[0].inspect}"
 
       if @first_result_id > fetch_output[:absolute_first]
         @show_previous = true
@@ -120,7 +121,12 @@ class DomainCrawlersController < ApplicationController
     search_query = SearchQuery.new();
     search_query.create(params, current_user);
     @query_id = search_query.id
-    #  crawler_debug
+#  crawler_debug
+    if params[:search_type] == "search_domains"
+      @search_groups1 = false
+    else
+      @search_groups1 = true
+    end
 
 
     @domain_length = 0;
@@ -145,7 +151,7 @@ class DomainCrawlersController < ApplicationController
           @show_next = false
         end
         @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
-     #   logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
+        #   logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
 
 
       end
@@ -163,27 +169,27 @@ class DomainCrawlersController < ApplicationController
   def create
     logger.info "DomainCrawlersController create called"
     @result_str = ""
-   # logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
+    # logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
     @domain_crawler = DomainCrawler.new(domain_crawler_params)
-  #  logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
+    #  logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
 
- #   logger.info "DomainCrawlersController create, after new"
+    #   logger.info "DomainCrawlersController create, after new"
     if @domain_crawler.save
-  #    logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
+      #    logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
       first_page_id = @domain_crawler.crawl
       if first_page_id !=0
-    #    logger.info "Crawl success first_id = #{first_page_id}"
+        #    logger.info "Crawl success first_id = #{first_page_id}"
         @domain_crawler.crawler_page_id = first_page_id
         @domain_crawler.save
 
         current_user.current_domain_crawler_id = @domain_crawler.id
         current_user.save
-     #   logger.info "DomainCrawlersController create, before redirect"
+        #   logger.info "DomainCrawlersController create, before redirect"
         redirect_to domain_crawlers_url, notice: "Domain Analysis of #{@domain_crawler.domain_home_page} was successfull!"
       else
-     #   logger.info "crawl failure"
+        #   logger.info "crawl failure"
         @domain_crawler.destroy
-     #   logger.info "DomainCrawlersController create, before redirect"
+        #   logger.info "DomainCrawlersController create, before redirect"
         redirect_to domain_crawlers_url, notice: "Domain Analysis failed of  #{@domain_crawler.domain_home_page} failed. Is the domain address correct?"
       end
     end
@@ -211,8 +217,8 @@ class DomainCrawlersController < ApplicationController
     current_user.current_domain_crawler_id = new_crawler_page.domain_crawler.id
     current_user.current_page = @crawler_page_id
     current_user.save
-  #  logger.info "new crawler_page = #{@crawler_page_id}, domain_crawler = #{current_domain_crawler.id}"
-  #  logger.info "set_Header end"
+    #  logger.info "new crawler_page = #{@crawler_page_id}, domain_crawler = #{current_domain_crawler.id}"
+    #  logger.info "set_Header end"
     respond_to do |format|
       format.js
     end
@@ -225,6 +231,12 @@ class DomainCrawlersController < ApplicationController
     @group_search_result_list.each do |group_search_result|
       GroupElement.destroy(group_search_result)
     end
+    user_paragraph_str = "SELECT * FROM user_paragraphs up WHERE up.user_id = #{current_user.id} AND\
+ (SELECT COUNT(*) FROM group_elements ge WHERE ge.user_id = #{current_user.id} AND ge.paragraph_id = up.paragraph_id) = 0"
+    delete_str = "DELETE FROM user_paragraphs up WHERE up.user_id = #{current_user.id} AND\
+ (SELECT COUNT(*) FROM group_elements ge WHERE ge.user_id = #{current_user.id} AND ge.paragraph_id = up.paragraph_id) = 0"
+    ActiveRecord::Base.connection.execute(delete_str)
+
     respond_to do |format|
       format.js
     end
@@ -244,7 +256,7 @@ class DomainCrawlersController < ApplicationController
     new_group.parent_id = params[:group_radio]
     new_group.user_id = current_user.id
     new_group.save
-    @selected = GROUP_ACTION[:new_group]
+    @group_selected = GROUP_ACTION[:new_group]
     @group_parent_id = new_group.parent_id
     @result_str = ""
   end
@@ -254,7 +266,7 @@ class DomainCrawlersController < ApplicationController
     group_name = GroupName.find_by_id(params[:group_radio]);
     group_name.name = params[:group_action_name];
     group_name.save
-    @selected = GROUP_ACTION[:rename]
+    @group_selected = GROUP_ACTION[:rename]
     @group_parent_id = group_name.parent_id
     @result_str = ""
   end
@@ -272,15 +284,15 @@ class DomainCrawlersController < ApplicationController
       group_name.save;
       @result_str = ""
     end
- #   logger.info "move_group result_str = #{@result_str}"
+#   logger.info "move_group result_str = #{@result_str}"
 
-    @selected = GROUP_ACTION[:move_group]
+    @group_selected = GROUP_ACTION[:move_group]
     @group_parent_id = group_name.parent_id
 
   end
 
   def remove_group(params)
-    @selected = GROUP_ACTION[:remove_group]
+    @group_selected = GROUP_ACTION[:remove_group]
     group_name = GroupName.find_by_id(params[:remove_group])
     if group_name != nil
       @group_parent_id = group_name.parent_id
@@ -288,6 +300,189 @@ class DomainCrawlersController < ApplicationController
       @result_str = ""
     else
       @result_str = "Group already deleted"
+    end
+  end
+
+  def expand_contract_action
+    crawler_page_id = params[:crawler_page_id].to_i
+    @expand_contract_crawler_page = CrawlerPage.find_by_id(crawler_page_id)
+
+    case params[:crawler_page_action]
+      when "expand-contract"
+
+        expand = params[:expand_contract_radio].to_s == 'true' ? true : false
+        if expand
+          if DisplayNode.exists?(user_id: current_user.id, crawler_page_id: crawler_page_id) == false and crawler_page_id > 0
+            display_node = DisplayNode.new
+            display_node.user_id = current_user.id
+            display_node.crawler_page_id = crawler_page_id
+            display_node.save
+            #@display_node = true;
+          end
+        else
+          delete_str = "DELETE FROM display_nodes WHERE user_id = #{current_user.id} AND crawler_page_id = #{crawler_page_id}"
+          ActiveRecord::Base.connection.execute(delete_str)
+          #@display_node = false;
+        end
+        descend_ids = @expand_contract_crawler_page.descendant_ids
+        if descend_ids == nil
+          next_page_id = crawler_page_id +1
+        else
+          next_page_id = descend_ids.max+1
+        end
+        @crawler_page_ranges = CrawlerRange.where('user_id = ? and begin_id <= ? and end_id >= ?', current_user.id, next_page_id, crawler_page_id).map { |range| [range.begin_id, range.end_id] }
+
+      when "page-range"
+        crawler_range = CrawlerRange.where(user_id: current_user.id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
+        descendant_ids = @expand_contract_crawler_page.descendant_ids
+        if descendant_ids.length > 0
+          begin_id2 = descendant_ids.max + 1
+        else
+          begin_id2 = crawler_page_id + 1
+        end
+        if crawler_range.length == 0
+          created_ranges = 0
+          begin_id = CrawlerPage.first.id+1
+          end_id = crawler_page_id -1
+          if begin_id <= end_id
+            new_crawler_range1 = CrawlerRange.new
+            new_crawler_range1.user_id = current_user.id
+            new_crawler_range1.begin_id = begin_id
+            new_crawler_range1.end_id = end_id
+            new_crawler_range1.save
+            logger.info "a new_crawler_range1 = #{new_crawler_range1.inspect}"
+            created_ranges = created_ranges +1
+          end
+
+          descendant_ids = @expand_contract_crawler_page.descendant_ids
+
+          if descendant_ids.length > 0
+            begin_id2 = descendant_ids.max + 1
+          else
+            begin_id2 = crawler_page_id + 1
+          end
+          end_id2 = CrawlerPage.last.id
+          if begin_id2 <= end_id2
+            new_crawler_range2 = CrawlerRange.new
+            new_crawler_range2.user_id = current_user.id
+            new_crawler_range2.begin_id = begin_id2
+            new_crawler_range2.end_id = end_id2
+            new_crawler_range2.save
+            logger.info "b new_crawler_range2 = #{new_crawler_range2.inspect}"
+            created_ranges = created_ranges +1
+          end
+
+          if created_ranges == 0 # everything has been deselected
+            new_crawler_range = CrawlerRange.new
+            new_crawler_range.user_id = current_user.id
+            new_crawler_range.begin_id = -1
+            new_crawler_range.end_id = -1
+            new_crawler_range.save
+            logger.info "c new_crawler_range = #{new_crawler_range.inspect}"
+          end
+          @crawler_page_ranges = [[-1, -1]] # crawler_page and children must be deselected
+        else
+          if @expand_contract_crawler_page.in_range?(crawler_range)
+            created_ranges = 0
+            end_id = crawler_range.map { |rr| rr[1] }.bsearch { |e_id| e_id >= crawler_page_id }
+            crawler_range = CrawlerRange.where('user_id = ? and end_id >= ?', current_user.id, end_id).first
+            begin_id1 = crawler_range.begin_id
+            end_id1 = crawler_page_id - 1
+            #begin_id2 already set
+            end_id2 = end_id
+            if begin_id1 <= end_id1
+              new_crawler_range1 = CrawlerRange.new
+              new_crawler_range1.user_id = current_user.id
+              new_crawler_range1.begin_id = begin_id
+              new_crawler_range1.end_id = end_id
+              new_crawler_range1.save
+              created_ranges = created_ranges +1
+              logger.info "d new_crawler_range1 = #{new_crawler_range1.inspect}"
+            end
+            if begin_id2<=end_id
+              new_crawler_range2 = CrawlerRange.new
+              new_crawler_range2.user_id = current_user.id
+              new_crawler_range2.begin_id = begin_id2
+              new_crawler_range2.end_id = end_id2
+              new_crawler_range2.save
+              created_ranges = created_ranges +1
+              logger.info "e new_crawler_range2 = #{new_crawler_range2.inspect}"
+            end
+            if created_ranges == 0
+              # this means that crawler_range = [CrawlerRange.first, CrawlerRange,last] this should never happen - should have had crawler_range.length = 0
+              # in any case, should this happens we are deselecting everything
+              new_crawler_range = CrawlerRange.new
+              new_crawler_range.user_id = current_user.id
+              new_crawler_range.begin_id = -1
+              new_crawler_range.end_id = -1
+              new_crawler_range.save
+              logger.info "f new_crawler_range = #{new_crawler_range.inspect}"
+            end
+            @crawler_page_ranges = [[-1, -1]] # crawler_page and children must be deselected
+          else
+            crawler_range = CrawlerRange.where('user_id = ?', current_user.id)
+            logger.info "** crawler_range = #{crawler_range.inspect}"
+            if crawler_range.length == 1 and crawler_range[0].begin_id == -1 and crawler_range[0].end_id == -1
+              begin_id1 = crawler_page_id
+              end_id1 = begin_id2 -1
+              logger.info "CrawlerPage.first.id = #{CrawlerPage.first.id}, CrawlerPage.last.id = #{CrawlerPage.last.id}"
+              if begin_id1 > CrawlerPage.first.id + 1 or end_id1 < CrawlerPage.last.id
+              crawler_range[0].begin_id = begin_id1
+              crawler_range[0].end_id = end_id1
+              crawler_range[0].save
+              logger.info "g new_crawler_range = #{crawler_range[0].inspect}"
+              else
+                CrawlerRange.destroy(crawler_range[0].id)
+                logger.info "g2 deleted crawler_range = #{crawler_range[0].inspect}"
+              end
+
+            else
+              updated_ranges = 0
+              delete_str = "DELETE FROM crawler_ranges WHERE user_id = #{current_user.id} AND begin_id > #{crawler_page_id} AND end_id < #{begin_id2-1}"
+              ActiveRecord::Base.connection.execute(delete_str)
+              previous_index = crawler_range.map { |rr| rr.end_id }.reverse.bsearch_index { |e_id| e_id < crawler_page_id }
+              logger.info "previous index = #{previous_index}, crawler_range = #{crawler_range.map { |rr| rr.end_id }}"
+
+              if previous_index != nil and crawler_range.reverse[previous_index].end_id+1 == crawler_page_id
+                crawler_range[previous_index].end_id = begin_id2 -1
+                crawler_range[previous_index].save
+                updated_ranges = updated_ranges + 1
+                logger.info "h crawler_range[previous_index] = #{crawler_range[previous_index].inspect}"
+              end
+              next_index = crawler_range.map { |rr| rr.begin_id }.reverse.bsearch_index { |b_id| b_id <= begin_id2 - 1 }
+              logger.info "next_index index = #{next_index}, crawler_range = #{crawler_range.map { |rr| rr.begin_id }}"
+              if next_index != nil and crawler_range.reverse[next_index].end_id>= begin_id2 - 1
+                crawler_range[next_index].begin_id = crawler_page_id
+                crawler_range[next_index].save
+                updated_ranges = updated_ranges + 1
+                logger.info "i crawler_range[next_index] = #{crawler_range[next_index].inspect}"
+              end
+              if updated_ranges == 2
+                crawler_range[previous_index].end_id = crawleer_range[next_index].end_id
+                crawler_range[previous_index].save
+                logger.info "j crawler_range[previous_index] = #{crawler_range[previous_index].inspect}, crawler_range[next_index] = #{crawler_range[next_index]}"
+                CrawlerRange.destroy(crawler_range[next_index].id)
+                
+              end
+              if updated_ranges == 0
+                new_crawler_range = CrawlerRange.new
+                new_crawler_range.user_id = current_user.id
+                new_crawler_range.begin_id = crawler_page_id
+                new_crawler_range.end_id = begin_id -1
+                new_crawler_range.save
+                logger.info "k new_crawler_range = #{new_crawler_range.inspect}"
+              end
+            end
+            @crawler_page_ranges = [[crawler_page_id, begin_id2-1]] # crawler_page and children must be selected
+          end
+        end
+      else
+    end
+
+
+    logger.info "@expand_contract_crawler_page = #{@expand_contract_crawler_page.inspect}"
+    respond_to do |format|
+      format.js
     end
   end
 
@@ -306,7 +501,7 @@ class DomainCrawlersController < ApplicationController
       else
         remove_group(params)
     end
- #   logger.info "group_action result_str = #{@result_str}"
+    #   logger.info "group_action result_str = #{@result_str}"
     respond_to do |format|
       format.js
     end
@@ -321,6 +516,8 @@ class DomainCrawlersController < ApplicationController
         rename_domain(params)
       when "Fix Domain"
         fix_domain(params)
+      when "Reorder Pages"
+        reorder_pages(params)
       when "Set Paragraphs"
         set_paragraphs(params)
       when "Move Selected"
@@ -330,30 +527,40 @@ class DomainCrawlersController < ApplicationController
       else
         remove_domain(params)
     end
-  #  logger.info "domain_action result_str = #{@result_str}"
+    #  logger.info "domain_action result_str = #{@result_str}"
     respond_to do |format|
       format.js
     end
   end
+
   def fix_domain(params)
     logger.info "fix_domain begin"
     @result_str = "hello"
     domain_crawler_id = CrawlerPage.find_by_id(params[:domain_radio]).domain_crawler_id;
-    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);1
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id); 1
     result_str = domain_crawler.fix_domain()
 
- #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
+    #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
     flash[:notice] = "fixing domain"
 
 
-
-  #  logger.info "fix_domain result: #{@result_str}"
+    #  logger.info "fix_domain result: #{@result_str}"
     @selected = DOMAIN_ACTION[:fix_domain]
+  end
+
+  def reorder_pages(params)
+    logger.info "reorder_pages begin"
+    domain_crawler_id = CrawlerPage.find_by_id(params[:domain_radio]).domain_crawler_id;
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id); 1
+    result_str = domain_crawler.reorder_pages()
+    #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
+    flash[:notice] = "reordering pages"
+    @selected = DOMAIN_ACTION[:reorder_pages]
   end
 
   def set_paragraphs(params)
     logger.info "set_paragraphs begin"
-      first_null_id = WordSingleton.find_by_sql("SELECT * FROM word_singletons WHERE paragraph_id IS NULL LIMIT 1").first;
+    first_null_id = WordSingleton.find_by_sql("SELECT * FROM word_singletons WHERE paragraph_id IS NULL LIMIT 1").first;
     if first_null_id != nil
       last_id = WordSingleton.find_by_sql("SELECT * FROM word_singletons ORDER BY id DESC LIMIT 1").first.id
       first_id = first_null_id.id
@@ -365,8 +572,6 @@ class DomainCrawlersController < ApplicationController
       end
     end
     last_id
-
-
 
 
     flash[:notice] = "setting paragraphs"
@@ -411,7 +616,7 @@ class DomainCrawlersController < ApplicationController
     crawler_page_name = CrawlerPage.find_by_id(params[:domain_radio]);
     new_parent = CrawlerPage.find_by_id(params[:move_location_domain_radio]);
     ancestor_ids = new_parent.ancestor_ids
- #   logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
+    #   logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
     if ancestor_ids.index(crawler_page_name.id) != nil
 
       @result_str = "You cannot move a parent to one of its children"
@@ -420,7 +625,7 @@ class DomainCrawlersController < ApplicationController
       crawler_page_name.save;
       @result_str = ""
     end
- #   logger.info "move_domain result_str = #{@result_str}"
+    #   logger.info "move_domain result_str = #{@result_str}"
 
     @selected = DOMAIN_ACTION[:move_domain]
     @crawler_parent_id = crawler_page_name.parent_id

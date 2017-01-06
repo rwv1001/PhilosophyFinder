@@ -1,19 +1,39 @@
+<% crawler_page = args[:crawler_page] %>
+<% crawler_page_ranges = args[:crawler_page_ranges] %>
+<% if crawler_page.result_page_id == nil or crawler_page.result_page_id < 0 %>
 
-<!--<div class="domain-url"  onclick="SelectDomain(<%=args[:crawler_page_id]%>,true)"><%= args[:url] %></div>-->
+    <li class="bad_page" name= "li-crawler-page-<%=crawler_page.id%>"> This page is bad
+      <% good_page = false  %>
+<% else %>
+    <li class="good_page" name= "li-crawler-page-<%=crawler_page.id%>">
+      <% good_page = true %>
+<% end %>
+
+<% if crawler_page.has_children? %>
+    <% display_node = DisplayNode.exists?(user_id: current_user.id, crawler_page_id: crawler_page.id) %>
+<%= render 'domain_crawlers/expand_buttons', args: {:id => crawler_page.id, :display_node => display_node} %>
+    <%end%>
+
 <div class="domain-url">
-<%= link_to args[:url], args[:long_url], target: '_blank'%>
+  <% if crawler_page.root? == false %>
+<%= link_to crawler_page.name, crawler_page.URL, target: '_blank'%>
+      <% else %>
+      <% domain_crawler =crawler_page.domain_crawler %>
+      <%= link_to domain_crawler.short_name, crawler_page.URL, target: '_blank'%>
+  <% end %>
 </div>
-<% if args[:good_page] == true %>
-<div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= args[:crawler_page_id] %>" name ="row_in_list[]" class="check"  value=<%= args[:crawler_page_id] %> onclick="SelectCrawlerPage(<%=args[:crawler_page_id]%>);"></div>
+<% if good_page == true %>
+<div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= crawler_page.id %>" name ="row_in_list[]" class="check" <% if crawler_page.in_range?(crawler_page_ranges)%> checked <% end %> value=<%= crawler_page.id  %> onclick="CrawlerPageRange(<%=crawler_page.id %>);"></div>
 <% end %>
 <div class="domain-name-radio domain-field" >
-  <input type="radio" name ="domain_radio" <% if args[:root] %> checked <% end %> value=<%=args[:crawler_page_id]%> id="domain-name-<%=args[:crawler_page_id]%>"  >
+  <input type="radio" name ="domain_radio" <% if crawler_page.root? %> checked <% end %> value=<%=crawler_page.id %> id="domain-name-<%=crawler_page.id %>"  >
 </div>
 <div class="move-location-domain-name-radio domain-field" >
-  <input type="radio" name ="move_location_domain_radio" <% if args[:root] %> checked <% end %> value=<%=args[:crawler_page_id]%> id="move-location-domain-name-<%=args[:crawler_page_id]%>"  >
+  <input type="radio" name ="move_location_domain_radio" <% if crawler_page.root? %> checked <% end %> value=<%=crawler_page.id %> id="move-location-domain-name-<%=crawler_page.id %>"  >
 </div>
-<div class="remove-domain domain-field" onclick="RemoveDomain(<%= args[:crawler_page_id]%>)">
+<div class="remove-domain domain-field" onclick="RemoveDomain(<%= crawler_page.id %>)">
   Remove
 </div>
+</li>
 
 

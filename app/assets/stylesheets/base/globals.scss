@@ -119,6 +119,12 @@ $menu-width: 350px;
   @include div-border($red-border-color, $div-border-width);
 
 }
+
+.div-child-crawler-page{
+  overflow:hidden;
+  clear: both;
+
+}
 .domain-pages{
 
   overflow:hidden
@@ -230,6 +236,31 @@ body {
 }
 .highlight{
   background-color: #fff78c;
+  .highlight{
+    background-color: #d7ff91;
+    .highlight{
+      background-color: #9fffb4;
+      .highlight{
+        background-color: #d0f0ff;
+        .highlight{
+          background-color: #c4c7ff;
+          .highlight{
+            background-color: #efd1ff;
+            .highlight{
+              background-color: #ffd1f0;
+              .highlight{
+                background-color: #ffddd6;
+                .highlight{
+                  background-color: #ffefc1;
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
 }
 
 .green {
@@ -393,7 +424,7 @@ ul{
 
 #domain_page_list, #group_names_list {
 
-  .expand-button {
+  .expand-button, .group-expand-button{
     margin: 3px 0px 0 0px;
     text-indent: -9999px;
     cursor: pointer;
@@ -402,7 +433,7 @@ ul{
     text-align: center;
     background: image-url('tiny_plus_button.png') no-repeat;
   }
-  .contract-button {
+  .contract-button, .group-contract-button{
     margin: 3px 0px 0 0px;
     text-indent: -9999px;
     cursor: pointer;
@@ -410,9 +441,11 @@ ul{
     height: 12px;
     text-align: center;
     background: image-url('tiny_minus_button.png') no-repeat;
+  //  display: none;
+  }
+  .group-contract-button {
     display: none;
   }
-
   .domain-selector {
     margin: 3px 0px 0px 0px;
 

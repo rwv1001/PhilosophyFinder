@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161227001324) do
+ActiveRecord::Schema.define(version: 20170105033543) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,22 @@ ActiveRecord::Schema.define(version: 20161227001324) do
 
   add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree
   add_index "crawler_pages", ["domain_crawler_id"], name: "index_crawler_pages_on_domain_crawler_id", using: :btree
+
+  create_table "crawler_ranges", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "begin_id"
+    t.integer "end_id"
+  end
+
+  add_index "crawler_ranges", ["user_id"], name: "index_crawler_ranges_on_user_id", using: :btree
+
+  create_table "display_nodes", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "crawler_page_id"
+  end
+
+  add_index "display_nodes", ["crawler_page_id"], name: "index_display_nodes_on_crawler_page_id", using: :btree
+  add_index "display_nodes", ["user_id"], name: "index_display_nodes_on_user_id", using: :btree
 
   create_table "domain_crawlers", force: :cascade do |t|
     t.integer  "user_id"
@@ -47,13 +63,13 @@ ActiveRecord::Schema.define(version: 20161227001324) do
     t.text     "note"
     t.integer  "group_name_id"
     t.integer  "search_result_id"
-    t.string   "hash_value"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "paragraph_id"
   end
 
   add_index "group_elements", ["group_name_id"], name: "index_group_elements_on_group_name_id", using: :btree
-  add_index "group_elements", ["hash_value"], name: "index_group_elements_on_hash_value", using: :btree
+  add_index "group_elements", ["paragraph_id"], name: "group_elements_paragraph_id_ix", using: :btree
   add_index "group_elements", ["search_result_id"], name: "index_group_elements_on_search_result_id", using: :btree
 
   create_table "group_names", force: :cascade do |t|
@@ -102,6 +118,8 @@ ActiveRecord::Schema.define(version: 20161227001324) do
     t.string   "hash_value"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "crawler_page_id"
+    t.text     "content"
   end
 
   add_index "result_pages", ["hash_value"], name: "hash_value_ix", using: :btree
@@ -160,6 +178,14 @@ ActiveRecord::Schema.define(version: 20161227001324) do
   end
 
   add_index "super_users", ["user_id"], name: "index_super_users_on_user_id", using: :btree
+
+  create_table "user_paragraphs", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "paragraph_id"
+  end
+
+  add_index "user_paragraphs", ["paragraph_id"], name: "index_user_paragraphs_on_paragraph_id", using: :btree
+  add_index "user_paragraphs", ["user_id"], name: "index_user_paragraphs_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email"

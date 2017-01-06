@@ -1,6 +1,6 @@
 
 
-$('#result-groups').replaceWith('<%= j render "domain_crawlers/groups", args: {:selected => @selected} %>');
+$('#result-groups').replaceWith('<%= j render "domain_crawlers/groups", args: {:selected => @group_selected} %>');
 <% group_id = @group_parent_id %>
 <% while group_id != nil %>
 expandGroupName(<%= group_id %>);

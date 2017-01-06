@@ -428,7 +428,25 @@ class SearchQuery < ApplicationRecord
       phrases_multiples << phrase_multiples
       end
       return phrases_multiples
+  end
+
+  def group_string(variable)
+    if @search_groups
+      ret_value = "INNER JOIN sentences s ON s.id = #{variable}.sentence_id INNER JOIN user_paragraphs up ON up.paragraph_id = s.paragraph_id "
+    else
+      ret_value = ""
     end
+    return ret_value
+  end
+
+  def group_where()
+    if @search_groups
+      ret_value = "up.user_id = #{self.user_id} AND "
+    else
+      ret_value = ""
+    end
+    return ret_value
+  end
 
   def single_search(search_term)
     logger.info "single_search begin"
@@ -447,7 +465,9 @@ class SearchQuery < ApplicationRecord
     terms.each do |term|
       #   logger.info "01"
       # word_singletons = WordSingleton.where(word_id: term.id_value, result_page_id: @result_pages).order("id asc")
-      word_singletons = WordSingleton.where(word_id: term.id_value).order("id asc")
+      sql_str = "SELECT * FROM word_singletons ws #{group_string('ws')} WHERE #{group_where()} word_id = #{term.id_value} ORDER BY ws.id ASC"
+      word_singletons = WordSingleton.find_by_sql(sql_str)
+      #word_singletons = WordSingleton.where(word_id: term.id_value).order("id asc")
       #   logger.info "02"
       word_singletons.each do |word_singleton|
         #     logger.info "03"
@@ -461,9 +481,9 @@ class SearchQuery < ApplicationRecord
     logger.info "phrases_multiples = #{phrases_multiples.length}"
 
     sql_str_array = (0..(phrases_multiples.length-1)).to_a.map {|jj|
-      "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
-        "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
- "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')}
+      "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+        "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id "}
 
    sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
     sentence_set|= sentence_phrase_set
@@ -619,9 +639,9 @@ class SearchQuery < ApplicationRecord
       return nil
     end
     phrases_multiples = get_phrase_multiples(phrases)
-    sql_str_array = (0..phrases_multiples.length - 1).map{|jj|  "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
-      "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
- "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')}
+    sql_str_array = (0..phrases_multiples.length - 1).map{|jj|  "SELECT wp.sentence_id FROM word_pairs wp #{group_string('wp')} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+      "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id "}
 
     sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
     if self.word_separation == SENTENCE_SEPARATION
@@ -697,24 +717,24 @@ class SearchQuery < ApplicationRecord
           logger.info "inter_term_ids = #{inter_term_ids.inspect}"
 
           if inter_term_ids[0].length > 0 and inter_term_ids[1].length > 0
-            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
- WHERE ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' , ')})"
+            sql_str = "SELECT  ws1.#{@separation_str} FROM word_singletons ws1 #{group_string('ws1')} INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE #{group_where()} ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' , ')})"<< " GROUP BY ws1.#{@separation_str} "
             pair_list |= find_sql_sentence_paragraph(sql_str)
           end
           #******************* term x phrase multiples **************************
 
 
           if word_ids[term_pair[0]].length>0 && phrase_ids[term_pair[1]]!=nil
-            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
- WHERE ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' , ')})"
+            sql_str = "SELECT ws1.#{@separation_str} FROM word_singletons ws1 #{group_string('ws1')} INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE #{group_where()} ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' , ')})"<< " GROUP BY ws1.#{@separation_str} "
             pair_list |= (find_sql_sentence_paragraph(sql_str) & phrase_ids[term_pair[1]])
           end
           #******************* phrase x term multiples **************************
 
 
           if word_ids[term_pair[1]].length>0 && phrase_ids[term_pair[0]]!=nil
-            sql_str = "SELECT DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
- WHERE ws1.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' , ')})"
+            sql_str = "SELECT ws1.#{@separation_str} FROM word_singletons ws1 #{group_string('ws1')} INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE #{group_where()} ws1.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' , ')})"<< " GROUP BY ws1.#{@separation_str} "
             pair_list |= (find_sql_sentence_paragraph(sql_str) & phrase_ids[term_pair[0]])
           end
           #******************* phrase x phrase multiples **************************
@@ -722,8 +742,8 @@ class SearchQuery < ApplicationRecord
 
           if phrase_ids[term_pair[0]]!=nil && phrase_ids[term_pair[1]]!=nil
             logger.info "c"
-            sql_str = "SELECT  DISTINCT ws1.#{@separation_str} FROM word_singletons ws1 INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
- WHERE ws1.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' ,')})"
+            sql_str = "SELECT  ws1.#{@separation_str} FROM word_singletons ws1 #{group_string('ws1')} INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
+ WHERE #{group_where()} ws1.word_id IN (#{phrase_terms[term_pair[1]].to_a.join(' ,')}) AND ws2.word_id IN (#{phrase_terms[term_pair[0]].to_a.join(' ,')})"<< " GROUP BY ws1.#{@separation_str} "
            # pair_list |= (WordSingleton.find_by_sql(sql_str).map{|word_singleton| word_singleton.sentence_id}.to_set & phrase_ids[term_pair[0]])
             pair_list |= phrase_ids[term_pair[0]] & phrase_ids[term_pair[1]]
             logger.info "d"
@@ -917,16 +937,16 @@ class SearchQuery < ApplicationRecord
 
           sql_str_array =  (0..(wml.length-1)).to_a.map {\
          |kk| (0..(wml[kk].length-1)).to_a.map {\
-           |ii| ["SELECT DISTINCT wp#{kk}_#{ii}.sentence_id FROM word_pairs wp#{kk}_#{ii}\
- WHERE wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) ", ((wml[kk][ii][1].length>0) ?\
+           |ii| ["SELECT  wp#{kk}_#{ii}.sentence_id FROM word_pairs wp#{kk}_#{ii} #{group_string('wp'<<kk.to_s<<'_'<<ii.to_s)} \
+ WHERE #{group_where()} wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) "<< " GROUP BY wp#{kk}_#{ii}.sentence_id  ", ((wml[kk][ii][1].length>0) ?\
               (0..(wml[kk][ii][1][0].length-1)).to_a.map {|jj|
-            "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
-              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
- "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})"}.join(' AND ')} :[]),((wml[kk][ii][1].length>1) ? \
+            "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
+              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
+ "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[]),((wml[kk][ii][1].length>1) ? \
  (0..(wml[kk][ii][1][1].length-1)).to_a.map {|jj|
-            "SELECT DISTINCT wp.sentence_id FROM word_pairs wp " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
-              "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|\
- "wps#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wps#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][1][jj][mm].join(', ')})"}.join(' AND ')} :[])] }}
+            "SELECT  wp.sentence_id FROM word_pairs wp #{group_string('wp')} " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
+              "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|\
+ "wps#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wps#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][1][jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[])] }}
 
 
       sql_str_array.each do |kk|
@@ -1061,6 +1081,12 @@ class SearchQuery < ApplicationRecord
     logger.info "SearchQuery create"
 
     self.user_id = current_user.id
+    if params[:search_type] == "search_domains"
+      @search_groups = false
+    else
+      @search_groups = true
+    end
+    logger.info "****** search_groups set to #{@search_groups} ******* "
     search_terms=[]
     if params[:word1].length >0 && params[:word1] !~ /^\s*$/
       search_terms << params[:word1]

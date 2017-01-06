@@ -1,0 +1,17 @@
+<% crawler_page = args[:crawler_page] %>
+
+  <% display_node = DisplayNode.exists?(user_id: current_user.id, crawler_page_id: crawler_page.id) %>
+  <% if display_node %>
+    <ul class="child-crawler-page" name="ul-crawler-page-<%= crawler_page.id %>">
+      <% logger.info "** displaying node crawler_page_id = #{crawler_page.id}, url = #{crawler_page.URL}" %>
+
+
+      <% children = crawler_page.children.arrange(:order => :id).map { |key, val| key } %>
+      <% children.each do |child_crawler_page| %>
+          <%= render 'domain_crawlers/submenu_crawler_pages', args: {:crawler_page => child_crawler_page, :crawler_page_ranges=> args[:crawler_page_ranges]} %>
+      <% end %>
+    </ul>
+    <% else %>
+    <ul class="child-crawler-page hidden" name="ul-crawler-page-<%= crawler_page.id %>">
+    </ul>
+  <% end %>

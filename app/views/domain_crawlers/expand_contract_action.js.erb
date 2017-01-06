@@ -1,0 +1,3 @@
+$('[name="li-crawler-page-<%=@expand_contract_crawler_page.id%>"]').replaceWith('<%= j render "domain_crawlers/url", args: {:crawler_page => @expand_contract_crawler_page, :crawler_page_ranges => @crawler_page_ranges} %>');
+$('[name="ul-crawler-page-<%=@expand_contract_crawler_page.id%>"]').replaceWith('<%= j render "domain_crawlers/children_crawler_pages", args: {:crawler_page => @expand_contract_crawler_page, :crawler_page_ranges => @crawler_page_ranges} %>');
+SelectDomainAction()

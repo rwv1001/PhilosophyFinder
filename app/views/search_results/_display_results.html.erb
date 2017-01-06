@@ -20,23 +20,40 @@
 
   <% if @search_results.length >0 %>
 
+       <% group_ids = [] %>
 
-      <% crawler_page_id = @search_results[0].crawler_page_id %>
-      <% if crawler_page_id != -1 %>
-          <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
-      <% end %>
-      <div class="page-results">
-        <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
-      </div>
+
+
+      <% crawler_page_id = -1000 %>
+      <% group_str = "" %>
+
+
       <%= form_tag add_result_path, :id => 'add_result_form', method: 'post', remote: true do %>
           <% @search_results.first(MAX_DISPLAY).each do |search_result| %>
               <% if search_result.crawler_page_id != -1 %>
+                  <% if @search_groups1 %>
 
-                  <% if search_result.crawler_page_id != crawler_page_id %>
+                 <% new_groups = GroupName.find_by_sql("SELECT * FROM group_names gn WHERE gn.user_id = #{current_user.id} AND (SELECT COUNT(*) FROM group_elements ge INNER JOIN search_results sr ON sr.id = ge.search_result_id WHERE ge.group_name_id = gn.id AND sr.begin_display_paragraph_id = #{search_result.begin_display_paragraph_id}) >0 ORDER BY gn.id ASC")%>
+                 <% new_group_ids = new_groups.map{|gn| gn.id} %>
+                      <% logger.info "**************** new_groups = #{new_groups.inspect}"%>
+                  <% if new_group_ids != group_ids %>
+                      <% group_ids = new_group_ids %>
+
+                          <% group_list = new_groups.map{|gn| "<#{gn.name}>"}.join(' ,')%>
+                          <% group_str = ", Groups: " + group_list %>
+
+
+                          <% else %>
+                          <% group_str = "" %>
+                          <% end %>
+
+                      <% end %>
+                  <% logger.info "***** group_str = #{group_str}, search_groups1 = #{@search_groups1}"%>
+                  <% if search_result.crawler_page_id != crawler_page_id or group_str.length > 0 %>
                       <% crawler_page_id = search_result.crawler_page_id %>
                       <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
                       <div class="page-results">
-                        <%= link_to crawler_page_name, crawler_page_name, target: '_blank' %>
+                        <%= link_to crawler_page_name + group_str, crawler_page_name, target: '_blank' %>
                       </div>
                   <% end %>
                   <div class="search-result-outer" name="search-result-<%= search_result.id %>">

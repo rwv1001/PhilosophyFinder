@@ -10,12 +10,13 @@
           <%= label_tag :Word_Separation %><br />
           <select id="word_separation" name="word_separation" onChange="SelectDomainAction()">
 
-            <option <% if args[:val_selected] == PARAGRAPH_SEPARATION %> selected <% end %>  value= <%= PARAGRAPH_SEPARATION %> > Within paragraph </option>
-            <option <% if args[:val_selected] == SENTENCE_SEPARATION %> selected <% end %>  value= <%= SENTENCE_SEPARATION %> > Within sentence </option>
+
             <%  (1..10).to_a.reverse_each do |val| %>
 
             <option <% if args[:val_selected] == val %> selected <% end %>  value= <%= val%> > Within <%= val%> </option>
             <% end %>
+            <option <% if args[:val_selected] == PARAGRAPH_SEPARATION %> selected <% end %>  value= <%= PARAGRAPH_SEPARATION %> > Within paragraph </option>
+            <option <% if args[:val_selected] == SENTENCE_SEPARATION %> selected <% end %>  value= <%= SENTENCE_SEPARATION %> > Within sentence </option>
 
           </select>
         </div>
@@ -39,6 +40,9 @@
         <div id="specific_action_variables" class = "hidden" >
 
         </div>
+        <div id="search_type_id" >
+          <%= text_field_tag :search_type, params[:search_type] %>
+        </div>
         <div class="actions hidden "><%= submit_tag "Search C" %>
         </div>
         <div><input type="button" name="search_button"  value="Search" onclick= Search() ></div>
@@ -46,6 +50,25 @@
 
   </div>
   <div id = "show-prev-next">
+  </div>
+  <div class="float-clear" name="expand-contract-form">
+    <%= form_tag expand_contract_action_path, :id => 'expand_contract_form', method: 'get', remote: true do %>
+        <div class="field">
+          <%= label_tag :crawler_page_id %><br />
+          <%= text_field_tag :crawler_page_id, params[:crawler_page_id] %>
+        </div>
+        <div class="field">
+          <%= label_tag :crawler_page_action %><br />
+          <%= text_field_tag :crawler_page_action, params[:crawler_page_action] %>
+        </div>
+        <div class="expand-contract-radio" >
+          <%= label_tag :expand %> <input type="radio" name ="expand_contract_radio" checked  value=true id="group-name-expand"  >
+          <%= label_tag :contract %> <input type="radio" name ="expand_contract_radio"  value=false id="group-name-contract"  >
+        </div>
+
+
+        <div class="actions expand-contract-action-button" ><%= submit_tag "expand or contract", id: "expand-contract-action-button" %></div>
+    <% end %>
   </div>
 
   <div id="search_notice"></div>

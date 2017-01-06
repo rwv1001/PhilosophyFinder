@@ -1,4 +1,9 @@
-<div class="expand-button" name="expand-button-<%=id%>"
-     onclick="expandCrawlerPage(<%=id%>);">+</div>
-<div class="contract-button" name="contract-button-<%=id%>"
-     onclick="contractCrawlerPage(<%=id%>);">-</div>
+<% if args[:display_node] == false %>
+<div class="expand-button" name="expand-button-<%=args[:id]%>"
+     onclick="expandCrawlerPage(<%=args[:id]%>);">+</div>
+    <%logger.info "args[:display_node] = #{args[:display_node]}, drawing +"%>
+    <% else %>
+<div class="contract-button" name="contract-button-<%=args[:id]%>"
+     onclick="contractCrawlerPage(<%=args[:id]%>);">-</div>
+    <%logger.info "args[:display_node] = #{args[:display_node]}, drawing -"%>
+<% end %>

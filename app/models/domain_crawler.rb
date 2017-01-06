@@ -698,6 +698,10 @@ class DomainCrawler < ApplicationRecord
 
   end
 
+  def reorder_pages
+
+  end
+
   def fix_domain
     initialize_crawl
     bad_pages = CrawlerPage.where(["(result_page_id  <0 or result_page_id is NULL) and domain_crawler_id = ?", self.id]).order("id asc")
