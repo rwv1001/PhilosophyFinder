@@ -698,7 +698,64 @@ class DomainCrawler < ApplicationRecord
 
   end
 
-  def reorder_pages
+
+  def reorder_pages(crawler_page)
+    @get_page_list_count = 0
+  #  logger.info "**************************reorder_pages: #{crawler_page.inspect}"
+    ids = [crawler_page.id]
+    ids.concat(crawler_page.descendant_ids).sort!
+    page_list = [crawler_page]
+    page_list.concat( get_page_list(crawler_page))
+    logger.info "************page_listinspect"
+    logger.info "= #{6.times.map{|ii| page_list[ii].inspect}}"
+    if page_list.length == ids.length
+      id_conversion = Hash.new;
+      page_list.size.times.each{|ii| id_conversion[page_list[ii].id] = ids[ii] }
+      del_str = "DELETE FROM crawler_pages WHERE id IN (#{ids.join(', ')})"
+      update_values = page_list.map do |pl|
+      "(#{id_conversion[pl.id]}, #{(pl.result_page_id)?(pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry)?pl.ancestry.split('/').map{|id| id_conversion[id.to_i]}.join('/'):nil}', #{pl.domain_crawler_id})"
+      end
+      logger.info "****del_str = #{del_str}"
+      update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id) VALUES #{update_values.join(', ')}"
+      logger.info "****update_crawler_page_str = #{update_crawler_page_str}"
+      result_page_hash = Hash.new
+      page_list.each{|pl|  result_page_hash[pl.result_page_id] = { "crawler_page_id" => id_conversion[pl.id]} if pl.result_page_id and pl.result_page_id>0}
+      result_page_hash.delete(-1)
+      logger.info "************result_page_hash = #{result_page_hash.inspect}"
+      @connection = ActiveRecord::Base.connection
+      @connection.execute(del_str)
+      @connection.execute(update_crawler_page_str)
+      ResultPage.update(result_page_hash.keys, result_page_hash.values)
+
+
+    else
+      logger.info "ERROR!!!! page_list.length =#{page_list.length}, ids.length =#{ids.length}"
+      logger.info "page_list = #{page_list.map{|pl| pl.id}.sort}"
+      logger.info "ids = #{ids}"
+    end
+    update_str = ""
+
+  end
+
+  def get_page_list(crawler_page)
+
+   # logger.info "get_page_list: #{crawler_page.inspect}"
+    ret_value = []
+    if crawler_page.is_childless?
+
+   #   logger.info "get_page_list Is childless: #{ret_value.inspect}"
+    else
+
+      crawler_page.children.arrange(:order => :name).map { |key, val| key }.each do |child|
+   #     logger.info "get_page_list child: #{child.inspect}"
+        ret_value<<child
+   #     logger.info "get_page_list ret_value is: #{ret_value.inspect}"
+
+          ret_value.concat(get_page_list(child))
+      end
+    end
+   #  logger.info "get_page_list ret_value is: #{ret_value.inspect}"
+    return ret_value
 
   end
 
