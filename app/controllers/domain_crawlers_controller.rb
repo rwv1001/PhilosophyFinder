@@ -330,7 +330,15 @@ class DomainCrawlersController < ApplicationController
         else
           next_page_id = descend_ids.max+1
         end
-        @crawler_page_ranges = CrawlerRange.where('user_id = ? and begin_id <= ? and end_id >= ?', current_user.id, next_page_id, crawler_page_id).map { |range| [range.begin_id, range.end_id] }
+        if CrawlerRange.exists?
+          @crawler_page_ranges = []
+        else
+          @crawler_page_ranges = CrawlerRange.where('user_id = ? and begin_id <= ? and end_id >= ?', current_user.id, next_page_id, crawler_page_id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
+          if @crawler_page_ranges.length ==0
+            @crawler_page_ranges = [[-1, -1]]
+          end
+        end
+
 
       when "page-range"
         crawler_range = CrawlerRange.where(user_id: current_user.id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
@@ -340,6 +348,7 @@ class DomainCrawlersController < ApplicationController
         else
           begin_id2 = crawler_page_id + 1
         end
+        logger.info "******* begin_id2 = #{begin_id2}"
         if crawler_range.length == 0
           created_ranges = 0
           begin_id = CrawlerPage.first.id+1
@@ -383,34 +392,71 @@ class DomainCrawlersController < ApplicationController
           @crawler_page_ranges = [[-1, -1]] # crawler_page and children must be deselected
         else
           if @expand_contract_crawler_page.in_range?(crawler_range)
+            logger.info "The db might  have ranges strictly contained in the interval [crawler_page_id, begin_id2]=[#{crawler_page_id},#{begin_id2}]"
+            logger.info "These need to be deleted"
+            CrawlerRange.where('user_id = ? AND begin_id >= ? AND end_id <= ?', current_user.id, crawler_page_id, begin_id2-1).destroy_all
+            delete_str = "DELETE FROM crawler_ranges WHERE user_id = #{current_user.id} AND begin_id >= #{crawler_page_id} AND end_id <= #{begin_id2-1}"
+            logger.info "** delete_str = #{delete_str}"
+            #ActiveRecord::Base.connection.execute(delete_str)
             created_ranges = 0
-            end_id = crawler_range.map { |rr| rr[1] }.bsearch { |e_id| e_id >= crawler_page_id }
-            crawler_range = CrawlerRange.where('user_id = ? and end_id >= ?', current_user.id, end_id).first
-            begin_id1 = crawler_range.begin_id
-            end_id1 = crawler_page_id - 1
-            #begin_id2 already set
-            end_id2 = end_id
-            if begin_id1 <= end_id1
-              new_crawler_range1 = CrawlerRange.new
-              new_crawler_range1.user_id = current_user.id
-              new_crawler_range1.begin_id = begin_id
-              new_crawler_range1.end_id = end_id
-              new_crawler_range1.save
-              created_ranges = created_ranges +1
-              logger.info "d new_crawler_range1 = #{new_crawler_range1.inspect}"
+            end_id = crawler_range.map { |rr| rr[1] }.bsearch { |e_id| e_id >= begin_id2-1 }
+
+            if end_id
+              crawler_range1 = CrawlerRange.where('user_id = ? and end_id = ?', current_user.id, end_id).first
+              logger.info "crawler_page_id = #{crawler_page_id}, crawler_range = #{crawler_range1.inspect}"
+
+              logger.info "1 There may still be an interval [begin_id,end_id]=[#{crawler_range1.begin_id},#{crawler_range1.end_id}] which intersects [crawler_page_id, begin_id2-1] = [#{crawler_page_id},#{begin_id2-1}]"
+              logger.info "if so, try to budge it to [begin_id2, end_id]=[#{begin_id2},#{end_id}]"
+              begin_id1 = begin_id2
+              end_id1 = end_id
+
+
+              #begin_id2 already set
+              end_id2 = end_id
+              if begin_id1<=end_id1 and crawler_range1.begin_id <= end_id1
+                if begin_id2-1 < crawler_range1.end_id  and crawler_range1.begin_id < crawler_page_id
+                  logger.info "[crawler_page_id, begin_id2-1]  is contained entirely within crawler_range1"
+                  logger.info "therefore we also need to create a new interval [#{crawler_range1.begin_id},#{crawler_page_id-1}]"
+                  new_crawler_range = CrawlerRange.new
+                  new_crawler_range.user_id = current_user.id
+                  new_crawler_range.begin_id= crawler_range1.begin_id
+                  new_crawler_range.end_id = crawler_page_id-1
+                  new_crawler_range.save
+
+                end
+
+                crawler_range1.begin_id = begin_id1
+                #crawler_range1.end_id = end_id1
+                crawler_range1.save
+                created_ranges = created_ranges +1
+                logger.info "e new_crawler_range2 = #{crawler_range1.inspect}"
+              end
             end
-            if begin_id2<=end_id
-              new_crawler_range2 = CrawlerRange.new
-              new_crawler_range2.user_id = current_user.id
-              new_crawler_range2.begin_id = begin_id2
-              new_crawler_range2.end_id = end_id2
-              new_crawler_range2.save
-              created_ranges = created_ranges +1
-              logger.info "e new_crawler_range2 = #{new_crawler_range2.inspect}"
+            crawler_rangee = CrawlerRange.where(user_id: current_user.id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
+            end_id = crawler_rangee.map { |rr| rr[1] }.bsearch { |e_id| e_id >= crawler_page_id }
+            if end_id
+              crawler_range2 = CrawlerRange.where('user_id = ? and end_id = ?', current_user.id, end_id).first
+
+              logger.info "2 There may still be an interval [begin_id,end_id]=[#{crawler_range2.begin_id},#{crawler_range2.end_id}] which intersects [crawler_page_id, begin_id2-1] = [#{crawler_page_id},#{begin_id2-1}]"
+              logger.info "if so, try to budge it to [begin_id, crawler_page_id-1]=[#{crawler_range2.begin_id},#{crawler_page_id-1}]"
+              begin_id1 = crawler_range2.begin_id
+              end_id1 = crawler_page_id-1
+
+
+              if begin_id1 <= end_id1 and crawler_range2.begin_id <= end_id1
+
+
+                crawler_range2.begin_id = begin_id1
+                crawler_range2.end_id = end_id1
+                crawler_range2.save
+
+                created_ranges = created_ranges +1
+                logger.info "d new_crawler_range2 = #{crawler_range2.inspect}"
+              end
             end
-            if created_ranges == 0
-              # this means that crawler_range = [CrawlerRange.first, CrawlerRange,last] this should never happen - should have had crawler_range.length = 0
-              # in any case, should this happens we are deselecting everything
+            if CrawlerRange.exists?(user_id: current_user.id) == false
+
+
               new_crawler_range = CrawlerRange.new
               new_crawler_range.user_id = current_user.id
               new_crawler_range.begin_id = -1
@@ -418,19 +464,22 @@ class DomainCrawlersController < ApplicationController
               new_crawler_range.save
               logger.info "f new_crawler_range = #{new_crawler_range.inspect}"
             end
+
+
             @crawler_page_ranges = [[-1, -1]] # crawler_page and children must be deselected
           else
-            crawler_range = CrawlerRange.where('user_id = ?', current_user.id)
+            # we want to put the crawler page into a range
+            crawler_range = CrawlerRange.where('user_id = ?', current_user.id).order('begin_id asc')
             logger.info "** crawler_range = #{crawler_range.inspect}"
             if crawler_range.length == 1 and crawler_range[0].begin_id == -1 and crawler_range[0].end_id == -1
               begin_id1 = crawler_page_id
               end_id1 = begin_id2 -1
               logger.info "CrawlerPage.first.id = #{CrawlerPage.first.id}, CrawlerPage.last.id = #{CrawlerPage.last.id}"
               if begin_id1 > CrawlerPage.first.id + 1 or end_id1 < CrawlerPage.last.id
-              crawler_range[0].begin_id = begin_id1
-              crawler_range[0].end_id = end_id1
-              crawler_range[0].save
-              logger.info "g new_crawler_range = #{crawler_range[0].inspect}"
+                crawler_range[0].begin_id = begin_id1
+                crawler_range[0].end_id = end_id1
+                crawler_range[0].save
+                logger.info "g new_crawler_range = #{crawler_range[0].inspect}"
               else
                 CrawlerRange.destroy(crawler_range[0].id)
                 logger.info "g2 deleted crawler_range = #{crawler_range[0].inspect}"
@@ -438,40 +487,48 @@ class DomainCrawlersController < ApplicationController
 
             else
               updated_ranges = 0
+              delete_rangs = CrawlerRange.where('user_id = ? AND begin_id > ? AND end_id < ?', current_user.id, crawler_page_id, begin_id2-1).destroy_all
               delete_str = "DELETE FROM crawler_ranges WHERE user_id = #{current_user.id} AND begin_id > #{crawler_page_id} AND end_id < #{begin_id2-1}"
-              ActiveRecord::Base.connection.execute(delete_str)
+              logger.info "** delete_str = #{delete_str}"
+              #ActiveRecord::Base.connection.execute(delete_str)
+              crawler_range = CrawlerRange.where('user_id = ?', current_user.id).order('begin_id asc')
               previous_index = crawler_range.map { |rr| rr.end_id }.reverse.bsearch_index { |e_id| e_id < crawler_page_id }
+              rcrawler_range = crawler_range.reverse
               logger.info "previous index = #{previous_index}, crawler_range = #{crawler_range.map { |rr| rr.end_id }}"
 
-              if previous_index != nil and crawler_range.reverse[previous_index].end_id+1 == crawler_page_id
-                crawler_range[previous_index].end_id = begin_id2 -1
-                crawler_range[previous_index].save
+
+              if previous_index != nil and rcrawler_range[previous_index].end_id+1 == crawler_page_id
+                rcrawler_range[previous_index].end_id = begin_id2 -1
+                rcrawler_range[previous_index].save
                 updated_ranges = updated_ranges + 1
-                logger.info "h crawler_range[previous_index] = #{crawler_range[previous_index].inspect}"
+                logger.info "h rcrawler_range[previous_index] = #{rcrawler_range[previous_index].inspect}"
               end
-              next_index = crawler_range.map { |rr| rr.begin_id }.reverse.bsearch_index { |b_id| b_id <= begin_id2 - 1 }
+              next_index = crawler_range.map { |rr| rr.begin_id }.bsearch_index { |b_id| b_id >= crawler_page_id }
+
               logger.info "next_index index = #{next_index}, crawler_range = #{crawler_range.map { |rr| rr.begin_id }}"
-              if next_index != nil and crawler_range.reverse[next_index].end_id>= begin_id2 - 1
+              if next_index != nil and crawler_range[next_index].begin_id <= begin_id2
                 crawler_range[next_index].begin_id = crawler_page_id
                 crawler_range[next_index].save
                 updated_ranges = updated_ranges + 1
                 logger.info "i crawler_range[next_index] = #{crawler_range[next_index].inspect}"
               end
               if updated_ranges == 2
-                crawler_range[previous_index].end_id = crawleer_range[next_index].end_id
-                crawler_range[previous_index].save
-                logger.info "j crawler_range[previous_index] = #{crawler_range[previous_index].inspect}, crawler_range[next_index] = #{crawler_range[next_index]}"
+                rcrawler_range[previous_index].end_id = crawler_range[next_index].end_id
+                rcrawler_range[previous_index].save
+                logger.info "j rcrawler_range[previous_index] = #{rcrawler_range[previous_index].inspect}, crawler_range[next_index] = #{crawler_range[next_index]}"
                 CrawlerRange.destroy(crawler_range[next_index].id)
-                
+
               end
+
               if updated_ranges == 0
                 new_crawler_range = CrawlerRange.new
                 new_crawler_range.user_id = current_user.id
                 new_crawler_range.begin_id = crawler_page_id
-                new_crawler_range.end_id = begin_id -1
+                new_crawler_range.end_id = begin_id2 -1
                 new_crawler_range.save
                 logger.info "k new_crawler_range = #{new_crawler_range.inspect}"
               end
+              CrawlerRange.where('begin_id = ? and end_id = ?', CrawlerPage.first.id + 1, CrawlerPage.last.id ).destroy_all
             end
             @crawler_page_ranges = [[crawler_page_id, begin_id2-1]] # crawler_page and children must be selected
           end

@@ -16,7 +16,7 @@
 
 <div class="domain-url">
   <% if crawler_page.root? == false %>
-<%= link_to crawler_page.name, crawler_page.URL, target: '_blank'%>
+<%= link_to "#{crawler_page.id} " + crawler_page.name, crawler_page.URL, target: '_blank'%>
       <% else %>
       <% domain_crawler =crawler_page.domain_crawler %>
       <%= link_to domain_crawler.short_name, crawler_page.URL, target: '_blank'%>
