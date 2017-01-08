@@ -17,7 +17,7 @@ class CrawlerPage < ApplicationRecord
         ii = ii + 1
       end
     end
-    logger.info "*** page_id = #{self.id} in_range? = #{ret_value}"
+    logger.info "*** page_id = #{self.id} in_range? = #{ret_value}, ranges = #{crawler_ranges}"
 
     return ret_value
   end

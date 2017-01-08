@@ -137,8 +137,8 @@ class DomainCrawlersController < ApplicationController
     @show_previous = false
     @show_next = false
 
-    if params[:row_in_list] != nil
-      search_output = search_query.search(params[:row_in_list]);
+
+      search_output = search_query.search();
 
       if search_output[:search_results].length >0
         @search_results = search_output[:search_results]
@@ -156,8 +156,13 @@ class DomainCrawlersController < ApplicationController
 
       end
       @truncate_length = search_output[:truncate_length]
-      @domain_length = params[:row_in_list]
+      @domain_length = 1
+      crawler_range =  CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id ).first
+    if crawler_range
+      @domain_length = 0
     end
+
+
 
     respond_to do |format|
       format.js
@@ -330,7 +335,7 @@ class DomainCrawlersController < ApplicationController
         else
           next_page_id = descend_ids.max+1
         end
-        if CrawlerRange.exists?
+        if CrawlerRange.exists? == false
           @crawler_page_ranges = []
         else
           @crawler_page_ranges = CrawlerRange.where('user_id = ? and begin_id <= ? and end_id >= ?', current_user.id, next_page_id, crawler_page_id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
@@ -399,6 +404,7 @@ class DomainCrawlersController < ApplicationController
             logger.info "** delete_str = #{delete_str}"
             #ActiveRecord::Base.connection.execute(delete_str)
             created_ranges = 0
+            crawler_range = CrawlerRange.where(user_id: current_user.id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }
             end_id = crawler_range.map { |rr| rr[1] }.bsearch { |e_id| e_id >= begin_id2-1 }
 
             if end_id
@@ -528,7 +534,7 @@ class DomainCrawlersController < ApplicationController
                 new_crawler_range.save
                 logger.info "k new_crawler_range = #{new_crawler_range.inspect}"
               end
-              CrawlerRange.where('begin_id = ? and end_id = ?', CrawlerPage.first.id + 1, CrawlerPage.last.id ).destroy_all
+              CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id ).destroy_all
             end
             @crawler_page_ranges = [[crawler_page_id, begin_id2-1]] # crawler_page and children must be selected
           end

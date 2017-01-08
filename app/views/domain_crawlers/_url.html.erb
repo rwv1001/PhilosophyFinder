@@ -23,7 +23,7 @@
   <% end %>
 </div>
 <% if good_page == true %>
-<div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= crawler_page.id %>" name ="row_in_list[]" class="check" <% if crawler_page.in_range?(crawler_page_ranges)%> checked <% end %> value=<%= crawler_page.id  %> onclick="CrawlerPageRange(<%=crawler_page.id %>);"></div>
+<div class="domain-field domain-checkbox"> <input type="checkbox" id="checkbox-domain-selector-<%= crawler_page.id %>"  class="check" <% if crawler_page.in_range?(crawler_page_ranges)%> checked <% end %> value=<%= crawler_page.id  %> onclick="CrawlerPageRange(<%=crawler_page.id %>);"></div>
 <% end %>
 <div class="domain-name-radio domain-field" >
   <input type="radio" name ="domain_radio" <% if crawler_page.root? %> checked <% end %> value=<%=crawler_page.id %> id="domain-name-<%=crawler_page.id %>"  >
