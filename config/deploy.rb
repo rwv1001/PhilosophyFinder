@@ -1,6 +1,7 @@
 # config valid only for current version of Capistrano
 lock '3.6.1'
 
+
 set :application, 'PhilosophyFinder'
 set :repo_url, 'git@github.com:rwv1001/PhilosophyFinder.git '
 
@@ -28,9 +29,42 @@ namespace :deploy do
       end
   end
 
+  desc "drop all data from the database"
+  task :drop do
+    on roles(:app), in: :sequence, wait: 5 do
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:drop RAILS_ENV=production"
+    end
+  end
+
+  desc "create the database"
+  task :create do
+    on roles(:app), in: :sequence, wait: 5 do
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:create RAILS_ENV=production"
+    end
+  end
+
+  desc "migrate the database"
+  task :migrate do
+    on roles(:app), in: :sequence, wait: 5 do
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:migrate RAILS_ENV=production"
+    end
+  end
+
+  desc "recreate and seed database"
+  task :recreate do
+    on roles(:app), in: :sequence, wait: 5 do
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:drop RAILS_ENV=production"
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:create RAILS_ENV=production"
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:migrate RAILS_ENV=production"
+      execute "cd #{current_path}; $HOME/.rbenv/bin/rbenv exec bundle exec rake db:seed RAILS_ENV=production"
+    end
+  end
+
   after :publishing, 'deploy:restart'
   after :finishing, 'deploy:cleanup'
 end
+
+
 
 # Default value for :scm is :git
 # set :scm, :git
