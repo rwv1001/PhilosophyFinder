@@ -357,7 +357,7 @@ class SearchQuery < ApplicationRecord
     term_list.each do |term|
       term = term.gsub(/(^\s*|\s*$)/, "")
       if term.length >0
-        phrase_split = term.split(' ')
+        phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Z0-9]+/)}.flatten
 
         if phrase_split.length == 1
           if term_str.length >0
@@ -368,8 +368,9 @@ class SearchQuery < ApplicationRecord
           phrase = []
           phrase_split.each do |phrase_word|
             if phrase.length == 0 or phrase[-1].length !=0
-
+              if phrase_word.length > 0
               phrase << Word.where("word_name ILIKE '#{phrase_word}'");
+                end
             else
               logger.info "get_terms failed, phrase_word = #{phrase_word.inspect}, phrase = #{phrase.inspect}"
               #Supose we have a phrase of the form 'on ioj% first'. After processing ioj% we know we aren't going to get a match
@@ -550,6 +551,7 @@ class SearchQuery < ApplicationRecord
       end
       or_item = or_item.gsub("%", "\\w*")
    #   logger.info "e #{or_item}"
+      or_item = or_item.gsub(/\s+/, "[^a-zA-Z0-9]+")
       tokens << or_item
     end
  #   logger.info "get_tokens, search_term: #{search_term}"

@@ -138,30 +138,29 @@ class DomainCrawlersController < ApplicationController
     @show_next = false
 
 
-      search_output = search_query.search();
+    search_output = search_query.search();
 
-      if search_output[:search_results].length >0
-        @search_results = search_output[:search_results]
-        @first_result_id = @search_results[0].id
-        @last_result_id = @search_results[-1].id
-        @show_previous = false
-        if search_output[:unprocessed_sentence_count] >0
-          @show_next = true
-        else
-          @show_next = false
-        end
-        @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
-        #   logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
-
-
+    if search_output[:search_results].length >0
+      @search_results = search_output[:search_results]
+      @first_result_id = @search_results[0].id
+      @last_result_id = @search_results[-1].id
+      @show_previous = false
+      if search_output[:unprocessed_sentence_count] >0
+        @show_next = true
+      else
+        @show_next = false
       end
-      @truncate_length = search_output[:truncate_length]
-      @domain_length = 1
-      crawler_range =  CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id ).first
+      @unprocessed_sentence_count = search_output[:unprocessed_sentence_count]
+      #   logger.info "Search @first_result_id = #{ @first_result_id }, @last_result_id = #{@last_result_id}, @unprocessed_sentence_count = #{@unprocessed_sentence_count} "
+
+
+    end
+    @truncate_length = search_output[:truncate_length]
+    @domain_length = 1
+    crawler_range = CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id).first
     if crawler_range
       @domain_length = 0
     end
-
 
 
     respond_to do |format|
@@ -177,11 +176,20 @@ class DomainCrawlersController < ApplicationController
     # logger.info "DomainCrawlersController params inspect #{domain_crawler_params.inspect}"
     @domain_crawler = DomainCrawler.new(domain_crawler_params)
     #  logger.info "DomainCrawlersController @domain_crawler inspect #{@domain_crawler.inspect}"
-
-    #   logger.info "DomainCrawlersController create, after new"
     if @domain_crawler.save
-      #    logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
-      first_page_id = @domain_crawler.crawl
+      case params[:new_domain_action]
+        when "new_domain"
+
+
+          #   logger.info "DomainCrawlersController create, after new"
+
+          #    logger.info "DomainCrawlersController create, after save, inspect #{@domain_crawler.inspect}"
+          first_page_id = @domain_crawler.crawl(params[:flow_str])
+
+
+        when "grab_domain"
+          first_page_id = @domain_crawler.grab_domain(params[:filter])
+      end
       if first_page_id !=0
         #    logger.info "Crawl success first_id = #{first_page_id}"
         @domain_crawler.crawler_page_id = first_page_id
@@ -198,7 +206,6 @@ class DomainCrawlersController < ApplicationController
         redirect_to domain_crawlers_url, notice: "Domain Analysis failed of  #{@domain_crawler.domain_home_page} failed. Is the domain address correct?"
       end
     end
-
 
   end
 
@@ -420,7 +427,7 @@ class DomainCrawlersController < ApplicationController
               #begin_id2 already set
               end_id2 = end_id
               if begin_id1<=end_id1 and crawler_range1.begin_id <= end_id1
-                if begin_id2-1 < crawler_range1.end_id  and crawler_range1.begin_id < crawler_page_id
+                if begin_id2-1 < crawler_range1.end_id and crawler_range1.begin_id < crawler_page_id
                   logger.info "[crawler_page_id, begin_id2-1]  is contained entirely within crawler_range1"
                   logger.info "therefore we also need to create a new interval [#{crawler_range1.begin_id},#{crawler_page_id-1}]"
                   new_crawler_range = CrawlerRange.new
@@ -534,7 +541,7 @@ class DomainCrawlersController < ApplicationController
                 new_crawler_range.save
                 logger.info "k new_crawler_range = #{new_crawler_range.inspect}"
               end
-              CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id ).destroy_all
+              CrawlerRange.where('user_id = ? and begin_id = ? and end_id = ?', current_user.id, CrawlerPage.first.id + 1, CrawlerPage.last.id).destroy_all
             end
             @crawler_page_ranges = [[crawler_page_id, begin_id2-1]] # crawler_page and children must be selected
           end
@@ -577,6 +584,8 @@ class DomainCrawlersController < ApplicationController
     case params[:commit]
       when "Rename Page"
         rename_domain(params)
+      when "Analyse Domain"
+        analyse_domain(params)
       when "Fix Domain"
         fix_domain(params)
       when "Reorder Pages"
@@ -588,12 +597,21 @@ class DomainCrawlersController < ApplicationController
       when "Remove Domain"
         remove_domain(params)
       else
-        remove_domain(params)
+
     end
     #  logger.info "domain_action result_str = #{@result_str}"
     respond_to do |format|
       format.js
     end
+  end
+
+  def analyse_domain(params)
+    logger.info "analyse_domain begin"
+    flash[:notice] = "analysing domain"
+    flow_str = params[:flow_str]
+    domain_crawler = DomainCrawler.find_by_id(current_user.current_domain_crawler_id)
+    domain_crawler.analyse_domain(current_user.id, flow_str)
+    @selected = DOMAIN_ACTION[:analyse_domain]
   end
 
   def fix_domain(params)
@@ -721,6 +739,6 @@ class DomainCrawlersController < ApplicationController
 
   def domain_crawler_params
     logger.info "DomainCrawlersController domain_crawler_params called"
-    params.require(:domain_crawler).permit(:user_id, :domain_home_page, :short_name, :description)
+    params.require(:domain_crawler).permit(:user_id, :domain_home_page, :short_name, :description, :filter, :flow_str)
   end
 end

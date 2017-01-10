@@ -40,7 +40,7 @@
         <div id="specific_action_variables" class = "hidden" >
 
         </div>
-        <div id="search_type_id" >
+        <div id="search_type_id" class="actions hidden " >
           <%= text_field_tag :search_type, params[:search_type] %>
         </div>
         <div class="actions hidden "><%= submit_tag "Search C" %>
@@ -51,7 +51,7 @@
   </div>
   <div id = "show-prev-next">
   </div>
-  <div class="float-clear" name="expand-contract-form">
+  <div class="float-clear hidden" name="expand-contract-form">
     <%= form_tag expand_contract_action_path, :id => 'expand_contract_form', method: 'get', remote: true do %>
         <div class="field">
           <%= label_tag :crawler_page_id %><br />

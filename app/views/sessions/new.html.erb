@@ -1,3 +1,4 @@
+<% if current_user == nil %>
 <h1>Log In</h1>
 
 <%= form_tag sessions_path do %>
@@ -16,4 +17,5 @@
     </div>
     <div class="actions"><%= submit_tag "Log In" %>
     </div>
+<% end %>
 <% end %>

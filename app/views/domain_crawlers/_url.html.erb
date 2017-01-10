@@ -9,7 +9,7 @@
       <% good_page = true %>
 <% end %>
 
-<% if crawler_page.has_children? %>
+<% if crawler_page.has_good_children? %>
     <% display_node = DisplayNode.exists?(user_id: current_user.id, crawler_page_id: crawler_page.id) %>
 <%= render 'domain_crawlers/expand_buttons', args: {:id => crawler_page.id, :display_node => display_node} %>
     <%end%>
@@ -19,7 +19,9 @@
 <%= link_to "#{crawler_page.id} " + crawler_page.name, crawler_page.URL, target: '_blank'%>
       <% else %>
       <% domain_crawler =crawler_page.domain_crawler %>
+      <% if domain_crawler %>
       <%= link_to domain_crawler.short_name, crawler_page.URL, target: '_blank'%>
+          <% end %>
   <% end %>
 </div>
 <% if good_page == true %>

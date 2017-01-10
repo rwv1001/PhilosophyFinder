@@ -31,6 +31,20 @@
           <%= f.text_field :description %>
         </div>
         <div class="field">
+          <%= label_tag :filter %><br/>
+          <%= text_field_tag :filter %>
+        </div>
+        <div class="field">
+          <%= label_tag :flow_str %><br/>
+          <%= text_field_tag :flow_str %>
+        </div>
+        <div class="field">
+          <%= label_tag :new_domain_action %><br/>
+          <%= text_field_tag :new_domain_action %>
+        </div>
+
+
+        <div class="field">
           <%= f.hidden_field :user_id, :value => args[:user_id] %>
         </div>
 

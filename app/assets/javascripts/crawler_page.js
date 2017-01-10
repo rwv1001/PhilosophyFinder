@@ -193,8 +193,25 @@ function SelectDomainAction()
             break;
         case "new_domain":
             $( ".domain-field" ).hide();
-            $( ".domain-new" ).show();         
+            $( ".domain-new" ).show();
+            $("#new_domain_action").prop('value', 'new_domain');
             break;
+        case "grab_domain":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $("#new_domain_action").prop('value', 'grab_domain');
+            break;
+        
+        case "analyse_domain":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $(".bad_page").hide();
+            $(".domain-checkbox").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Analyse Domain');
+            break;           
+        
+        
         case "fix_domain":
             $( ".domain-field" ).hide();
             $( ".domain-new" ).show();
@@ -202,7 +219,7 @@ function SelectDomainAction()
             $(".domain-name-radio").show();
             $( ".domain-action-button" ).show();
             $("#domain-action-button").prop('value', 'Fix Domain');
-            break;reorder_pages
+            break;
         case "reorder_pages":
             $( ".domain-field" ).hide();
             $( ".domain-new" ).show();
