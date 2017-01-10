@@ -360,6 +360,7 @@ class DomainCrawler < ApplicationRecord
 
     for par_count in 0..paragraphs.length-1
       par = paragraphs[par_count]
+      logger.info "ProcessParagraphs, result_page_id = #{result_page_id}, par = #{par}"
 
       if @max_paragraph_number<0 || paragraph_count<@max_paragraph_number
         par_text = par.text
@@ -380,14 +381,16 @@ class DomainCrawler < ApplicationRecord
           par_inserts[-1] = par_inserts[-1] + " " + par_text
         else
           if par.name=="p" or par_ok == false
-            par_text.split(/[\r\n]{4,}+/).each{|split_par| par_inserts << split_par.gsub(/\r\n/,' ') }
+            par_inserts.concat( par_text.split(/[\r\n]{4,}+/).map{|split_par| split_par.split(/\n{2,}+/).map{|sp| sp.gsub(/\r\n/,' ').gsub(/\n/,' ')}}.flatten.select{|p| p.length >0})
           else
-            columns =  par.xpath('//td')
+            columns =  par.children
             if columns.length >1
-              par_inserts << "<tr><td>" << columns.map{|cc| cc.text}.join('<\td><td>') << "<\td><\tr>".gsub(/\r\n/,' ')
+              par_inserts << "<table><tr><td>" + columns.select{|cc| cc.name == "td"}.map{|td| td.text}.join('</td><td>') + '</td></tr></table>'.gsub(/\r\n/,' ')
+
             else
-              par_text.split(/[\r\n]{4,}+/).each{|split_par| par_inserts << split_par.gsub(/\r\n/,' ') }
+              par_inserts.concat( par_text.split(/[\r\n]{4,}+/).map{|split_par| split_par.split(/\n{2,}+/).map{|sp| sp.gsub(/\r\n/,' ').gsub(/\n/,' ')}}.flatten.select{|p| p.length >0})
             end
+
 
           end
 
@@ -415,9 +418,9 @@ class DomainCrawler < ApplicationRecord
   end
 
   def save_paragraphs(result_page_id)
-    #  logger.info "rwv1001 a"
+     logger.info "rwv1001 a"
     if Paragraph.exists?()
-      #    logger.info "rwv1001 b"
+         logger.info "rwv1001 b"
       max_id = Paragraph.maximum('id')
       logger.debug ""
     else
@@ -427,9 +430,9 @@ class DomainCrawler < ApplicationRecord
     sql = %Q"INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
     # logger.info "sql = #{sql}"
     sql_save(sql)
-    #   logger.info "rwv1001 c"
+     logger.info "rwv1001 c"
     paragraphs = Paragraph.where("id > #{max_id}").order("id asc")
-    #   logger.info "rwv1001 d"
+     logger.info "rwv1001 d"
     par_sentences = []
     paragraphs.each do |paragraph|
       par_sentence = Hash.new
@@ -441,17 +444,18 @@ class DomainCrawler < ApplicationRecord
       period_indices2 = matches2.map{|match| match.to_s.to_enum(:scan, /\./).map {Regexp.last_match}.map{|period_match| match.offset(0)[0]+period_match.offset(0)[0] }}.flatten.sort.reverse
       period_indices2.each{|pi| par_content[pi]= 'a¶a'}
 
-      matches3 = par_content.to_enum(:scan, /\.\s*[a-z]/).map {Regexp.last_match}
+      matches3 = par_content.to_enum(:scan, /\.\s*[a-z0-9]/).map {Regexp.last_match}
       period_indices3 = matches3.map{|match| match.to_s.to_enum(:scan, /\./).map {Regexp.last_match}.map{|period_match| match.offset(0)[0]+period_match.offset(0)[0] }}.flatten.sort.reverse
       period_indices3.each{|pi| par_content[pi]= 'a¶a'}
       
       par_sentence[:sentences] = par_content.split('.').map{|sentence|sentence.gsub(/a¶a/,'.')}
+      logger.info "*** par_sentence #{par_sentence.inspect} "
       par_sentence[:paragraph_id] = paragraph.id
       par_sentences.push(par_sentence)
     end
-    #    logger.info "rwv1001 e"
+       logger.info "rwv1001 e"
     ProcessSentences(par_sentences, result_page_id)
-    #   logger.info "rwv1001 ee"
+      logger.info "rwv1001 ee"
     @paragraph_inserts =[]
 
 
@@ -527,7 +531,7 @@ class DomainCrawler < ApplicationRecord
           sleep(4)
 
         end
-     #   begin
+       begin
           if second_attempt == true
             logger.info "2nd attempt read"
             doc = Nokogiri::HTML(open(url))
@@ -563,7 +567,7 @@ class DomainCrawler < ApplicationRecord
           result_page = ResultPage.find_by_hash_value(hash_value)
 
               logger.info "ProcessPage 05"
-          if (result_page==nil or @always_process) and paragraphs.length > 0
+          if (result_page==nil or @always_process) and content.length > 0
                 logger.info "ProcessPage 06"
             result_page = ResultPage.new
             result_page.content = content
@@ -683,7 +687,7 @@ class DomainCrawler < ApplicationRecord
           end
             #    logger.info "ProcessPage 13"
             #      logger.info "ProcessPage 4"
-=begin
+
         rescue Exception => e
           logger.info "2nd attempt - Couldn't read \"#{ url }\": #{ e }"
           if new_crawler_page.result_page_id != nil
@@ -695,7 +699,7 @@ class DomainCrawler < ApplicationRecord
           end
           new_crawler_page.save
         end
-=end
+
       end
       old_parent_id = parent_id
 
@@ -1050,10 +1054,7 @@ class DomainCrawler < ApplicationRecord
 
   end
 
-  def analyse_domain
 
-
-  end
 
   def fix_domain
     initialize_crawl
@@ -1129,8 +1130,11 @@ class DomainCrawler < ApplicationRecord
 
       result_pages = ResultPage.find_by_sql(sql_str);
 
-      result_pages.each{|rp| WordSingleton.where(:result_page_id => rp.id).destroy_all}
-      result_pages.each{|rp| WordPair.where(:result_page_id => rp.id).destroy_all}
+     # result_pages.each{|rp| WordSingleton.where(:result_page_id => rp.id).destroy_all}
+      result_pages.each{|rp| ActiveRecord::Base.connection.execute("DELETE FROM word_singletons WHERE result_page_id = #{rp.id}")}
+
+      #result_pages.each{|rp| WordPair.where(:result_page_id => rp.id).destroy_all}
+      result_pages.each{|rp| ActiveRecord::Base.connection.execute("DELETE FROM word_pairs WHERE result_page_id = #{rp.id}")}
 
       result_pages.each{|rp| analyse_page(rp, flow_str)}
 

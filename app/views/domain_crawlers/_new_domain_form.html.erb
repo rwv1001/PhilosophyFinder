@@ -34,10 +34,7 @@
           <%= label_tag :filter %><br/>
           <%= text_field_tag :filter %>
         </div>
-        <div class="field">
-          <%= label_tag :flow_str %><br/>
-          <%= text_field_tag :flow_str %>
-        </div>
+
         <div class="field">
           <%= label_tag :new_domain_action %><br/>
           <%= text_field_tag :new_domain_action %>
@@ -48,7 +45,7 @@
           <%= f.hidden_field :user_id, :value => args[:user_id] %>
         </div>
 
-        <div class="actions"><%= f.submit "Analyse Domain" %></div>
+        <div class="actions"><%= f.submit "Crawl Domain" %></div>
     <% end %>
   </div>
 </div>

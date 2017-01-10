@@ -208,6 +208,7 @@ function SelectDomainAction()
             $(".bad_page").hide();
             $(".domain-checkbox").show();
             $( ".domain-action-button" ).show();
+            $("#domain_flow").show();
             $("#domain-action-button").prop('value', 'Analyse Domain');
             break;           
         

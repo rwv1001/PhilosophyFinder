@@ -363,7 +363,7 @@ class SearchQuery < ApplicationRecord
           if term_str.length >0
             term_str << " OR "
           end
-          term_str << "word_name ILIKE '#{term}'"
+          term_str << "word_name ILIKE '#{phrase_split[0]}'"
         else
           phrase = []
           phrase_split.each do |phrase_word|
@@ -533,6 +533,7 @@ class SearchQuery < ApplicationRecord
 
     or_list.each do |or_item|
       or_item = or_item.gsub(/(^\s*|\s*$)/, "") # " hello " -> "hello"
+      or_item = or_item.gsub(/[^a-zA-Z0-9%]+/, "[^a-zA-Z0-9]+")
       if or_item[0]=="%"
         or_item[0]=""
         or_item.insert(0, "\\b\\w*")
@@ -552,6 +553,7 @@ class SearchQuery < ApplicationRecord
       or_item = or_item.gsub("%", "\\w*")
    #   logger.info "e #{or_item}"
       or_item = or_item.gsub(/\s+/, "[^a-zA-Z0-9]+")
+
       tokens << or_item
     end
  #   logger.info "get_tokens, search_term: #{search_term}"

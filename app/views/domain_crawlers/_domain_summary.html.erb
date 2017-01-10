@@ -43,6 +43,10 @@
       <% end %>
       </ul>
     </div>
+  <div class = "domain_action_name domain-field" id = "domain_flow">
+    <%= label_tag :flow_str %><br/>
+    <%= text_field_tag :flow_str %>
+  </div>
         <div class="domain-field domain_action_name">
           <label for="domain_action_name" id = "domain_action_name">Domain action name</label>:<br/>
           <%= text_field_tag :domain_action_name, params[:domain_action_name] %>
