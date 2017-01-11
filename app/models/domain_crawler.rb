@@ -509,7 +509,7 @@ class DomainCrawler < ApplicationRecord
       new_pages = Set.new
 
       second_attempt = false
-      if @filter.length == 0 or url !~ /@filter/
+      if @filter.length == 0 or url !~ /#{@filter}/
         if CrawlerPage.exists?(URL: url, domain_crawler_id: self.id)
           new_crawler_results = CrawlerPage.where(URL: url, domain_crawler_id: self.id)
           new_crawler_page = new_crawler_results.first
@@ -700,7 +700,7 @@ class DomainCrawler < ApplicationRecord
           new_crawler_page.save
         end
 
-      end
+
       old_parent_id = parent_id
 
       new_process_pages = []
@@ -711,6 +711,7 @@ class DomainCrawler < ApplicationRecord
         grab_page(url, next_level, parent_id)
       end if next_level < @max_level
       parent_id = old_parent_id
+      end
     end
 
   end

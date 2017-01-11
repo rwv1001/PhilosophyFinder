@@ -1,3 +1,5 @@
+
+
 <h1>Sign Up</h1>
 
 <%= form_for @user do |f| %>
@@ -32,5 +34,9 @@
       <%= f.label :password_confirmation %><br />
       <%= f.password_field :password_confirmation %>
     </div>
+
+
+      <div class="g-recaptcha" data-sitekey="6LcSYhEUAAAAAOrwZzo5IuoxVkNEI53v3v2yzEoy"></div>
+
     <div class="actions"><%= f.submit "Sign Up" %></div>
 <% end %>

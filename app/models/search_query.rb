@@ -533,7 +533,7 @@ class SearchQuery < ApplicationRecord
 
     or_list.each do |or_item|
       or_item = or_item.gsub(/(^\s*|\s*$)/, "") # " hello " -> "hello"
-      or_item = or_item.gsub(/[^a-zA-Z0-9%]+/, "[^a-zA-Z0-9]+")
+      or_item = or_item.gsub(/[^a-zA-Z0-9%]+/, "[^a-zA-Z0-9]*")
       if or_item[0]=="%"
         or_item[0]=""
         or_item.insert(0, "\\b\\w*")

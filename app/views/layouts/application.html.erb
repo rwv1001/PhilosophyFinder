@@ -6,7 +6,9 @@
 <head>
   <title>St. Thomas the Search Engine</title>
   <%= csrf_meta_tags %>
-
+  <% if  current_user == nil %>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
+  <% end %>
 
 </head>
 
@@ -67,49 +69,27 @@
         (2) Make sure you have selected some pages to search by clicking on the checkboxes in the 'Domain Summary' pane.<br>
         (3) In the 'New Search' pane, fill any one of the word1 to word4 text fields with words you would like to find near to each other. You can specify the separation
         of the words by using the drop down menu. You can specify wild cards by using the '%' character. You can use the 'OR' keyword within a text field to specify
-        different alternatives you would like to find. For example, you could set the following:
+        different alternatives you would like to find. You can also search for exact phrase. For example, you could set the following:
       <ul>
-        <li>word1: faith OR belie%</li>
-        <li>word2: intel% OR understand% </li>
+        <li>word1: Sacred Scripture</li>
+        <li>word2: love% OR desire% </li>
       </ul> <br>
-      Here is one of the results: To the further question, whether it is wisdom, it should be answered that it is wisdom in the most proper sense, as has been said. To the objection that no one is most certain about this doctrine, we say it is false. The believer more firmly assents to the things that are of faith than to the first principles of reason. The statement that faith is below science is not true of infused faith, but of acquired faith, which is opinion fortified by argument. The habit of these principles, namely, of the articles, is called
-      <span class="highlight">faith</span>
-      and not
-      <span class="highlight">understanding</span>
-      because these principles are above reason and human reason is unable to grasp them perfectly. There results a kind of defective knowledge, but not from any defect of certitude in the things known, but from a defect in the knower. Reason led by
-      <span class="highlight">faith</span>
-      grows in such a way that it more fully comprehends what is
-      <span class="highlight">believed</span>
-      and thus in a way
-      <span class="highlight">understands</span>
-      them. Hence Isaiah 7:9 says in one version, ‘Unless you
-      <span class="highlight">believe</span>
-      , you will not
-      <span class="highlight">understand</span>
-      . ’.    <br>
+      This search for the exact phrase "Sacred Scripture" near words such as love, loves, loved, desire, desires, desired etc. Here is one of the results: <span class="highlight">Sacred Scripture</span> likewise records the <span class="highlight">love</span> of God: “He hath <span class="highlight">loved</span> the people” (Deut. 33:3); “I have <span class="highlight">loved</span> you with an everlasting <span class="highlight">love</span>” (Jer. 31:3); “For the Father Himself <span class="highlight">loves</span>
+      you” (John 16:27).  Certain philosophers likewise made God’s love to be
+      the principle of things.  With this view the words of Dionysius agree
+      when he says that “the divine love did not allow Him to be without
+      offspring” [De div. nom. IV, 11].     <br>
       (4) If desired, you can create groups of results that you can save for later reference. To do so, do the following: (a) click on the 'New Group'
       drop down menu item in the 'Groups' pane. (b) Select the directory you would like it to be in by selecting a radio button.
       (c) Use the text field to enter an appropriate group name. (d) Create the group by clicking on 'Create Group' (e) Do a search. (f) Among the search results,
       click on the corresponding check boxes if you want to add the search results to the group. (g) Click on 'Add Search Results' drop down menu item in the
       'Groups' pane. (h) Click on the 'add results' link next to the group you want to add the results to.<br><br>
-      <b> !!!!!!!!!!  WARNING  !!!!!!!!! </b> <br>
-      As this web application is still in development, I may have to reset the database at any time. If I have to do this, you will lose all your saved results. Therefore,
-      for the time being do not rely on this 'Groups' functionality if you want to save valualbe results.
       </p>
 
       <h2> Further Developments</h2>
 
       There are a number of bugs in this application and I would also like to implement some further functionality.
-      <h3>Bugs</h3>
-      <p>
-      <ul>
-        <li>1. Clicking on the Domain Summary check boxes often doesn't select and deselect items properly</li>
-        <li>2. Selecting previous results often doesn't fill in the word fields properly in the 'New Search' pane. </li>
-        <li>3. Clicking on the group links doesn't display subgroup results.</li>
-        <li>4. Remove extra period displayed at the end of every paragraph.</li>
-      </ul>
-      </p><br><br><br><br>
-      <p>
+
       <h3>Further Functionality</h3>
 
       <ul>
