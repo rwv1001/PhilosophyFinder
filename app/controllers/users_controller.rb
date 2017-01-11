@@ -28,6 +28,16 @@ class UsersController < ApplicationController
     @users = User.all
   end
 
+  def update
+    if @user.update_attributes(params[:user])
+      sign_in @user
+      flash[:success] = "Profile updated"
+      redirect_to new_domain_crawler_path
+    else
+      render 'edit'
+    end
+  end
+
   private
 
   def user_params
