@@ -59,6 +59,6 @@ gem 'ancestry'
 
 gem 'rails_12factor', group: :production
 
-
+gem "recaptcha", require: "recaptcha/rails"
 
 
