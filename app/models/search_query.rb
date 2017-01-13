@@ -612,9 +612,9 @@ class SearchQuery < ApplicationRecord
     end
     sql_str = "SELECT par.id, max(sen.id) as max_sen_id FROM paragraphs par INNER JOIN sentences sen ON sen.paragraph_id = par.id WHERE sen.id IN  (#{sentence_set.to_a.join(', ')})  GROUP BY par.id ORDER BY par.id ASC;"
 
-  #  logger.info("TRUNCATE QUERY: #{sql_str}")
+   logger.info("TRUNCATE QUERY: #{sql_str}")
     paragraphs = Paragraph.find_by_sql(sql_str)
- #   logger.info("paragraphs length = #{paragraphs.length}")
+   logger.info("paragraphs length = #{paragraphs.length}")
     if paragraphs.length > MAX_RESULTS
       @truncate_length = paragraphs.length
       max_par = paragraphs[MAX_RESULTS-1]
@@ -623,7 +623,7 @@ class SearchQuery < ApplicationRecord
       while sentence_set[ind]<=max_sen and ind < sentence_set.length
         ind = ind +1
       end
- #     logger.info "max_par.id = #{max_par.id}, max_sen = #{max_sen}, sentence_set[ind-1] = #{sentence_set[ind-1]}, ind = #{ind}"
+     logger.info "max_par.id = #{max_par.id}, max_sen = #{max_sen}, sentence_set[ind-1] = #{sentence_set[ind-1]}, ind = #{ind}"
       return sentence_set = sentence_set[0..(ind-1)]
 
 
