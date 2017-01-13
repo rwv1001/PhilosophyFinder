@@ -516,7 +516,7 @@ class SearchQuery < ApplicationRecord
     tokens = [get_tokens(search_term)]
 
     logger.info "***********************sentence_set = #{sentence_set.inspect}"
-    sentence_set = truncate(sentence_set.to_a)
+    sentence_set = truncate(sentence_set.to_a.sort)
 
     process_sentences(sentence_set, tokens)
 
@@ -796,7 +796,7 @@ class SearchQuery < ApplicationRecord
 
 
         logger.info "***************************** before truncate sentence_set = #{sentence_paragraph_set.inspect}"
-        sentence_paragraph_set = truncate_sentence_paragraph(sentence_paragraph_set)
+        sentence_paragraph_set = truncate_sentence_paragraph(sentence_paragraph_set.to_a.sort)
 
       end
       if self.word_separation == SENTENCE_SEPARATION
@@ -1038,7 +1038,7 @@ class SearchQuery < ApplicationRecord
 
 
 
-      sentence_set= truncate(sentence_set)
+      sentence_set= truncate(sentence_set.to_a.sort)
       end
       process_sentences(sentence_set, tokens)
     else
