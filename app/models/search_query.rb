@@ -357,7 +357,7 @@ class SearchQuery < ApplicationRecord
     term_list.each do |term|
       term = term.gsub(/(^\s*|\s*$)/, "")
       if term.length >0
-        phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Z0-9]+/)}.flatten
+        phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Z0-9%]+/)}.flatten
 
         if phrase_split.length == 1
           if term_str.length >0
@@ -500,9 +500,9 @@ class SearchQuery < ApplicationRecord
     logger.info "phrases_multiples = #{phrases_multiples.length}"
 
     sql_str_array = (0..(phrases_multiples.length-1)).to_a.map {|jj|
-      "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} #{page_string('wp')} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+      "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} #{page_string('wp')} " << (1..(phrases_multiples[jj].length-1)).to_a.map {|mm|
         "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
- "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id "}
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})".gsub(/wpf\d+_0/, "wp")}.join(' AND ')<< " GROUP BY wp.sentence_id "}
 
 
    sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
@@ -662,9 +662,11 @@ class SearchQuery < ApplicationRecord
       return nil
     end
     phrases_multiples = get_phrase_multiples(phrases)
-    sql_str_array = (0..phrases_multiples.length - 1).map{|jj|  "SELECT wp.sentence_id FROM word_pairs wp #{group_string('wp')} #{page_string('wp')} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|
+    sql_str_array = (0..phrases_multiples.length - 1).map{|jj|  "SELECT wp.sentence_id FROM word_pairs wp #{group_string('wp')} #{page_string('wp')} " << (1..(phrases_multiples[jj].length-1)).to_a.map {|mm|
       "INNER JOIN word_pairs wpf#{jj}_#{mm} ON wpf#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(phrases_multiples[jj].length-1)).to_a.map {|mm|\
- "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id "}
+ "wpf#{jj}_#{mm}.separation = 1 AND wpf#{jj}_#{mm}.word_multiple IN (#{phrases_multiples[jj][mm].join(', ')})".gsub(/wpf\d+_0/, "wp")}.join(' AND ')<< " GROUP BY wp.sentence_id "}
+
+    logger.info "******************** get_phrase_sentence_paragraphs sql_str_array = #{sql_str_array} "
 
     sentence_phrase_set = sql_str_array.map{|jj| WordPair.find_by_sql(jj).map{|wp| wp.sentence_id}.to_set}.inject(:|)
     if self.word_separation == SENTENCE_SEPARATION
@@ -964,23 +966,17 @@ class SearchQuery < ApplicationRecord
  WHERE #{group_where()} #{page_where()} wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) "<< " GROUP BY wp#{kk}_#{ii}.sentence_id  ", ((wml[kk][ii][1].length>0) ?\
               (0..(wml[kk][ii][1][0].length-1)).to_a.map {|jj|
             "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} #{page_string('wp')} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
-              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
- "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[]),((wml[kk][ii][1].length>1) ? \
+              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (1..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
+ "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})".gsub(/wpf\d+_\d+_\d+_0/, "wp")}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[]),((wml[kk][ii][1].length>1) ? \
  (0..(wml[kk][ii][1][1].length-1)).to_a.map {|jj|
-            "SELECT  wp.sentence_id FROM word_pairs wp #{group_string('wp')} #{page_string('wp')} " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
+            "SELECT  wp.sentence_id FROM word_pairs wp #{group_string('wp')} #{page_string('wp')} " << (1..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
               "INNER JOIN word_pairs wps#{kk}_#{ii}_#{jj}_#{mm} ON wps#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|\
- "wps#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wps#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][1][jj][mm].join(', ')})"}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[])] }}
+ "wps#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wps#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][1][jj][mm].join(', ')})".gsub(/wps\d+_\d+_\d+_0/, "wp")}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[])] }}
 
 
-      sql_str_array.each do |kk|
-        (0..kk.length - 1).each.each do |ii|
-          (0..kk[ii].length - 1).each do |aa|
-          logger.info "kk[ii=#{ii}][#{aa}]  = #{kk[ii][aa].inspect}"
-          end
-        end
-      end
 
-      logger.info " sql_str_array = #{sql_str_array.inspect}"
+
+      logger.info "************ sql_str_array = #{sql_str_array.inspect}"
       sentence_set_1 = sql_str_array.map{|kk| kk.map{|ii|
         if ii[1][0]==nil and ii[2][0]==nil
         WordPair.find_by_sql(ii[0]).map{|wp| wp.sentence_id}.to_set
