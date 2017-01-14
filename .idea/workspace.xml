@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3ab608ba-9c73-4252-8f89-3bd7ce8e6d0c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/environments/production.rb" afterPath="$PROJECT_DIR$/config/environments/production.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/search_query.rb" afterPath="$PROJECT_DIR$/app/models/search_query.rb" />
     </list>
     <ignored path="PhilosophyFinder.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -85,17 +85,17 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="search_query.rb" pinned="false" current-in-tab="false">
+      <file leaf-file-name="search_query.rb" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/models/search_query.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="55">
-              <caret line="791" column="9" selection-start-line="791" selection-start-column="9" selection-end-line="791" selection-end-column="9" />
+            <state relative-caret-position="160">
+              <caret line="503" column="157" selection-start-line="503" selection-start-column="153" selection-end-line="503" selection-end-column="157" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="production.rb" pinned="false" current-in-tab="true">
+      <file leaf-file-name="production.rb" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config/environments/production.rb">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="271">
@@ -193,8 +193,8 @@
         <option value="$PROJECT_DIR$/config/initializers/recaptcha.rb" />
         <option value="$PROJECT_DIR$/config/secrets.yml" />
         <option value="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
-        <option value="$PROJECT_DIR$/app/models/search_query.rb" />
         <option value="$PROJECT_DIR$/config/environments/production.rb" />
+        <option value="$PROJECT_DIR$/app/models/search_query.rb" />
       </list>
     </option>
   </component>
@@ -747,12 +747,12 @@
       <workItem from="1484089508057" duration="4932000" />
       <workItem from="1484094831660" duration="9843000" />
       <workItem from="1484336995979" duration="2968000" />
-      <workItem from="1484340673804" duration="2775000" />
+      <workItem from="1484340673804" duration="3431000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="977521000" />
+    <option name="totallyTimeSpent" value="978177000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="24" width="1855" height="1056" extended-state="6" />
@@ -1195,14 +1195,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/models/search_query.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="55">
-          <caret line="791" column="9" selection-start-line="791" selection-start-column="9" selection-end-line="791" selection-end-column="9" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/config/database.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="106">
@@ -1215,6 +1207,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="271">
           <caret line="48" column="26" selection-start-line="48" selection-start-column="26" selection-end-line="48" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/models/search_query.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="503" column="157" selection-start-line="503" selection-start-column="153" selection-end-line="503" selection-end-column="157" />
           <folding />
         </state>
       </provider>
