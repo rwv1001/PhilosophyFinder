@@ -966,7 +966,7 @@ class SearchQuery < ApplicationRecord
  WHERE #{group_where()} #{page_where()} wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) "<< " GROUP BY wp#{kk}_#{ii}.sentence_id  ", ((wml[kk][ii][1].length>0) ?\
               (0..(wml[kk][ii][1][0].length-1)).to_a.map {|jj|
             "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} #{page_string('wp')} " << (1..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
-              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (1..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
+              "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
  "wpf#{kk}_#{ii}_#{jj}_#{mm}.separation = 1 AND wpf#{kk}_#{ii}_#{jj}_#{mm}.word_multiple IN (#{wml[kk][ii][1][0][jj][mm].join(', ')})".gsub(/wpf\d+_\d+_\d+_0/, "wp")}.join(' AND ')<< " GROUP BY wp.sentence_id  "} :[]),((wml[kk][ii][1].length>1) ? \
  (0..(wml[kk][ii][1][1].length-1)).to_a.map {|jj|
             "SELECT  wp.sentence_id FROM word_pairs wp #{group_string('wp')} #{page_string('wp')} " << (1..(wml[kk][ii][1][1][jj].length-1)).to_a.map {|mm|
