@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170105033543) do
+ActiveRecord::Schema.define(version: 20170114043042) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -223,6 +223,7 @@ ActiveRecord::Schema.define(version: 20170105033543) do
 
   add_index "word_singletons", ["paragraph_id"], name: "word_singletons_paragraph_id_ix", using: :btree
   add_index "word_singletons", ["result_page_id"], name: "index_word_singletons_on_result_page_id", using: :btree
+  add_index "word_singletons", ["sentence_id"], name: "ws_sentence_id_ix", using: :btree
   add_index "word_singletons", ["word_id"], name: "word_id_ix", using: :btree
 
   create_table "words", primary_key: "word_name", force: :cascade do |t|

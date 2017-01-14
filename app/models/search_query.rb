@@ -745,6 +745,7 @@ class SearchQuery < ApplicationRecord
             sql_str = "SELECT  ws1.#{@separation_str} FROM word_singletons ws1 #{group_string('ws1')} #{page_string('ws1')} INNER JOIN word_singletons ws2 ON ws2.#{@separation_str} = ws1.#{@separation_str}\
  WHERE #{group_where()} #{page_where()} ws1.word_id IN (#{word_ids[term_pair[0]].map{|mm| mm.id_value}.join(' ,')}) AND ws2.word_id IN (#{word_ids[term_pair[1]].map{|mm| mm.id_value}.join(' , ')})"<< " GROUP BY ws1.#{@separation_str} "
             pair_list |= find_sql_sentence_paragraph(sql_str)
+
           end
           #******************* term x phrase multiples **************************
 
