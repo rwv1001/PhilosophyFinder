@@ -825,6 +825,16 @@ class SearchQuery < ApplicationRecord
     terms = []
   end
 
+  def where_separation(var, separation)
+    if separation >= 10
+      ret_val = ""
+    else
+      ret_val = "#{var}.separation <= #{separation} AND "
+    end
+    return ret_val
+
+  end
+
 
 
   def get_multiples_sql_str(multiples_list, separation)
@@ -833,7 +843,7 @@ class SearchQuery < ApplicationRecord
       sql_str << "INNER JOIN word_pairs wp#{i} ON wp#{i}.sentence_id = wp0.sentence_id "
     end
     sql_str << " WHERE "
-    sql_str << (0..(multiples_list.length-1)).to_a.map{|i| "wp#{i}.separation <=#{separation} AND wp#{i}.word_multiple IN (#{multiples_list[i].to_a.join(', ')}) "}.join(' AND ')
+    sql_str << (0..(multiples_list.length-1)).to_a.map{|i| where_separation("wp#{i}",separation) + " wp#{i}.word_multiple IN (#{multiples_list[i].to_a.join(', ')}) "}.join(' AND ')
     return sql_str
   end
 
@@ -964,7 +974,7 @@ class SearchQuery < ApplicationRecord
           sql_str_array =  (0..(wml.length-1)).to_a.map {\
          |kk| (0..(wml[kk].length-1)).to_a.map {\
            |ii| ["SELECT  wp#{kk}_#{ii}.sentence_id FROM word_pairs wp#{kk}_#{ii} #{group_string('wp'<<kk.to_s<<'_'<<ii.to_s)} #{page_string('wp'<<kk.to_s<<'_'<<ii.to_s)}  \
- WHERE #{group_where()} #{page_where()} wp#{kk}_#{ii}.separation <= #{self.word_separation} AND wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) "<< " GROUP BY wp#{kk}_#{ii}.sentence_id  ", ((wml[kk][ii][1].length>0) ?\
+ WHERE #{group_where()} #{page_where()} " + where_separation("wp#{kk}_#{ii}",self.word_separation) +  " wp#{kk}_#{ii}.word_multiple IN (#{wml[kk][ii][0].join(', ')}) "<< " GROUP BY wp#{kk}_#{ii}.sentence_id  ", ((wml[kk][ii][1].length>0) ?\
               (0..(wml[kk][ii][1][0].length-1)).to_a.map {|jj|
             "SELECT wp.sentence_id FROM word_pairs wp  #{group_string('wp')} #{page_string('wp')} " << (1..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|
               "INNER JOIN word_pairs wpf#{kk}_#{ii}_#{jj}_#{mm} ON wpf#{kk}_#{ii}_#{jj}_#{mm}.sentence_id = wp.sentence_id "}.join(' ')<< "WHERE #{group_where()} #{page_where()} " << (0..(wml[kk][ii][1][0][jj].length-1)).to_a.map {|mm|\
