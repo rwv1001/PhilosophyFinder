@@ -1,7 +1,6 @@
 <% crawler_page = args[:crawler_page] %>
 
 
-    <% display_node = DisplayNode.exists?(user_id: current_user.id, crawler_page_id: crawler_page.id) %>
     <%= render 'domain_crawlers/url', args: {:crawler_page => crawler_page, :crawler_page_ranges => args[:crawler_page_ranges]} %>
     <%= render 'domain_crawlers/children_crawler_pages', args: {:crawler_page => crawler_page, :crawler_page_ranges => args[:crawler_page_ranges]} %>
 

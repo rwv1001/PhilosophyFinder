@@ -189,7 +189,7 @@ class SearchQuery < ApplicationRecord
         search_fields.each do |token|
 
           if token.length >0 and @search_ok
-            matches =paragraph_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            matches =paragraph_content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
             if matches.length > 0
               token_found = true
             else
@@ -212,7 +212,7 @@ class SearchQuery < ApplicationRecord
           search_fields.each do |token|
 
             if token.length >0
-              matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+              matches =content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
               if matches.length > 0
                 token_found = true
                 matches.each do |match|
@@ -238,7 +238,7 @@ class SearchQuery < ApplicationRecord
         search_fields.each do |token|
 
           if token.length >0 and @search_ok
-            matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            matches =content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
             if matches.length > 0
               token_found = true
               matches.each do |match|
@@ -355,9 +355,9 @@ class SearchQuery < ApplicationRecord
     phrases = []
     terms_hash = Hash.new
     term_list.each do |term|
-      term = term.gsub(/(^\s*|\s*$)/, "")
+      term = term.greek.gsub(/(^\s*|\s*$)/, "")
       if term.length >0
-        phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Z0-9%]+/)}.flatten
+        phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Zα-ω0-9%]+/)}.flatten
 
         if phrase_split.length == 1
           if term_str.length >0
@@ -528,15 +528,15 @@ class SearchQuery < ApplicationRecord
   end
 
   def get_tokens(search_term)
-    or_list = search_term.split(/ OR /)
+    or_list = search_term.greek.split(/ OR /)
     tokens = []
 
     or_list.each do |or_item|
       or_item = or_item.gsub(/(^\s*|\s*$)/, "") # " hello " -> "hello"
-      or_item = or_item.gsub(/[^a-zA-Z0-9%]+/, "[^a-zA-Z0-9]*")
+      or_item = or_item.gsub(/[^a-zA-Zα-ω0-9%]+/, "[^a-zA-Zα-ω0-9]*")
       if or_item[0]=="%"
         or_item[0]=""
-        or_item.insert(0, "\\b\\w*")
+        or_item.insert(0, "\\b[a-zA-Zα-ω0-9]*")
      #   logger.info "a #{or_item}"
       else
         or_item.insert(0, "\\b")
@@ -544,15 +544,15 @@ class SearchQuery < ApplicationRecord
       end
       if or_item[-1]=="%"
         or_item[-1]=""
-        or_item.insert(-1, "\\w*\\b")
+        or_item.insert(-1, "[a-zA-Zα-ω0-9]*\\b")
    #     logger.info "c #{or_item}"
       else
         or_item.insert(-1, "\\b")
    #     logger.info "d #{or_item}"
       end
-      or_item = or_item.gsub("%", "\\w*")
+      or_item = or_item.gsub("%", "[a-zA-Zα-ω0-9]*")
    #   logger.info "e #{or_item}"
-      or_item = or_item.gsub(/\s+/, "[^a-zA-Z0-9]+")
+      or_item = or_item.gsub(/\s+/, "[^a-zA-Zα-ω0-9]+")
 
       tokens << or_item
     end

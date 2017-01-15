@@ -186,9 +186,10 @@ class DomainCrawler < ApplicationRecord
 
   def ProcessSentence(sentence, paragraph_id)
     #@sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
+    logger.info "************ ProcessSentence #{sentence}"
     @sentence_inserts.push "(\'#{sentence.gsub("'", "''")}\',#{paragraph_id})" # psql
 
-    sentence = sentence.gsub(/[^a-zA-Z0-9]/, ' ')
+    sentence = sentence.greek.gsub(/[^a-zA-Z0-9α-ω]/, ' ')
     word_list = sentence.split(' ')
 
     word_list.each do |word|
@@ -197,8 +198,8 @@ class DomainCrawler < ApplicationRecord
       #   logger.info "v2"
       if word.length > 0
         #      logger.info "v3"
-        @word_entries.add "(\'#{word.downcase}\', 0, 0)"
-        @word_set.add("\'#{word.downcase}\'")
+        @word_entries.add "(\'#{word.downcase.greek}\', 0, 0)"
+        @word_set.add("\'#{word.downcase.greek}\'")
       end
       #  logger.info "v14"
     end
@@ -206,13 +207,13 @@ class DomainCrawler < ApplicationRecord
 
   def ProcessSingletonPairs(sentence_obj, result_page_id)
 
-    sentence = sentence_obj.content.gsub(/[^a-zA-Z0-9]/, ' ')
+    sentence = sentence_obj.content.greek.gsub(/[^a-zα-ωA-Z0-9]/, ' ')
     word_list = sentence.downcase.split(' ')
     #   TimeLogger("03")
     word_inserts = []
     word_singleton_set = Set.new
     word_list.each do |word|
-      word_singleton_set.add(word.downcase)
+      word_singleton_set.add(word.downcase.greek)
     end
 
     #  logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
@@ -225,11 +226,17 @@ class DomainCrawler < ApplicationRecord
 
     for i in 0..word_list.length-1
       word_1 = @word_prime_hash[word_list[i]]
-
+      if word_1 == nil
+        logger.info "!!!!!!!!!!!!!!!! word_1 is nil for #{word_list[i]}"
+      end
 
       if i<word_list.length-1
         for j in (i+1) .. [i+@max_separation, word_list.length-1].min
           word_2 = @word_prime_hash[word_list[j]]
+          if word_2 == nil
+            logger.info "!!!!!!!!!!!!!!!! word_2 is nil for #{word_list[j]}"
+            logger.info "@word_prime_hash = #{@word_prime_hash.inspect}"
+          end
           #    logger.info "word_list[i] = #{word_list[i]}, word_list[j] = #{word_list[j]}, @word_prime_hash = [#{ @word_prime_hash[word_list[i]]},#{ @word_prime_hash[word_list[j]]}]"
           @word_pairs_inserts.push "(#{word_1 * word_2},#{j-i}, #{result_page_id}, #{sentence_obj.id})"
         end
@@ -255,7 +262,7 @@ class DomainCrawler < ApplicationRecord
     word_count=1
     word_array = Array.new
     word_set = Set.new
-    sentence = sentence.gsub(/[^a-zA-Z0-9]/, ' ')
+    sentence = sentence.gsub(/[^a-zα-ωA-Z0-9]/, ' ')
     # TimeLogger("02")
     #  logger.info "sentence without punctuation: #{sentence}"
     word_list = sentence.split(' ')
