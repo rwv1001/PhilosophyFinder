@@ -11,7 +11,7 @@ set :repo_url, 'git@github.com:rwv1001/PhilosophyFinder.git '
 # Default deploy_to directory is /var/www/my_app_name
 set :deploy_to, '/home/deploy/PhilosophyFinder'
 
-set :linked_files, %w{config/database.yml config/secrets.yml config/initializers/recaptcha.rb environments/config/production.rb}
+set :linked_files, %w{config/database.yml config/secrets.yml config/initializers/recaptcha.rb config/environments/production.rb}
 set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 namespace :deploy do
 
