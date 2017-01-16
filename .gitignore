@@ -12,4 +12,5 @@
 !/log/.keep
 /tmp
 /config/secrets.yml
+/config/environments/production.rb
 /config/initializers/recaptcha.rb
