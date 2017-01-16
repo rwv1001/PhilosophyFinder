@@ -303,9 +303,9 @@ class SearchQuery < ApplicationRecord
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
       sentence1 = Sentence.find_by_id(sentence_id1)
-      @highlighted_result << sentence1.content << ". "
+      @highlighted_result << sentence1.content
     end
-    @highlighted_result << '<span class="highlight-sentence">' << content << ". " << "</span>"
+    @highlighted_result << '<span class="highlight-sentence">' << content  << "</span>"
       end
   end
 
@@ -567,7 +567,7 @@ class SearchQuery < ApplicationRecord
 
     sentence_ids.each do |sentence_id|
       sentence = Sentence.find_by_id(sentence_id)
-      @highlighted_result << sentence.content << ". "
+      @highlighted_result << sentence.content
       @last_sentence_id = sentence.id
     end
     @search_result.highlighted_result = @highlighted_result

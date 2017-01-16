@@ -31,6 +31,69 @@ class DomainCrawler < ApplicationRecord
 
   end
 
+  BEGIN_TOKEN = 0
+  END_TOKEN = 1
+  END_TAG = 2
+  PRIME = 3
+  TAG_STRUCTS = [[],["<td[^>]*>", "<\/td[^>]*>", "</td>", 2],["<tr[^>]*>", "<\/tr[^>]*>", "</tr>", 3],["<table[^>]*>", "<\/table[^>]*>", "</table>", 5], ["<p[^>]*>", "<\/p[^>]*>", "</p>", 7]]
+
+  def fix_html(html_content)
+    tag_indices = []
+    (TAG_STRUCTS.size-1).times.each do |struc_ind|
+      html_content.to_enum(:scan, /#{TAG_STRUCTS[struc_ind+1][BEGIN_TOKEN]}/im).map { Regexp.last_match }.map { |match| tag_indices << [match.offset(0)[0],match.offset(0)[1], struc_ind+1] }
+      html_content.to_enum(:scan, /#{TAG_STRUCTS[struc_ind+1][END_TOKEN]}/im).map { Regexp.last_match }.map { |match| tag_indices <<[match.offset(0)[0],match.offset(0)[1],  -struc_ind-1] }
+    end
+    tag_indices.sort!
+    tag_multiple = 1
+    tag_changes = []
+    tag_indices.size.times.each do |tag_ind|
+      struc_ind = tag_indices[tag_ind][2]
+      insert_pos = tag_indices[tag_ind][0]
+      if struc_ind > 0
+        prime = TAG_STRUCTS[struc_ind][PRIME]
+        if tag_multiple%prime==0
+# this means an end tag is missing. We have to supply the end tags for all struc ids <= struc_id
+
+          (struc_ind-1).times do |id|
+            l_prime = TAG_STRUCTS[id+1][PRIME]
+            if tag_multiple%l_prime == 0
+              tag_changes<<[insert_pos, TAG_STRUCTS[id+1][END_TAG]]
+              tag_multiple = tag_multiple/l_prime
+            end
+          end
+          tag_changes<<[insert_pos, TAG_STRUCTS[struc_ind][END_TAG]]
+        else
+          tag_multiple =tag_multiple*prime
+        end
+      else
+        prime = TAG_STRUCTS[-struc_ind][PRIME]
+        if tag_multiple%prime==0
+          tag_multiple =tag_multiple/prime
+          (-struc_ind-1).times do |id|
+            l_prime = TAG_STRUCTS[id+1][PRIME]
+            if tag_multiple%l_prime == 0
+              tag_changes<<[insert_pos, TAG_STRUCTS[id+1][END_TAG]]
+              tag_multiple = tag_multiple/l_prime
+            end
+          end
+        else
+          tag_changes << [tag_indices[tag_ind][0],tag_indices[tag_ind][1] ]
+        end
+      end
+    end
+ #   puts tag_changes
+    tag_changes.reverse_each do |change|
+      if change[1].is_a? Integer
+       # puts "Removing #{change.inspect}"
+        html_content[change[0],change[1]-change[0]]=""
+      else
+       # puts "inserting #{change.inspect}"
+        html_content.insert(change[0],change[1])
+      end
+    end
+
+  end
+
   def GetNextPrime(n)
     if n%2 == 0
       possible_prime = n+1
@@ -454,9 +517,13 @@ class DomainCrawler < ApplicationRecord
       matches3 = par_content.to_enum(:scan, /\.\s*[a-z0-9]/).map {Regexp.last_match}
       period_indices3 = matches3.map{|match| match.to_s.to_enum(:scan, /\./).map {Regexp.last_match}.map{|period_match| match.offset(0)[0]+period_match.offset(0)[0] }}.flatten.sort.reverse
       period_indices3.each{|pi| par_content[pi]= 'a¶a'}
+      paragraph_sentences = par_content.split('.').map{|sentence|sentence.gsub(/a¶a/,'.')<<"."}
+      if par_content[-1] != "."
+        paragraph_sentences[-1]=paragraph_sentences[-1][0..-2]
+      end
       
-      par_sentence[:sentences] = par_content.split('.').map{|sentence|sentence.gsub(/a¶a/,'.')}
-      logger.info "*** par_sentence #{par_sentence.inspect} "
+      par_sentence[:sentences] = paragraph_sentences
+      logger.info "*** par_sente nce #{par_sentence.inspect} "
       par_sentence[:paragraph_id] = paragraph.id
       par_sentences.push(par_sentence)
     end
@@ -568,6 +635,7 @@ class DomainCrawler < ApplicationRecord
           #logger.info "Paragraph 2 is #{paragraphs[2].text}"
           #logger.info "Paragraph 3 is #{paragraphs[3].text}"
           content = doc.to_html
+          fix_html(content)
           hash_value = Digest::MD5.hexdigest(content)
           #   logger.info "hash_value is #{hash_value}"
 
