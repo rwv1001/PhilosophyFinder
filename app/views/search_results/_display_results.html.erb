@@ -51,9 +51,10 @@
                   <% logger.info "***** group_str = #{group_str}, search_groups1 = #{@search_groups1}"%>
                   <% if search_result.crawler_page_id != crawler_page_id or group_str.length > 0 %>
                       <% crawler_page_id = search_result.crawler_page_id %>
-                      <% crawler_page_name = CrawlerPage.find_by_id(crawler_page_id).URL %>
+                      <% crawler_page = CrawlerPage.find_by_id(crawler_page_id) %>
+                      <% download_date = crawler_page.download_date %>
                       <div class="page-results">
-                        <%= link_to crawler_page_name + group_str, crawler_page_name, target: '_blank' %>
+                        <%= link_to crawler_page.URL+download_date.strftime(" (Access date: %b %e, %Y) ") + group_str, crawler_page.URL, target: '_blank' %>
                       </div>
                   <% end %>
                   <div class="search-result-outer" name="search-result-<%= search_result.id %>">

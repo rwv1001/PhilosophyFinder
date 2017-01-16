@@ -661,6 +661,7 @@ class DomainCrawler < ApplicationRecord
 
           new_crawler_page.name = file_name
           new_crawler_page.result_page_id = result_page.id
+          new_crawler_page.download_date = Date.today
 
 
                   logger.info "ProcessPage 10"

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170114043042) do
+ActiveRecord::Schema.define(version: 20170116000344) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20170114043042) do
     t.string  "name"
     t.string  "ancestry"
     t.integer "domain_crawler_id"
+    t.date    "download_date"
   end
 
   add_index "crawler_pages", ["ancestry"], name: "index_crawler_pages_on_ancestry", using: :btree
