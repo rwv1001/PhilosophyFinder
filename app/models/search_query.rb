@@ -299,9 +299,9 @@ class SearchQuery < ApplicationRecord
       @search_result.begin_display_paragraph_id = paragraph.id
       @search_result.end_display_paragraph_id = paragraph.id
     end
-    logger.info "Before Sentence.where"
+
     sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id).order("id asc")
-    logger.info "After Sentence.where"
+
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
       #sentence1 = Sentence.find_by_id(sentence_id1)
@@ -565,27 +565,29 @@ class SearchQuery < ApplicationRecord
   end
 
   def complete_result
+    logger.info "complete_result begin"
     sentence_ids = Sentence.where("paragraph_id = ? and id > ?", @current_paragraph_id, @last_sentence_id).order("id asc")
 
     sentence_ids.each do |sentence_id|
-      sentence = Sentence.find_by_id(sentence_id)
-      @highlighted_result << sentence.content
-      @last_sentence_id = sentence.id
+     # sentence = Sentence.find_by_id(sentence_id)
+      @highlighted_result << sentence_id.content
+      @last_sentence_id = sentence_id.id
     end
     @search_result.highlighted_result = @highlighted_result
 
-    hash_value = Digest::MD5.hexdigest(@highlighted_result)
-    if SearchResult.exists?(search_query_id: self.id, hash_value: hash_value)== false
-      @search_result.hash_value = hash_value
+ #   hash_value = Digest::MD5.hexdigest(@highlighted_result)
+  #  if SearchResult.exists?(search_query_id: self.id, hash_value: hash_value)== false
+  #    @search_result.hash_value = hash_value
       @search_result.save
       @count = @count +1
       @search_results << @search_result
-    else
-      logger.info "result already exists - set to @search_result to nil"
-      @search_result= nil
-    end
+  #  else
+  #    logger.info "result already exists - set to @search_result to nil"
+  #    @search_result= nil
+  #  end
 #    logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"
     @highlighted_result = "";
+    logger.info "complete_result end"
   end
 
   def get_all_tokens(search_terms)
