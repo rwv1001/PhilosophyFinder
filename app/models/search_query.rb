@@ -312,6 +312,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def process_sentences(sentence_set, tokens)
+    logger.info "begin process sentences"
     initialize_process_sentences()
 
     sentence_inserts = []
@@ -347,7 +348,8 @@ class SearchQuery < ApplicationRecord
 
     if @search_result != nil and @quit_processing == false
       complete_result()
-   end
+    end
+    logger.info "end process sentences"
   end
 
 
@@ -565,7 +567,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def complete_result
-    logger.info "complete_result begin"
+
     sentence_ids = Sentence.where("paragraph_id = ? and id > ?", @current_paragraph_id, @last_sentence_id).order("id asc")
 
     sentence_ids.each do |sentence_id|
@@ -587,7 +589,7 @@ class SearchQuery < ApplicationRecord
   #  end
 #    logger.info "single search: #{@search_result.inspect}, #{@highlighted_result}"
     @highlighted_result = "";
-    logger.info "complete_result end"
+
   end
 
   def get_all_tokens(search_terms)
