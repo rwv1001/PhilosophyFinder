@@ -299,11 +299,13 @@ class SearchQuery < ApplicationRecord
       @search_result.begin_display_paragraph_id = paragraph.id
       @search_result.end_display_paragraph_id = paragraph.id
     end
+    logger.info "Before Sentence.where"
     sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id).order("id asc")
+    logger.info "After Sentence.where"
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
-      sentence1 = Sentence.find_by_id(sentence_id1)
-      @highlighted_result << sentence1.content
+      #sentence1 = Sentence.find_by_id(sentence_id1)
+      @highlighted_result << sentence_id1.content
     end
     @highlighted_result << '<span class="highlight-sentence">' << content  << "</span>"
       end
