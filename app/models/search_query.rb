@@ -208,6 +208,7 @@ class SearchQuery < ApplicationRecord
 
 
     end
+    logger.info "06a"
     if self.word_separation == PARAGRAPH_SEPARATION
       if @search_ok
         tokens.each do |search_fields|
@@ -234,6 +235,7 @@ class SearchQuery < ApplicationRecord
         end
       end
     else
+      logger.info "06b"
       token_found = false
       @search_ok = true
       tokens.each do |search_fields|
