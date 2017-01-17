@@ -68,9 +68,12 @@
       <file leaf-file-name="search_query.rb" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/models/search_query.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="236">
-              <caret line="354" column="39" selection-start-line="354" selection-start-column="39" selection-end-line="354" selection-end-column="39" />
-              <folding />
+            <state relative-caret-position="404">
+              <caret line="320" column="21" selection-start-line="320" selection-start-column="21" selection-end-line="320" selection-end-column="21" />
+              <folding>
+                <element signature="e#6283#7044#0" expanded="false" />
+                <element signature="e#7049#8927#0" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -723,12 +726,12 @@
       <workItem from="1484507867561" duration="13064000" />
       <workItem from="1484529014509" duration="1139000" />
       <workItem from="1484543562190" duration="2637000" />
-      <workItem from="1484604516833" duration="6794000" />
+      <workItem from="1484604516833" duration="7183000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1026700000" />
+    <option name="totallyTimeSpent" value="1027089000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="33" y="145" width="1855" height="892" extended-state="0" />
@@ -1200,9 +1203,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/models/search_query.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="236">
-          <caret line="354" column="39" selection-start-line="354" selection-start-column="39" selection-end-line="354" selection-end-column="39" />
-          <folding />
+        <state relative-caret-position="404">
+          <caret line="320" column="21" selection-start-line="320" selection-start-column="21" selection-end-line="320" selection-end-column="21" />
+          <folding>
+            <element signature="e#6283#7044#0" expanded="false" />
+            <element signature="e#7049#8927#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

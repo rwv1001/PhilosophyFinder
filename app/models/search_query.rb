@@ -168,15 +168,16 @@ class SearchQuery < ApplicationRecord
   end
 
   def process_sentence(sentence_id, tokens)
-    logger.info "process sentence begin"
+    logger.info "process sentence begin "
 
 
     sentence = Sentence.find_by_id(sentence_id)
-    #     logger.info "04"
-    paragraph = Paragraph.find_by_id(sentence.paragraph_id)
-    #   logger.info "05"
-    content = sentence.content.gsub(/\n/, ' ')
 
+         logger.info "04"
+    paragraph = Paragraph.find_by_id(sentence.paragraph_id)
+     logger.info "05"
+    content = sentence.content.gsub(/\n/, ' ')
+    logger.info "06"
  #  logger.info "@count #{@count}, sentence_id = #{sentence_id}, content: #{content}"
 
     highlights = Hash.new
@@ -263,7 +264,9 @@ class SearchQuery < ApplicationRecord
       end
 
     end
+    logger.info "07"
     if @search_ok and highlights.length>0
+      logger.info "08"
     #  logger.info "highlights: #{highlights}"
     sorted_highlights = Hash[highlights.sort]
 
@@ -276,40 +279,46 @@ class SearchQuery < ApplicationRecord
         compressed_highlights[-1][1] = b
       end
     end
+      logger.info "09"
     compressed_highlights.reverse_each do |pair|
 #      logger.info "inserting pair #{pair} into content #{content}"
 
       content.insert(pair[1], '</span>')
       content.insert(pair[0], '<span class="highlight">')
     end
+      logger.info "10"
     #  logger.info "compressed highlights: #{compressed_highlights}"
     # logger.info "highlighted content: #{content}"
     if @current_paragraph_id != paragraph.id
+      logger.info "11"
       if @search_result != nil
         complete_result()
       else
         logger.info "@search_result is nil"
       end
+      logger.info "12"
       @current_paragraph_id = paragraph.id
       @search_result = SearchResult.new
       @search_result.user_id = self.user_id
       @search_result.search_query_id = self.id
       @search_result.sentence_id = sentence.id
-
+      logger.info "13"
       @search_result.crawler_page_id = ResultPage.find_by_id(paragraph.result_page_id).crawler_page_id
-
+      logger.info "14"
       @search_result.begin_display_paragraph_id = paragraph.id
       @search_result.end_display_paragraph_id = paragraph.id
     end
-
+      logger.info "15"
     sentence_ids = Sentence.where("paragraph_id = ? and id < ? and id > ?", paragraph.id, sentence.id, @last_sentence_id).order("id asc")
-
+      logger.info "16"
     @last_sentence_id = sentence.id
     sentence_ids.each do |sentence_id1|
       #sentence1 = Sentence.find_by_id(sentence_id1)
       @highlighted_result << sentence_id1.content
     end
+      logger.info "17"
     @highlighted_result << '<span class="highlight-sentence">' << content  << "</span>"
+      logger.info "18"
     end
     logger.info "process sentence end"
   end
