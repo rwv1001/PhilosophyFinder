@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170116000344) do
+ActiveRecord::Schema.define(version: 20170117045738) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -84,6 +84,8 @@ ActiveRecord::Schema.define(version: 20170116000344) do
   create_table "paragraphs", force: :cascade do |t|
     t.text    "content"
     t.integer "result_page_id"
+    t.text    "deaccented_content", default: ""
+    t.boolean "accented",           default: false
   end
 
   add_index "paragraphs", ["result_page_id"], name: "result_page_id_ix", using: :btree
@@ -170,6 +172,8 @@ ActiveRecord::Schema.define(version: 20170116000344) do
   create_table "sentences", force: :cascade do |t|
     t.text    "content"
     t.integer "paragraph_id"
+    t.text    "deaccented_content"
+    t.boolean "accented"
   end
 
   add_index "sentences", ["paragraph_id"], name: "paragraph_id_ix", using: :btree

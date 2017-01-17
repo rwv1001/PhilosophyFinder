@@ -229,6 +229,15 @@ function SelectDomainAction()
             $( ".domain-action-button" ).show();
             $("#domain-action-button").prop('value', 'Reorder Pages');
             break;
+        case "deaccent_domain":
+            $( ".domain-field" ).hide();
+            $( ".domain-new" ).show();
+            $(".bad_page").show();
+            $(".domain-name-radio").show();
+            $( ".domain-action-button" ).show();
+            $("#domain-action-button").prop('value', 'Deaccent Domain');
+            break;
+            
         case "set_paragraphs":
             $( ".domain-field" ).hide();
             $( ".domain-new" ).show();

@@ -24,7 +24,17 @@ class String
   #   puts 'αβγδεζηθικλμνξοπρστυφχψω άέήίϊΐόύ ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ ABCDEFGHIJKLMNOPQRSTUVXYZ'.greeklish
   # returns:
   #   avgdezhthiklmnksoprstyfxpsw aehiiioy AVGDEZHTHIKLMNKSOPRSTYFXPSW ABCDEFGHIJKLMNOPQRSTUVXYZ
-  def greek!
+  def accented
+    for i in 0...self.chars.length
+      char = self.chars[i]
+      if MAPPING_TABLE[char.to_s]
+        return true
+      end
+    end
+    return false
+  end
+
+  def deaccent!
 
 
     for i in 0...self.chars.length
@@ -37,7 +47,7 @@ class String
 
   # Returns a new string which is converted from Greek Unicode characters
   # to latin ones (aka greeklish)
-  def greek
-    self.dup.greek!
+  def deaccent
+    self.dup.deaccent!
   end
 end

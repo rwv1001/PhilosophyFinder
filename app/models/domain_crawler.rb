@@ -132,7 +132,7 @@ class DomainCrawler < ApplicationRecord
     end
     if @sentence_inserts.length >0
       #   logger.info "rwv1001 i"
-      sql = %Q"INSERT INTO sentences (content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
+      sql = %Q"INSERT INTO sentences (content, accented, deaccented_content, paragraph_id) VALUES #{@sentence_inserts.to_a.join(', ')}"
       sql_save(sql)
       # logger.info "rwv1001 j"
 
@@ -250,9 +250,10 @@ class DomainCrawler < ApplicationRecord
   def ProcessSentence(sentence, paragraph_id)
     #@sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
     logger.info "************ ProcessSentence #{sentence}"
-    @sentence_inserts.push "(\'#{sentence.gsub("'", "''")}\',#{paragraph_id})" # psql
+    @sentence_inserts.push "(\'#{sentence.gsub("'", "''")}\',"+(sentence.accented)? "TRUE,\'#{sentence.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{paragraph_id})" # psql
 
-    sentence = sentence.greek.gsub(/[^a-zA-Z0-9α-ω]/, ' ')
+
+    sentence = sentence.deaccent.gsub(/[^a-zA-Z0-9α-ω]/, ' ')
     word_list = sentence.split(' ')
 
     word_list.each do |word|
@@ -261,8 +262,8 @@ class DomainCrawler < ApplicationRecord
       #   logger.info "v2"
       if word.length > 0
         #      logger.info "v3"
-        @word_entries.add "(\'#{word.downcase.greek}\', 0, 0)"
-        @word_set.add("\'#{word.downcase.greek}\'")
+        @word_entries.add "(\'#{word.downcase.deaccent}\', 0, 0)"
+        @word_set.add("\'#{word.downcase.deaccent}\'")
       end
       #  logger.info "v14"
     end
@@ -270,13 +271,13 @@ class DomainCrawler < ApplicationRecord
 
   def ProcessSingletonPairs(sentence_obj, result_page_id)
 
-    sentence = sentence_obj.content.greek.gsub(/[^a-zα-ωA-Z0-9]/, ' ')
+    sentence = sentence_obj.content.deaccent.gsub(/[^a-zα-ωA-Z0-9]/, ' ')
     word_list = sentence.downcase.split(' ')
     #   TimeLogger("03")
     word_inserts = []
     word_singleton_set = Set.new
     word_list.each do |word|
-      word_singleton_set.add(word.downcase.greek)
+      word_singleton_set.add(word.downcase.deaccent)
     end
 
     #  logger.info "word_set length = #{word_set.length}, word_array = #{word_array}"
@@ -469,7 +470,7 @@ class DomainCrawler < ApplicationRecord
 
 
         if par_inserts.length>=paragraph_block_num
-          @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',#{result_page_id})"}
+          @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+(pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{result_page_id})"}
           par_inserts = []
           save_paragraphs(result_page_id)
 
@@ -478,7 +479,7 @@ class DomainCrawler < ApplicationRecord
 
     end
     if par_inserts.length > 0
-      @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',#{result_page_id})"}
+      @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+(pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{result_page_id})"}
       save_paragraphs(result_page_id)
 
 
@@ -497,7 +498,7 @@ class DomainCrawler < ApplicationRecord
       max_id = 0;
     end
     logger.debug ""
-    sql = %Q"INSERT INTO paragraphs (content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
+    sql = %Q"INSERT INTO paragraphs (content, accented, deaccented_content, result_page_id) VALUES #{@paragraph_inserts.join(', ')}"
     # logger.info "sql = #{sql}"
     sql_save(sql)
      logger.info "rwv1001 c"
@@ -1066,6 +1067,44 @@ class DomainCrawler < ApplicationRecord
       match_count= match_count+1
     end
     return match_count
+
+
+  end
+
+  def deaccent_domain(crawler_page)
+    sentence_block_size = 100
+    sentence_id_start = 1
+    sentences = Sentence.where("id>=? and id < ?", sentence_id_start, sentence_id_start + sentence_block_size )
+    while sentences.length > 0
+      logger.info "sentence_id_start = #{sentence_id_start}"
+    sentences.each do |sentence|
+      if sentence.content.accented
+        sentence.accented = true
+        sentence.deaccented_content = sentence.content.deaccent
+        sentence.save
+      end
+    end
+    sentence_id_start = sentence_id_start + sentence_block_size
+    sentences = Sentence.where("id>=? and id < ?", sentence_id_start, sentence_id_start + sentence_block_size )
+    end
+
+    paragraph_block_size = 30
+    paragraph_id_start = 1
+    paragraphs = Paragraph.where("id>=? and id < ?", paragraph_id_start, paragraph_id_start + paragraph_block_size )
+    while paragraphs.length > 0
+      logger.info "paragraph_id_start = #{paragraph_id_start}"
+      paragraphs.each do |paragraph|
+        if paragraph.content.accented
+          paragraph.accented = true
+          paragraph.deaccented_content = paragraph.content.deaccent
+          paragraph.save
+        end
+      end
+      paragraph_id_start = paragraph_id_start + paragraph_block_size
+      paragraphs = Paragraph.where("id>=? and id < ?", paragraph_id_start, paragraph_id_start + paragraph_block_size )
+    end
+
+
 
 
   end

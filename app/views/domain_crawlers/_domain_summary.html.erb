@@ -13,6 +13,8 @@
       <option <% if args[:selected] == DOMAIN_ACTION[:analyse_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:analyse_domain]%> > Analyse Domain</option>
       <option <% if args[:selected] == DOMAIN_ACTION[:fix_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:fix_domain]%> > Fix Domain</option>
       <option <% if args[:selected] == DOMAIN_ACTION[:reorder_pages]%> selected <% end %>  value= <%= DOMAIN_ACTION[:reorder_pages]%> > Reorder Pages</option>
+      <option <% if args[:selected] == DOMAIN_ACTION[:deaccent_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:deaccent_domain]%> > Deaccent Domain</option>
+
       <option <% if args[:selected] == DOMAIN_ACTION[:set_paragraphs]%> selected <% end %>  value= <%= DOMAIN_ACTION[:set_paragraphs]%> > Set Paragraphs</option>
       <option <% if args[:selected] == DOMAIN_ACTION[:rename] %> selected <% end %>  value= <%= DOMAIN_ACTION[:rename]%> > Rename Domain</option>
       <option <% if args[:selected] == DOMAIN_ACTION[:move_domain]%> selected <% end %>  value= <%= DOMAIN_ACTION[:move_domain]%> > Move Domain</option>

@@ -590,6 +590,8 @@ class DomainCrawlersController < ApplicationController
         fix_domain(params)
       when "Reorder Pages"
         reorder_pages(params)
+      when "Deaccent Domain"
+        deaccent_domain(params)
       when "Set Paragraphs"
         set_paragraphs(params)
       when "Move Selected"
@@ -628,7 +630,30 @@ class DomainCrawlersController < ApplicationController
     #  logger.info "fix_domain result: #{@result_str}"
     @selected = DOMAIN_ACTION[:fix_domain]
   end
+  def deaccent_domain(params)
+    logger.info "reorder_pages begin"
+    crawler_page = CrawlerPage.find_by_id(params[:domain_radio])
+    domain_crawler_id = crawler_page.domain_crawler_id;
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
 
+
+    result_str = domain_crawler.deaccent_domain(crawler_page)
+    #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
+    flash[:notice] = "deaccenting domain"
+    @selected = DOMAIN_ACTION[:deaccent_domain]
+  end
+  def deaccent_domain(params)
+    logger.info "deaccent_domain begin"
+    crawler_page = CrawlerPage.find_by_id(params[:domain_radio])
+    domain_crawler_id = crawler_page.domain_crawler_id;
+    domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
+
+
+    result_str = domain_crawler.deaccent_domain(crawler_page)
+    #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
+    flash[:notice] = "deaccenting domain"
+    @selected = DOMAIN_ACTION[:deaccent_domain]
+  end
   def reorder_pages(params)
     logger.info "reorder_pages begin"
     crawler_page = CrawlerPage.find_by_id(params[:domain_radio])

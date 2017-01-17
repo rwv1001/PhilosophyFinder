@@ -136,6 +136,7 @@ class SearchQuery < ApplicationRecord
       tokens = get_all_tokens(search_terms)
 
       initialize_process_sentences()
+
       prelim_results.each do |prelim_result|
         if  @quit_processing == false and (@count < MAX_DISPLAY-1 or (@count >= MAX_DISPLAY-1 and Sentence.find_by_id(prelim_result.sentence_id).paragraph_id == @current_paragraph_id))
           process_sentence(prelim_result.sentence_id, tokens)
@@ -183,7 +184,12 @@ class SearchQuery < ApplicationRecord
     highlights = Hash.new
 
     if self.word_separation == PARAGRAPH_SEPARATION and @current_paragraph_id != paragraph.id
-      paragraph_content = paragraph.content
+      if paragraph.accented
+      paragraph_content = paragraph.deaccented_content
+      else
+        paragraph_content = paragraph.content
+      end
+
       token_found = false
       @search_ok = true
       tokens.each do |search_fields|
@@ -191,7 +197,7 @@ class SearchQuery < ApplicationRecord
         search_fields.each do |token|
 
           if token.length >0 and @search_ok
-            matches =paragraph_content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            matches =paragraph_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
             if matches.length > 0
               token_found = true
             else
@@ -216,7 +222,14 @@ class SearchQuery < ApplicationRecord
           search_fields.each do |token|
 
             if token.length >0
-              matches =content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+              if sentence.accented
+                matches =sentence.deaccented_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+
+
+              else
+                matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+              end
+
               if matches.length > 0
                 token_found = true
                 matches.each do |match|
@@ -243,7 +256,12 @@ class SearchQuery < ApplicationRecord
         search_fields.each do |token|
 
           if token.length >0 and @search_ok
-            matches =content.greek.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            if sentence.accented
+              matches =sentence.deaccented_content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            else
+
+            matches =content.to_enum(:scan, /#{token}/im).map { Regexp.last_match }
+            end
             if matches.length > 0
               token_found = true
               matches.each do |match|
@@ -373,7 +391,7 @@ class SearchQuery < ApplicationRecord
     phrases = []
     terms_hash = Hash.new
     term_list.each do |term|
-      term = term.greek.gsub(/(^\s*|\s*$)/, "")
+      term = term.deaccent.gsub(/(^\s*|\s*$)/, "")
       if term.length >0
         phrase_split = term.split(' ').map{|wd| wd.split(/[^a-zA-Zα-ω0-9%]+/)}.flatten
 
@@ -546,7 +564,7 @@ class SearchQuery < ApplicationRecord
   end
 
   def get_tokens(search_term)
-    or_list = search_term.greek.split(/ OR /)
+    or_list = search_term.deaccent.split(/ OR /)
     tokens = []
 
     or_list.each do |or_item|
