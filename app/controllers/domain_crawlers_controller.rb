@@ -738,7 +738,7 @@ class DomainCrawlersController < ApplicationController
       crawler_page_name.save;
 
       if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
-        if current_user.current_domain_crawler_id = old_domain_crawler_id
+        if current_user.current_domain_crawler_id == old_domain_crawler_id
           current_user.current_domain_crawler_id = new_parent.domain_crawler_id
 
           current_user.save
