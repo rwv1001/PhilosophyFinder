@@ -192,7 +192,7 @@ class DomainCrawlersController < ApplicationController
       end
       if first_page_id !=0
         #    logger.info "Crawl success first_id = #{first_page_id}"
-        @domain_crawler.crawler_page_id = first_page_id
+        @domain_crawler.crawler_page_id = CrawlerPage.find_by_id(first_page_id).root.id
         @domain_crawler.save
 
         current_user.current_domain_crawler_id = @domain_crawler.id
@@ -631,7 +631,7 @@ class DomainCrawlersController < ApplicationController
     @selected = DOMAIN_ACTION[:fix_domain]
   end
   def deaccent_domain(params)
-    logger.info "reorder_pages begin"
+    logger.info "deaccent_domain begin"
     crawler_page = CrawlerPage.find_by_id(params[:domain_radio])
     domain_crawler_id = crawler_page.domain_crawler_id;
     domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
@@ -731,11 +731,29 @@ class DomainCrawlersController < ApplicationController
       @result_str = "You cannot move a parent to one of its children"
     else
       crawler_page_name.parent_id = new_parent.id
+      old_domain_crawler_id = crawler_page_name.domain_crawler_id
+      crawler_page_name.domain_crawler_id = new_parent.domain_crawler_id
       crawler_page_name.save;
+
+      if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
+        if current_user.current_domain_crawler_id = old_domain_crawler_id
+          current_user.current_domain_crawler_id = new_parent.domain_crawler_id
+
+          current_user.save
+          @domain_crawler = DomainCrawler.find_by_id(new_parent.domain_crawler_id)
+          @domain_crawler.crawler_page_id = new_parent.root.id
+          @domain_crawler.save
+
+
+        end
+        DomainCrawler.destroy(old_domain_crawler_id)
+      end
+
       @result_str = ""
     end
     #   logger.info "move_domain result_str = #{@result_str}"
-
+    param2 = {:domain_radio=> params[:move_location_domain_radio]}
+    reorder_pages(param2)
     @selected = DOMAIN_ACTION[:move_domain]
     @crawler_parent_id = crawler_page_name.parent_id
 

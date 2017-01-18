@@ -172,8 +172,8 @@ ActiveRecord::Schema.define(version: 20170117045738) do
   create_table "sentences", force: :cascade do |t|
     t.text    "content"
     t.integer "paragraph_id"
-    t.text    "deaccented_content"
-    t.boolean "accented"
+    t.text    "deaccented_content", default: ""
+    t.boolean "accented",           default: false
   end
 
   add_index "sentences", ["paragraph_id"], name: "paragraph_id_ix", using: :btree

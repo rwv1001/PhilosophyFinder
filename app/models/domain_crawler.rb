@@ -250,7 +250,7 @@ class DomainCrawler < ApplicationRecord
   def ProcessSentence(sentence, paragraph_id)
     #@sentence_inserts.push "(\"#{sentence.gsub('"', '\"')}\",#{paragraph_id})"
     logger.info "************ ProcessSentence #{sentence}"
-    @sentence_inserts.push "(\'#{sentence.gsub("'", "''")}\',"+(sentence.accented)? "TRUE,\'#{sentence.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{paragraph_id})" # psql
+    @sentence_inserts.push "(\'#{sentence.gsub("'", "''")}\',"+((sentence.accented)? "TRUE,\'#{sentence.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',")+"#{paragraph_id})" # psql
 
 
     sentence = sentence.deaccent.gsub(/[^a-zA-Z0-9α-ω]/, ' ')
@@ -470,7 +470,7 @@ class DomainCrawler < ApplicationRecord
 
 
         if par_inserts.length>=paragraph_block_num
-          @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+(pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{result_page_id})"}
+          @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+((pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',")+"#{result_page_id})"}
           par_inserts = []
           save_paragraphs(result_page_id)
 
@@ -479,7 +479,7 @@ class DomainCrawler < ApplicationRecord
 
     end
     if par_inserts.length > 0
-      @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+(pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',"+"#{result_page_id})"}
+      @paragraph_inserts = par_inserts.map{|pi|  "(\'#{pi.gsub("'", "''")}\',"+((pi.accented)? "TRUE,\'#{pi.deaccent.gsub("'", "''")}\'," : "FALSE,\'\',")+"#{result_page_id})"}
       save_paragraphs(result_page_id)
 
 
@@ -922,6 +922,8 @@ class DomainCrawler < ApplicationRecord
 
         new_crawler_page.name = file_name
         new_crawler_page.result_page_id = result_page.id
+        new_crawler_page.download_date = Date.today
+
 
 
         if parent_id!=0
@@ -1121,13 +1123,17 @@ class DomainCrawler < ApplicationRecord
     logger.info "= #{6.times.map { |ii| page_list[ii].inspect }}"
     if page_list.length == ids.length
       id_conversion = Hash.new;
+
       page_list.size.times.each { |ii| id_conversion[page_list[ii].id] = ids[ii] }
+      self.crawler_page_id = id_conversion[self.crawler_page_id]
+      self.save
+
       del_str = "DELETE FROM crawler_pages WHERE id IN (#{ids.join(', ')})"
       update_values = page_list.map do |pl|
-        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| id_conversion[id.to_i] }.join('/') : nil}', #{pl.domain_crawler_id})"
+        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| id_conversion[id.to_i] }.join('/') : nil}', #{pl.domain_crawler_id}, '#{pl.download_date}')"
       end
       logger.info "****del_str = #{del_str}"
-      update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id) VALUES #{update_values.join(', ')}"
+      update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id, download_date) VALUES #{update_values.join(', ')}"
       logger.info "****update_crawler_page_str = #{update_crawler_page_str}"
       result_page_hash = Hash.new
       page_list.each { |pl| result_page_hash[pl.result_page_id] = {"crawler_page_id" => id_conversion[pl.id]} if pl.result_page_id and pl.result_page_id>0 }
