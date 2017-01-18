@@ -655,13 +655,15 @@ class DomainCrawlersController < ApplicationController
     @selected = DOMAIN_ACTION[:deaccent_domain]
   end
   def reorder_pages(params)
-    logger.info "reorder_pages begin"
+    logger.info "reorder_pages begin parama = #{params}"
     crawler_page = CrawlerPage.find_by_id(params[:domain_radio])
     domain_crawler_id = crawler_page.domain_crawler_id;
     domain_crawler = DomainCrawler.find_by_id(domain_crawler_id);
 
 
+    if domain_crawler !=nil
     result_str = domain_crawler.reorder_pages(crawler_page)
+    end
     #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
     flash[:notice] = "reordering pages"
     @selected = DOMAIN_ACTION[:reorder_pages]
