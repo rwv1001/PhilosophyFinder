@@ -3,7 +3,7 @@ class DomainCrawlersController < ApplicationController
     @result_str = ""
     logger.info "DomainCrawlersController index called with method #{params[:method]}"
     @users = User.all
-    @domain_crawler = current_domain_crawler
+
 
     case params[:method]
       when "set_header"
@@ -195,8 +195,8 @@ class DomainCrawlersController < ApplicationController
         @domain_crawler.crawler_page_id = CrawlerPage.find_by_id(first_page_id).root.id
         @domain_crawler.save
 
-        current_user.current_domain_crawler_id = @domain_crawler.id
-        current_user.save
+
+
         #   logger.info "DomainCrawlersController create, before redirect"
         redirect_to domain_crawlers_url, notice: "Domain Analysis of #{@domain_crawler.domain_home_page} was successfull!"
       else
@@ -218,23 +218,7 @@ class DomainCrawlersController < ApplicationController
     end
   end
 
-  def set_header
-    logger.info "set_Header begin"
-    @result_str = ""
 
-    @crawler_page_id = params[:id]
-    @old_crawler_page_id = current_page;
-
-    new_crawler_page = CrawlerPage.find_by_id(@crawler_page_id)
-    current_user.current_domain_crawler_id = new_crawler_page.domain_crawler.id
-    current_user.current_page = @crawler_page_id
-    current_user.save
-    #  logger.info "new crawler_page = #{@crawler_page_id}, domain_crawler = #{current_domain_crawler.id}"
-    #  logger.info "set_Header end"
-    respond_to do |format|
-      format.js
-    end
-  end
 
   def remove_group_result
 
@@ -611,7 +595,8 @@ class DomainCrawlersController < ApplicationController
     logger.info "analyse_domain begin"
     flash[:notice] = "analysing domain"
     flow_str = params[:flow_str]
-    domain_crawler = DomainCrawler.find_by_id(current_user.current_domain_crawler_id)
+
+    domain_crawler = DomainCrawler.where('id > 1').first
     domain_crawler.analyse_domain(current_user.id, flow_str)
     @selected = DOMAIN_ACTION[:analyse_domain]
   end
@@ -697,7 +682,7 @@ class DomainCrawlersController < ApplicationController
         DomainCrawler.destroy(crawler_page_name.domain_crawler.id)
         @result_str = ""
         @crawler_parent_id = nil
-        current_user.current_domain_crawler_id = DEFAULT_PAGE[:domain_crawler]
+
 
       else
         @crawler_parent_id = crawler_page_name.parent_id
@@ -736,19 +721,16 @@ class DomainCrawlersController < ApplicationController
       old_domain_crawler_id = crawler_page_name.domain_crawler_id
       crawler_page_name.domain_crawler_id = new_parent.domain_crawler_id
       crawler_page_name.save;
+      descendents = crawler_page_name.descendants
+      descendents.each do |descendant|
+        descendant.domain_crawler_id = new_parent.domain_crawler_id
+        descendant.save
+      end
 
       if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
-        if current_user.current_domain_crawler_id == old_domain_crawler_id
-          current_user.current_domain_crawler_id = new_parent.domain_crawler_id
 
-          current_user.save
-          @domain_crawler = DomainCrawler.find_by_id(new_parent.domain_crawler_id)
-          @domain_crawler.crawler_page_id = new_parent.root.id
-          @domain_crawler.save
-
-
-        end
         DomainCrawler.destroy(old_domain_crawler_id)
+
       end
 
       @result_str = ""
@@ -771,16 +753,7 @@ class DomainCrawlersController < ApplicationController
     end
   end
 
-  def show
-    logger.info "DomainCrawlersController show called"
-    @result_str = ""
-    @domain_crawler = current_domain_crawler
 
-    respond_to do |format|
-      format.html # show.html.erb
-
-    end
-  end
 
   def domain_crawler_params
     logger.info "DomainCrawlersController domain_crawler_params called"

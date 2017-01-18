@@ -197,8 +197,6 @@ ActiveRecord::Schema.define(version: 20170117045738) do
     t.string   "first_name"
     t.string   "second_name"
     t.string   "password_digest"
-    t.integer  "current_page",              default: 0
-    t.integer  "current_domain_crawler_id", default: 1
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "auth_token"

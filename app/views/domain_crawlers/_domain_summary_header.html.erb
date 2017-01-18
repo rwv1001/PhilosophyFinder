@@ -1,9 +1,0 @@
-<div id="domain_summary_header">
-<p>Selected Domain: <%= current_domain_crawler.short_name %> </p>
-<p>URL: <%= current_domain_crawler.domain_home_page %></p>
-<p>Version: <%= current_domain_crawler.version %>, Date: <%= current_domain_crawler.created_at.strftime("%b %e, %Y") %></p>
-
-<% if current_domain_crawler.description and current_domain_crawler.description.length > 0 %>
-    <p>Description: <%= current_domain_crawler.description %></p>
-<% end %>
-  </div>

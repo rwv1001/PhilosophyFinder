@@ -722,7 +722,7 @@ class DomainCrawler < ApplicationRecord
               new_url = (base_url+href_str).gsub(/\/[^\.\/]+\/\.\./, "")
               logger.info "base_url+href_str =  #{base_url+href_str}"
 
-              if href_str.length >0 and crawl_number < @max_crawl_number
+              if href_str.length >0 and crawl_number < @max_crawl_number  and new_url !~ /#{@filter}/
                 #   match_value = get_match_value(new_url, url)
                 if CrawlerPage.exists?(URL: new_url, domain_crawler_id: self.id)== false
 
@@ -989,7 +989,7 @@ class DomainCrawler < ApplicationRecord
             new_url = (base_url+href_str).gsub(/\/[^\.\/]+\/\.\./, "")
             logger.info "base_url+href_str =  #{base_url+href_str}"
 
-            if href_str.length >0 and crawl_number < @max_crawl_number
+            if href_str.length >0 and crawl_number < @max_crawl_number and new_url !~ /#{@filter}/
               #   match_value = get_match_value(new_url, url)
               if CrawlerPage.exists?(URL: new_url, domain_crawler_id: self.id)== false
 
@@ -1221,7 +1221,13 @@ class DomainCrawler < ApplicationRecord
     @filter = filter
     initialize_crawl
     grab_page(domain_home_page, @current_level, @parent_id)
-    return @first_page_id
+    page= CrawlerPage.find_by_id(@first_page_id)
+    if page != nil
+      first_page_id  =  page.root.id
+    else
+      first_page_id = 0
+    end
+    return first_page_id
   end
 
   def analyse_page(rp, flow_str)
@@ -1296,7 +1302,13 @@ class DomainCrawler < ApplicationRecord
 
     logger.info "end of crawl"
     #return @current_pages
-    return @first_page_id
+    page= CrawlerPage.find_by_id(@first_page_id)
+    if page != nil
+      first_page_id  =  page.root.id
+    else
+      first_page_id = 0
+    end
+    return first_page_id
 
   end
 end

@@ -40,13 +40,7 @@ class ApplicationController < ActionController::Base
     return @current_search_query = SearchQuery.find_by_id(DEFAULT_PAGE[:search_query])
   end
 
-  def current_domain_crawler
-    (current_user != nil) ?
-        current_domain_crawler_id = current_user.current_domain_crawler_id :
-        current_domain_crawler_id = DEFAULT_PAGE[:domain_crawler]
 
-    @current_domain_crawler = DomainCrawler.find_by_id( current_domain_crawler_id)
-  end
 
   def root_group
     @root_group = GroupName.where(["user_id = ?", current_user.id]).first
@@ -72,7 +66,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_user
   helper_method :current_page
   helper_method :current_search_query
-  helper_method :current_domain_crawler
+
   helper_method :root_group
 
   def authorize
