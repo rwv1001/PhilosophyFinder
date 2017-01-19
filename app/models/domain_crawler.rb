@@ -1125,12 +1125,12 @@ class DomainCrawler < ApplicationRecord
       id_conversion = Hash.new;
 
       page_list.size.times.each { |ii| id_conversion[page_list[ii].id] = ids[ii] }
-      self.crawler_page_id = id_conversion[self.crawler_page_id]
+      self.crawler_page_id = id_conversion[self.crawler_page_id]?id_conversion[self.crawler_page_id]:self.crawler_page_id
       self.save
 
       del_str = "DELETE FROM crawler_pages WHERE id IN (#{ids.join(', ')})"
       update_values = page_list.map do |pl|
-        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| id_conversion[id.to_i] }.join('/') : nil}', #{pl.domain_crawler_id}, '#{pl.download_date}')"
+        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| (id_conversion[id.to_i]? id_conversion[id.to_i]:id)  }.join('/') : nil}', #{pl.domain_crawler_id}, '#{pl.download_date}')"
       end
       logger.info "****del_str = #{del_str}"
       update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id, download_date) VALUES #{update_values.join(', ')}"
@@ -1143,7 +1143,8 @@ class DomainCrawler < ApplicationRecord
       @connection.execute(del_str)
       @connection.execute(update_crawler_page_str)
       ResultPage.update(result_page_hash.keys, result_page_hash.values)
-
+      ret_value = id_conversion[crawler_page.id]
+      return ret_value
 
     else
       logger.info "ERROR!!!! page_list.length =#{page_list.length}, ids.length =#{ids.length}"

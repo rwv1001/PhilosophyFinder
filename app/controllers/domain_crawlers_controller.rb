@@ -652,6 +652,7 @@ class DomainCrawlersController < ApplicationController
     #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
     flash[:notice] = "reordering pages"
     @selected = DOMAIN_ACTION[:reorder_pages]
+    return result_str
   end
 
   def set_paragraphs(params)
@@ -709,37 +710,56 @@ class DomainCrawlersController < ApplicationController
   end
 
   def move_domain(params)
-    crawler_page_name = CrawlerPage.find_by_id(params[:domain_radio]);
+    pages_in_range = CrawlerPage.get_pages_in_range(current_user.id)
     new_parent = CrawlerPage.find_by_id(params[:move_location_domain_radio]);
-    ancestor_ids = new_parent.ancestor_ids
-    #   logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
-    if ancestor_ids.index(crawler_page_name.id) != nil
+    logger.info "move domain crawler_range = #{pages_in_range.inspect}"
+    logger.info "move domain new_parent = #{new_parent.inspect}"
+    while pages_in_range.length > 0
+      ancestor_ids = new_parent.ancestor_ids
+      #   logger.info "move_domain ancestors: #{ancestor_ids}, domain_name_id = #{crawler_page_name.id}"
+      crawler_page_name = pages_in_range[0]
+      logger.info "moving crawler_page: #{crawler_page_name.inspect}"
+      pages_in_range.delete(pages_in_range[0])
+      if ancestor_ids.index(crawler_page_name.id) != nil
 
-      @result_str = "You cannot move a parent to one of its children"
-    else
-      crawler_page_name.parent_id = new_parent.id
-      old_domain_crawler_id = crawler_page_name.domain_crawler_id
-      crawler_page_name.domain_crawler_id = new_parent.domain_crawler_id
-      crawler_page_name.save;
-      descendents = crawler_page_name.descendants
-      descendents.each do |descendant|
-        descendant.domain_crawler_id = new_parent.domain_crawler_id
-        descendant.save
+        @result_str = "You cannot move a parent to one of its children"
+      else
+        crawler_page_name.parent_id = new_parent.id
+        old_domain_crawler_id = crawler_page_name.domain_crawler_id
+        crawler_page_name.domain_crawler_id = new_parent.domain_crawler_id
+        crawler_page_name.save;
+        descendents = crawler_page_name.descendants
+        descendents.each do |descendant|
+          logger.info "removing from crawler range id = #{descendant.id}"
+          descendant.domain_crawler_id = new_parent.domain_crawler_id
+          descendant.save
+          pages_in_range.delete(descendant.id)
+        end
+
+        if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
+
+          if DomainCrawler.exists?(:id => old_domain_crawler_id)
+            DomainCrawler.destroy(old_domain_crawler_id)
+            logger.info "destroyed domain crawler, id = #{old_domain_crawler_id}"
+          else
+            logger.info "how did we get here with domain crawler id = #{old_domain_crawler_id}"
+
+          end
+
+
+        end
+
+        @result_str = ""
       end
-
-      if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
-
-        DomainCrawler.destroy(old_domain_crawler_id)
-
-      end
-
-      @result_str = ""
     end
+
+
     #   logger.info "move_domain result_str = #{@result_str}"
     param2 = {:domain_radio=> params[:move_location_domain_radio]}
-    reorder_pages(param2)
+
+    @crawler_parent_id = reorder_pages(param2)
     @selected = DOMAIN_ACTION[:move_domain]
-    @crawler_parent_id = crawler_page_name.parent_id
+
 
   end
 

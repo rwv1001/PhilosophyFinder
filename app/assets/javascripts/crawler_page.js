@@ -267,7 +267,8 @@ function SelectDomainAction()
         
         case "move_domain":
             $(".domain-field").hide();
-            $(".domain-name-radio").show();
+            //$(".domain-name-radio").show();
+            $(".domain-checkbox").show();
             $(".move-location-domain-name-radio").show();
             $( ".domain-action-button" ).show();
             $("#domain-action-button").prop('value', 'Move Selected');
