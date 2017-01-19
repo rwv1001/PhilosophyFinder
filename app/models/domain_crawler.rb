@@ -1130,7 +1130,7 @@ class DomainCrawler < ApplicationRecord
 
       del_str = "DELETE FROM crawler_pages WHERE id IN (#{ids.join(', ')})"
       update_values = page_list.map do |pl|
-        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| (id_conversion[id.to_i]? id_conversion[id.to_i]:id)  }.join('/') : nil}', #{pl.domain_crawler_id}, '#{pl.download_date}')"
+        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| (id_conversion[id.to_i]? id_conversion[id.to_i]:id)  }.join('/') : nil}', #{pl.domain_crawler_id}, '#{(pl.download_date ? pl.download_date : Date.today)}')"
       end
       logger.info "****del_str = #{del_str}"
       update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id, download_date) VALUES #{update_values.join(', ')}"
@@ -1224,7 +1224,7 @@ class DomainCrawler < ApplicationRecord
     grab_page(domain_home_page, @current_level, @parent_id)
     page= CrawlerPage.find_by_id(@first_page_id)
     if page != nil
-      first_page_id  =  page.root.id
+      first_page_id = reorder_pages(page.root)
     else
       first_page_id = 0
     end
