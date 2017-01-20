@@ -737,7 +737,7 @@ class DomainCrawlersController < ApplicationController
           logger.info "removing from crawler range id = #{descendant.id}"
           descendant.domain_crawler_id = new_parent.domain_crawler_id
           descendant.save
-          pages_in_range.delete(descendant.id)
+          pages_in_range.delete(descendant)
         end
 
         if CrawlerPage.exists?(domain_crawler_id: old_domain_crawler_id) ==false
@@ -759,7 +759,7 @@ class DomainCrawlersController < ApplicationController
 
 
     #   logger.info "move_domain result_str = #{@result_str}"
-    param2 = {:domain_radio=> params[:move_location_domain_radio]}
+    param2 = {:domain_radio=> new_parent.root.id}
 
     @crawler_parent_id = reorder_pages(param2)
     @selected = DOMAIN_ACTION[:move_domain]
