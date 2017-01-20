@@ -648,6 +648,10 @@ class DomainCrawlersController < ApplicationController
 
     if domain_crawler !=nil
     result_str = domain_crawler.reorder_pages(crawler_page)
+    CrawlerRange.where('user_id = ?', current_user.id).destroy_all
+    new_range = CrawlerRange.new(:user_id => current_user.id, :begin_id => -1, :end_id => -1)
+    new_range.save
+
     end
     #   call_rake :fix_domain, :domain_crawler_id => domain_crawler_id
     flash[:notice] = "reordering pages"

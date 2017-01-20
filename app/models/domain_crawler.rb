@@ -1119,6 +1119,7 @@ class DomainCrawler < ApplicationRecord
     ids.concat(crawler_page.descendant_ids).sort!
     page_list = [crawler_page]
     page_list.concat(get_page_list(crawler_page))
+    default_domain_crawler_id = crawler_page.domain_crawler_id
     logger.info "************page_listinspect"
     logger.info "= #{6.times.map { |ii| page_list[ii].inspect }}"
     if page_list.length == ids.length
@@ -1130,7 +1131,7 @@ class DomainCrawler < ApplicationRecord
 
       del_str = "DELETE FROM crawler_pages WHERE id IN (#{ids.join(', ')})"
       update_values = page_list.map do |pl|
-        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| (id_conversion[id.to_i]? id_conversion[id.to_i]:id)  }.join('/') : nil}', #{pl.domain_crawler_id}, '#{(pl.download_date ? pl.download_date : Date.today)}')"
+        "(#{id_conversion[pl.id]}, #{(pl.result_page_id) ? (pl.result_page_id) : 'NULL'}, '#{pl.URL}', '#{pl.name}', '#{(pl.ancestry) ? pl.ancestry.split('/').map { |id| (id_conversion[id.to_i]? id_conversion[id.to_i]:id)  }.join('/') : nil}', #{(pl.domain_crawler_id ? pl.domain_crawler_id : default_domain_crawler_id)}, '#{(pl.download_date ? pl.download_date : Date.today)}')"
       end
       logger.info "****del_str = #{del_str}"
       update_crawler_page_str = "INSERT INTO crawler_pages (id, result_page_id, \"URL\", name, ancestry, domain_crawler_id, download_date) VALUES #{update_values.join(', ')}"
@@ -1144,6 +1145,7 @@ class DomainCrawler < ApplicationRecord
       @connection.execute(update_crawler_page_str)
       ResultPage.update(result_page_hash.keys, result_page_hash.values)
       ret_value = id_conversion[crawler_page.id]
+
       return ret_value
 
     else
