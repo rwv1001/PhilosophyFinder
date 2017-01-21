@@ -1,6 +1,14 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
+  before_filter :redirect_if_old
 
+  protected
+
+  def redirect_if_old
+    if request.host == 'tranquil-tor-39142.herokuapp.com'
+      redirect_to "#{request.protocol}st-thomas-the-search-engine.op.org#{request.fullpath}", :status => :moved_permanently
+    end
+  end
 
 
   private
