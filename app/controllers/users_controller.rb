@@ -6,6 +6,8 @@ class UsersController < ApplicationController
 
 
 
+
+
   def create
     logger.info "UsersController create called"
     index

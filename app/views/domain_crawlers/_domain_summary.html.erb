@@ -25,7 +25,9 @@
       <div>
         <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
           <option  <% if args[:selected] == DOMAIN_ACTION[:search_domain] %> selected <% end %>    value= <%= DOMAIN_ACTION[:search_domain]%> > Search Domain</option>
+          <% if !current_user.guest %>
           <option  <% if args[:selected] == DOMAIN_ACTION[:search_groups] %> selected <% end %>     value= <%= DOMAIN_ACTION[:search_groups]%> > Search Groups</option>
+          <% end %>
         </select>
       </div>
       <% end %>

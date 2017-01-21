@@ -180,6 +180,13 @@ function SelectPreviousSearch(argss)
 
 }
 
+function HideForms()
+{
+    $( ".domain-field" ).hide();
+    $('[id="domain-summary"]').hide();
+    
+}
+
 
 function SelectDomainAction()
 {

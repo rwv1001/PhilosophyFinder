@@ -12,7 +12,12 @@ class ApplicationController < ActionController::Base
   #  end
     #logger.info "current_user: #{cookies[:auth_token]}"
    # @current_user ||= User.find_by_auth_token!(cookies[:auth_token]) if cookies[:auth_token]
-    @current_user ||= User.where("auth_token =?", cookies[:auth_token]).first if cookies[:auth_token]
+    if cookies[:auth_token]
+      @current_user ||= User.where("auth_token =?", cookies[:auth_token]).first
+    else
+      @current_user = User.new_guest
+      cookies[:auth_token] = @current_user.auth_token
+    end
     #if @current_user
      # logger.debug "current_user = #{@current_user.id}"
    # else

@@ -2,7 +2,7 @@
   <div class="dominican-logo"></div>
   <div class="thomas-header"> St. Thomas <br> The Search Engine </div>
   <div class="login-status-div">
-  <% if current_user %>
+  <% if !current_user.guest %>
       Logged in as <%= current_user.email %>. <br>
       <%= link_to "Log Out", logout_path %>
   <% else %>

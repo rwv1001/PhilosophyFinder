@@ -326,7 +326,7 @@ class DomainCrawlersController < ApplicationController
         else
           next_page_id = descend_ids.max+1
         end
-        if CrawlerRange.exists? == false
+        if CrawlerRange.exists?(user_id: current_user.id) == false
           @crawler_page_ranges = []
         else
           @crawler_page_ranges = CrawlerRange.where('user_id = ? and begin_id <= ? and end_id >= ?', current_user.id, next_page_id, crawler_page_id).order('begin_id asc').map { |range| [range.begin_id, range.end_id] }

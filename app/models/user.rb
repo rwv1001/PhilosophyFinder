@@ -1,11 +1,21 @@
 class User < ApplicationRecord
-  has_secure_password
+  has_secure_password(validations: false)
   has_many :domain_crawlers
 
-  validates_uniqueness_of :email
-  validates_presence_of :password, :on => :create
+  validates_uniqueness_of :email, unless: :guest?
+  validates_presence_of :password, :on => :create, unless: :guest?
 
   before_create { generate_token(:auth_token) }
+  def self.new_guest
+    logger.info "*** calling self.new_guest"
+    new_guest_user = User.new
+    new_guest_user.guest = true
+    new_guest_user.save!
+
+
+    return new_guest_user
+
+  end
 
   def send_password_reset
     generate_token(:password_reset_token)
