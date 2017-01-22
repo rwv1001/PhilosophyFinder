@@ -187,6 +187,11 @@ function HideForms()
     
 }
 
+function HideOptions()
+{
+    $('[id="select-domain-div"]').hide();    
+}
+
 
 function SelectDomainAction()
 {

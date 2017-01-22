@@ -3,7 +3,7 @@
     <h3>Domain Summary</h3></div>
   <%= render 'domain_crawlers/showhide', div_name: "domain_summary" %>
 <% if SuperUser.exists?(user_id: current_user) %>
-  <div>
+  <div class="float-clear" id="select-domain-div">
     <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
       <option <% if args[:selected] == DOMAIN_ACTION[:select_action] %> selected <% end %> value= <%= DOMAIN_ACTION[:select_action] %> > Select Domain Action</option>
       <option <% if args[:selected] == DOMAIN_ACTION[:search_domain] %> selected <% end %>  value= <%= DOMAIN_ACTION[:search_domain]%> > Search Domain</option>
@@ -22,7 +22,7 @@
     </select>
   </div>
       <% else %>
-      <div>
+      <div class="float-clear" id="select-domain-div">
         <select id="select-domain-action" name="select-domain-action" onChange="SelectDomainAction()">
           <option  <% if args[:selected] == DOMAIN_ACTION[:search_domain] %> selected <% end %>    value= <%= DOMAIN_ACTION[:search_domain]%> > Search Domain</option>
           <% if !current_user.guest %>
@@ -67,5 +67,8 @@
   <script>  $("#group_notice").show();
     $("#group_notice").text("<%= @result_str %>");</script>
     <%  @result_str = "" %>
+<% end %>
+<% if current_user.guest %>
+    <script>HideOptions();</script>
 <% end %>
 
