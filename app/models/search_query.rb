@@ -836,10 +836,16 @@ class SearchQuery < ApplicationRecord
 
         logger.info "***************************** before truncate sentence_set = #{sentence_paragraph_set.inspect}"
         sentence_paragraph_set = truncate_sentence_paragraph(sentence_paragraph_set.to_a.sort)
+      else
+        sentence_paragraph_set = []
 
       end
       if self.word_separation == SENTENCE_SEPARATION
+        if sentence_paragraph_set.length >0
         sentence_set = sentence_paragraph_set.sort
+        else
+          sentence_set=[]
+          end
       elsif sentence_paragraph_set.length >0
         sentence_set = Sentence.find_by_sql("SELECT * FROM sentences WHERE paragraph_id IN (#{sentence_paragraph_set.to_a.join(' ,')})").map{|ss| ss.id}.to_set.sort
       else

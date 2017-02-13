@@ -24,7 +24,7 @@ class ApplicationController < ActionController::Base
       @current_user ||= User.where("auth_token =?", cookies[:auth_token]).first
     else
       @current_user = User.new_guest
-      cookies[:auth_token] = @current_user.auth_token
+      cookies.permanent[:auth_token] = @current_user.auth_token
     end
     #if @current_user
      # logger.debug "current_user = #{@current_user.id}"

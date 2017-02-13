@@ -57,7 +57,7 @@ gem 'nokogiri'
 
 gem 'ancestry'
 
-
+gem 'rails_real_favicon'
 
 gem "recaptcha", require: "recaptcha/rails"
 
