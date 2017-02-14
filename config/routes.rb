@@ -22,6 +22,8 @@ Rails.application.routes.draw do
   get 'group_action', to: 'domain_crawlers#group_action', as: 'group_action'
   get 'expand_contract_action', to: 'domain_crawlers#expand_contract_action', as: 'expand_contract_action'
 
+
+
   get 'domain_action', to: 'domain_crawlers#domain_action', as: 'domain_action'
   get 'more_results', to: 'domain_crawlers#more_results', as: 'more_results'
   get 'process_more_results', to: 'domain_crawlers#process_more_results', as: 'process_more_results'
