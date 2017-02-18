@@ -21,12 +21,12 @@ Rails.application.routes.draw do
 
   get 'group_action', to: 'domain_crawlers#group_action', as: 'group_action'
   get 'expand_contract_action', to: 'domain_crawlers#expand_contract_action', as: 'expand_contract_action'
-  get 'apple-touch-icon-120x120-precomposed.png', to: redirect('/assets/apple-touch-icon-120x120-precomposed.png')
-  get 'apple-touch-icon-120x120.png', to: redirect('/assets/apple-touch-icon-120x120.png')
-  get 'apple-touch-icon.png', to: redirect('/assets/apple-touch-icon.png')
-  get 'apple-touch-icon-precomposed.png', to: redirect('/assets/apple-touch-icon-precomposed.png')
-  get 'apple-touch-icon-152x152.png', to: redirect('/assets/apple-touch-icon-152x152.png')
-  get 'apple-touch-icon-152x152-precomposed.png', to: redirect('/assets/apple-touch-icon-152x152-precomposed.png')
+  get 'apple-touch-icon-120x120-precomposed.png', to: redirect('/assets/favicon/apple-touch-icon-120x120-precomposed.png')
+  get 'apple-touch-icon-120x120.png', to: redirect('/assets/favicon/apple-touch-icon-120x120.png')
+  get 'apple-touch-icon.png', to: redirect('/assets/favicon/apple-touch-icon.png')
+  get 'apple-touch-icon-precomposed.png', to: redirect('/assets/favicon/apple-touch-icon-precomposed.png')
+  get 'apple-touch-icon-152x152.png', to: redirect('/assets/favicon/apple-touch-icon-152x152.png')
+  get 'apple-touch-icon-152x152-precomposed.png', to: redirect('/assets/favicon/apple-touch-icon-152x152-precomposed.png')
 
 
   get 'domain_action', to: 'domain_crawlers#domain_action', as: 'domain_action'
